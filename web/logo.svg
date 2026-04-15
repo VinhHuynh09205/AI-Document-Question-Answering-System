@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Antenna lines -->
+  <line x1="160" y1="120" x2="160" y2="40" stroke="#3a4d56" stroke-width="14" stroke-linecap="round"/>
+  <line x1="352" y1="120" x2="352" y2="40" stroke="#3a4d56" stroke-width="14" stroke-linecap="round"/>
+  <!-- Antenna balls -->
+  <circle cx="160" cy="34" r="22" fill="#3a4d56"/>
+  <circle cx="352" cy="34" r="22" fill="#3a4d56"/>
+  <!-- Body outer (speech bubble) light gray -->
+  <path d="M256 100 C380 100 440 170 440 270 C440 370 380 420 310 420 L280 420 L256 480 L232 420 L202 420 C120 420 72 370 72 270 C72 170 132 100 256 100Z" fill="#bcc8cd"/>
+  <!-- Inner face dark -->
+  <path d="M256 130 C360 130 410 190 410 275 C410 360 360 400 300 400 L212 400 C152 400 102 360 102 275 C102 190 152 130 256 130Z" fill="#3a4d56"/>
+  <!-- Left eye -->
+  <circle cx="195" cy="260" r="36" fill="#1cb7f5"/>
+  <!-- Right eye -->
+  <circle cx="317" cy="260" r="36" fill="#1cb7f5"/>
+  <!-- Mouth white -->
+  <path d="M210 330 Q256 380 302 330 Z" fill="#fff"/>
+  <!-- Tongue blue -->
+  <ellipse cx="256" cy="352" rx="28" ry="18" fill="#1cb7f5"/>
+</svg>

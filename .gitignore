@@ -1,0 +1,22 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+
+# Test cache
+.pytest_cache/
+
+# OS/editor
+.DS_Store
+.vscode/
+
+# Runtime data
+data/uploads/
+data/faiss_index/
+data/faiss_backups/
+data/users.json

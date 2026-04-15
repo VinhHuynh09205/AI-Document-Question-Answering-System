@@ -1,0 +1,114 @@
+from pydantic import BaseModel, Field
+
+
+class UploadResponse(BaseModel):
+    message: str
+    files_processed: int
+    chunks_indexed: int
+    original_names: list[str] = Field(default_factory=list)
+
+
+class AskRequest(BaseModel):
+    question: str = Field(..., min_length=3, max_length=2000)
+    chat_id: str | None = Field(default=None, min_length=1, max_length=128)
+    top_k: int | None = Field(default=None, ge=1, le=20, description="Number of chunks to retrieve")
+
+
+class AskResponse(BaseModel):
+    answer: str
+    sources: list[str] = Field(default_factory=list)
+
+
+class HealthResponse(BaseModel):
+    status: str
+    app_name: str
+    environment: str
+
+
+class ReadinessResponse(BaseModel):
+    status: str
+    checks: dict[str, bool]
+
+
+class MetricsResponse(BaseModel):
+    uptime_seconds: int
+    total_requests: int
+    status_counts: dict[str, int]
+    endpoint_counts: dict[str, int]
+    fallback_answers: int
+    rate_limited_requests: int
+
+
+class VectorStoreStatusResponse(BaseModel):
+    document_count: int
+    backup_root_dir: str
+
+
+class VectorStoreBackupResponse(BaseModel):
+    backup_name: str | None = None
+    backup_dir: str | None = None
+    backed_up: bool | None = None
+    restored: bool | None = None
+    cleared: bool | None = None
+    reason: str | None = None
+    document_count: int
+
+
+class RegisterRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=64)
+    password: str = Field(..., min_length=8, max_length=128)
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=64)
+    password: str = Field(..., min_length=8, max_length=128)
+
+
+class AuthResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
+
+
+class CreateChatRequest(BaseModel):
+    title: str = Field(default="Đoạn chat mới", min_length=1, max_length=200)
+
+
+class RenameChatRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=200)
+
+
+class RenameDocumentRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+
+
+class ChatResponse(BaseModel):
+    chat_id: str
+    title: str
+    created_at: str
+
+
+class ChatListResponse(BaseModel):
+    chats: list[ChatResponse]
+
+
+class DocumentRecordResponse(BaseModel):
+    document_id: str
+    original_name: str
+    stored_path: str
+    created_at: str
+
+
+class DocumentListResponse(BaseModel):
+    documents: list[DocumentRecordResponse]
+
+
+class MessageRecordResponse(BaseModel):
+    message_id: str
+    role: str
+    content: str
+    created_at: str
+
+
+class MessageListResponse(BaseModel):
+    messages: list[MessageRecordResponse]
