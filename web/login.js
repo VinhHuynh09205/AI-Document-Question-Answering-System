@@ -13,8 +13,184 @@ const confirmGroup = document.getElementById("confirmGroup");
 const confirmInput = document.getElementById("authConfirmPassword");
 const togglePassword = document.getElementById("togglePassword");
 const passwordInput = document.getElementById("authPassword");
+const forgotPasswordLink = document.getElementById("forgotPasswordLink");
+const btnGoogleLogin = document.getElementById("btnGoogleLogin");
+const btnGithubLogin = document.getElementById("btnGithubLogin");
 
 let currentMode = "login";
+
+/* ---- Custom modal ---- */
+function ensureLoginModal() {
+  let modal = document.getElementById("loginUiModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "loginUiModal";
+  modal.className = "login-ui-modal";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="login-ui-modal-backdrop" data-role="backdrop">
+      <div class="login-ui-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="loginUiModalTitle">
+        <div class="login-ui-modal-header">
+          <h3 id="loginUiModalTitle" class="login-ui-modal-title"></h3>
+          <button type="button" class="login-ui-modal-close" data-role="close" aria-label="Đóng">✕</button>
+        </div>
+        <p class="login-ui-modal-message" id="loginUiModalMessage"></p>
+        <div class="login-ui-modal-fields" id="loginUiModalFields"></div>
+        <p class="login-ui-modal-error" id="loginUiModalError"></p>
+        <div class="login-ui-modal-actions">
+          <button type="button" class="login-ui-modal-btn login-ui-modal-btn-secondary" data-role="cancel">Hủy</button>
+          <button type="button" class="login-ui-modal-btn login-ui-modal-btn-primary" data-role="confirm">Xác nhận</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function openLoginModal(options) {
+  const {
+    title,
+    message,
+    fields = [],
+    confirmText = "Xác nhận",
+    cancelText = "Hủy",
+    hideCancel = false,
+    validate,
+  } = options;
+
+  return new Promise((resolve) => {
+    const modal = ensureLoginModal();
+    const backdrop = modal.querySelector("[data-role='backdrop']");
+    const closeBtn = modal.querySelector("[data-role='close']");
+    const cancelBtn = modal.querySelector("[data-role='cancel']");
+    const confirmBtn = modal.querySelector("[data-role='confirm']");
+    const titleEl = document.getElementById("loginUiModalTitle");
+    const messageEl = document.getElementById("loginUiModalMessage");
+    const fieldsEl = document.getElementById("loginUiModalFields");
+    const errorEl = document.getElementById("loginUiModalError");
+
+    titleEl.textContent = title || "Thông báo";
+    messageEl.textContent = message || "";
+    errorEl.textContent = "";
+
+    cancelBtn.style.display = hideCancel ? "none" : "inline-flex";
+    cancelBtn.textContent = cancelText;
+    confirmBtn.textContent = confirmText;
+
+    fieldsEl.innerHTML = "";
+    const inputMap = new Map();
+
+    for (const field of fields) {
+      const row = document.createElement("div");
+      row.className = "login-ui-modal-field";
+
+      const label = document.createElement("label");
+      label.className = "login-ui-modal-label";
+      label.textContent = field.label || "";
+
+      const input = document.createElement("input");
+      input.className = "login-ui-modal-input";
+      input.type = field.type || "text";
+      input.placeholder = field.placeholder || "";
+      input.value = field.defaultValue || "";
+      if (field.maxLength) input.maxLength = field.maxLength;
+      if (field.autocomplete) input.autocomplete = field.autocomplete;
+
+      row.appendChild(label);
+      row.appendChild(input);
+      fieldsEl.appendChild(row);
+      inputMap.set(field.name, input);
+    }
+
+    function cleanup() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      closeBtn.removeEventListener("click", onCancel);
+      cancelBtn.removeEventListener("click", onCancel);
+      confirmBtn.removeEventListener("click", onConfirm);
+      backdrop.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKeydown);
+    }
+
+    function done(value) {
+      cleanup();
+      resolve(value);
+    }
+
+    function onCancel() {
+      done(null);
+    }
+
+    function collectValues() {
+      const values = {};
+      for (const [name, input] of inputMap.entries()) {
+        values[name] = input.value;
+      }
+      return values;
+    }
+
+    function onConfirm() {
+      const values = collectValues();
+      if (typeof validate === "function") {
+        const validationError = validate(values);
+        if (validationError) {
+          errorEl.textContent = validationError;
+          const firstInput = fieldsEl.querySelector("input");
+          if (firstInput) firstInput.focus();
+          return;
+        }
+      }
+      done(values);
+    }
+
+    function onBackdrop(event) {
+      if (event.target === backdrop) onCancel();
+    }
+
+    function onKeydown(event) {
+      if (!modal.classList.contains("open")) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCancel();
+      }
+      if (event.key === "Enter") {
+        event.preventDefault();
+        onConfirm();
+      }
+    }
+
+    closeBtn.addEventListener("click", onCancel);
+    cancelBtn.addEventListener("click", onCancel);
+    confirmBtn.addEventListener("click", onConfirm);
+    backdrop.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKeydown);
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+
+    requestAnimationFrame(() => {
+      const firstInput = fieldsEl.querySelector("input");
+      if (firstInput) {
+        firstInput.focus();
+        firstInput.select?.();
+      } else {
+        confirmBtn.focus();
+      }
+    });
+  });
+}
+
+function showLoginAlert(options) {
+  return openLoginModal({
+    title: options.title,
+    message: options.message,
+    confirmText: options.confirmText || "Đã hiểu",
+    hideCancel: true,
+  });
+}
 
 /* ---- Tab switching ---- */
 tabLogin.addEventListener("click", () => switchTab("login"));
@@ -50,6 +226,64 @@ togglePassword.addEventListener("click", () => {
   togglePassword.querySelector(".eye-icon").style.display = isHidden ? "none" : "block";
   togglePassword.querySelector(".eye-off-icon").style.display = isHidden ? "block" : "none";
 });
+
+/* ---- Forgot password ---- */
+forgotPasswordLink?.addEventListener("click", async (e) => {
+  e.preventDefault();
+  authError.textContent = "";
+
+  const input = await openLoginModal({
+    title: "Quên Mật Khẩu",
+    message: "Nhập email hoặc tài khoản để nhận liên kết đặt lại mật khẩu.",
+    confirmText: "Tiếp tục",
+    cancelText: "Hủy",
+    fields: [
+      {
+        name: "username",
+        label: "Email / Tài khoản",
+        placeholder: "nguyen.van.a@example.com",
+        type: "text",
+        maxLength: 64,
+        autocomplete: "username",
+      },
+    ],
+    validate: (values) => {
+      if (!String(values.username || "").trim()) {
+        return "Vui lòng nhập email hoặc tài khoản.";
+      }
+      return "";
+    },
+  });
+  if (!input) return;
+  const username = String(input.username || "").trim();
+
+  try {
+    const redirectUri = `${window.location.origin}/login`;
+    const res = await fetch("/api/v1/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: username.trim(), redirect_uri: redirectUri }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Không thể xử lý yêu cầu quên mật khẩu");
+
+    if (!data.reset_token) {
+      await showLoginAlert({
+        title: "Yêu Cầu Đã Ghi Nhận",
+        message: data.message || "Nếu tài khoản tồn tại, hệ thống sẽ gửi liên kết đặt lại mật khẩu.",
+      });
+      return;
+    }
+
+    await runResetPasswordFlow(data.reset_token, username.trim());
+  } catch (err) {
+    authError.textContent = err.message;
+  }
+});
+
+btnGoogleLogin?.addEventListener("click", () => startOAuth("google"));
+btnGithubLogin?.addEventListener("click", () => startOAuth("github"));
 
 /* ---- Form submit ---- */
 authForm.addEventListener("submit", async (e) => {
@@ -89,7 +323,7 @@ authForm.addEventListener("submit", async (e) => {
 
     // Store auth
     localStorage.setItem("auth_token", data.access_token);
-    localStorage.setItem("username", username);
+    localStorage.setItem("username", data.username || username);
 
     // Redirect to main workspace
     window.location.href = "/";
@@ -101,10 +335,172 @@ authForm.addEventListener("submit", async (e) => {
   }
 });
 
+async function startOAuth(provider) {
+  authError.textContent = "";
+  try {
+    const redirectUri = `${window.location.origin}/login?oauth_provider=${encodeURIComponent(provider)}`;
+    const res = await fetch(
+      `/api/v1/auth/oauth/${provider}/start?redirect_uri=${encodeURIComponent(redirectUri)}`,
+      { method: "GET" }
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Không thể bắt đầu đăng nhập OAuth");
+    window.location.href = data.authorization_url;
+  } catch (err) {
+    authError.textContent = err.message;
+  }
+}
+
+async function completeOAuthLogin(provider, code, state) {
+  const redirectUri = `${window.location.origin}/login?oauth_provider=${encodeURIComponent(provider)}`;
+  const res = await fetch(`/api/v1/auth/oauth/${provider}/complete`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, state, redirect_uri: redirectUri }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Đăng nhập OAuth thất bại");
+
+  localStorage.setItem("auth_token", data.access_token);
+  localStorage.setItem("username", data.username || provider);
+  window.location.href = "/";
+}
+
+async function runResetPasswordFlow(token, usernameHint = "") {
+  const result = await openLoginModal({
+    title: "Đổi Mật Khẩu",
+    message: "Nhập mật khẩu mới cho tài khoản của bạn.",
+    confirmText: "Cập nhật",
+    cancelText: "Hủy",
+    fields: [
+      {
+        name: "newPassword",
+        label: "Mật khẩu mới",
+        placeholder: "Ít nhất 8 ký tự",
+        type: "password",
+        maxLength: 128,
+        autocomplete: "new-password",
+      },
+      {
+        name: "confirmPassword",
+        label: "Xác nhận mật khẩu",
+        placeholder: "Nhập lại mật khẩu mới",
+        type: "password",
+        maxLength: 128,
+        autocomplete: "new-password",
+      },
+    ],
+    validate: (values) => {
+      const newPassword = String(values.newPassword || "");
+      const confirmPassword = String(values.confirmPassword || "");
+      if (newPassword.length < 8) {
+        return "Mật khẩu mới phải có ít nhất 8 ký tự.";
+      }
+      if (newPassword !== confirmPassword) {
+        return "Mật khẩu xác nhận không khớp.";
+      }
+      return "";
+    },
+  });
+
+  if (!result) return;
+  const newPassword = String(result.newPassword || "");
+
+  const res = await fetch("/api/v1/auth/reset-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Không thể đặt lại mật khẩu");
+
+  await showLoginAlert({
+    title: "Đổi Mật Khẩu Thành Công",
+    message: data.message || "Đặt lại mật khẩu thành công. Vui lòng đăng nhập lại.",
+  });
+  switchTab("login");
+  if (usernameHint) {
+    const usernameInput = document.getElementById("authUsername");
+    if (usernameInput) usernameInput.value = usernameHint;
+  }
+}
+
+function clearTransientAuthParams() {
+  const url = new URL(window.location.href);
+  [
+    "code",
+    "state",
+    "scope",
+    "authuser",
+    "prompt",
+    "error",
+    "error_description",
+    "reset_token",
+  ].forEach((k) => url.searchParams.delete(k));
+
+  const search = url.searchParams.toString();
+  const finalUrl = search ? `${url.pathname}?${search}` : url.pathname;
+  window.history.replaceState({}, "", finalUrl);
+}
+
+async function handleOAuthAndResetCallbacks() {
+  const params = new URLSearchParams(window.location.search);
+
+  const resetToken = params.get("reset_token");
+  if (resetToken) {
+    try {
+      await runResetPasswordFlow(resetToken);
+    } catch (err) {
+      authError.textContent = err.message;
+    } finally {
+      clearTransientAuthParams();
+    }
+    return true;
+  }
+
+  const oauthError = params.get("error");
+  if (oauthError) {
+    authError.textContent = "Đăng nhập OAuth bị hủy hoặc thất bại. Vui lòng thử lại.";
+    clearTransientAuthParams();
+    return true;
+  }
+
+  const code = params.get("code");
+  const state = params.get("state");
+  const provider = params.get("oauth_provider");
+
+  if (!code || !state || !provider) {
+    return false;
+  }
+
+  try {
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "Đang xác thực OAuth...";
+    await completeOAuthLogin(provider, code, state);
+  } catch (err) {
+    authError.textContent = err.message;
+    clearTransientAuthParams();
+  } finally {
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = currentMode === "login" ? "Đăng nhập ngay" : "Đăng ký ngay";
+  }
+
+  return true;
+}
+
 /* ---- Check if already logged in ---- */
-(function checkAuth() {
+function checkAuth() {
   const token = localStorage.getItem("auth_token") || localStorage.getItem("access_token");
   if (token) {
     window.location.href = "/";
+  }
+}
+
+(async function initAuthPage() {
+  const handled = await handleOAuthAndResetCallbacks();
+  if (!handled) {
+    checkAuth();
   }
 })();

@@ -41,6 +41,22 @@ class FileUserRepository(IUserRepository):
             )
             self._write_all(users)
 
+    def update_password_hash(self, username: str, password_hash: str) -> bool:
+        normalized = username.strip().lower()
+        with self._lock:
+            users = self._read_all()
+            updated = False
+            for row in users:
+                if row.get("username", "").lower() == normalized:
+                    row["password_hash"] = password_hash
+                    updated = True
+                    break
+
+            if updated:
+                self._write_all(users)
+
+            return updated
+
     def _ensure_file_exists(self) -> None:
         self._users_file_path.parent.mkdir(parents=True, exist_ok=True)
         if not self._users_file_path.exists():

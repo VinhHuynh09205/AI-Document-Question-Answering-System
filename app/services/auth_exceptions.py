@@ -8,3 +8,19 @@ class UserAlreadyExistsError(Exception):
 
 class InvalidCredentialsError(Exception):
     pass
+
+
+class InvalidPasswordResetTokenError(Exception):
+    pass
+
+
+class OAuthProviderNotSupportedError(Exception):
+    pass
+
+
+class OAuthStateInvalidError(Exception):
+    pass
+
+
+class OAuthConfigurationError(Exception):
+    pass

@@ -11,3 +11,7 @@ class IUserRepository(ABC):
     @abstractmethod
     def add(self, user: UserAccount) -> None:
         raise NotImplementedError
+
+    @abstractmethod
+    def update_password_hash(self, username: str, password_hash: str) -> bool:
+        raise NotImplementedError

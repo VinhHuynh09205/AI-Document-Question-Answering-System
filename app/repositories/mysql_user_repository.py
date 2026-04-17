@@ -33,6 +33,17 @@ class MySqlUserRepository(IUserRepository):
                 )
             conn.commit()
 
+    def update_password_hash(self, username: str, password_hash: str) -> bool:
+        normalized = username.strip().lower()
+        with connect(self._config) as conn:
+            with conn.cursor() as cursor:
+                affected = cursor.execute(
+                    "UPDATE users SET password_hash = %s WHERE lower(username) = %s",
+                    (password_hash, normalized),
+                )
+            conn.commit()
+            return affected > 0
+
     def _initialize(self) -> None:
         with connect(self._config) as conn:
             with conn.cursor() as cursor:

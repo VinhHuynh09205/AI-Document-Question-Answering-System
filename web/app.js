@@ -132,8 +132,11 @@ function bindEvents() {
   applyStoredTheme();
 
   /* Auth */
-  btnLogin.addEventListener("click", () => {
-    if (state.token) { handleLogout(); return; }
+  btnLogin.addEventListener("click", async () => {
+    if (state.token) {
+      await handleLogoutRequested();
+      return;
+    }
     window.location.href = "/login";
   });
 
@@ -213,6 +216,18 @@ function handleLogout() {
   statusPill.textContent = "";
 }
 
+async function handleLogoutRequested() {
+  const confirmed = await showConfirmModal({
+    title: "Đăng xuất",
+    message: "Bạn có muốn đăng xuất khỏi tài khoản hiện tại không?",
+    confirmText: "Đăng xuất",
+    cancelText: "Ở lại",
+    confirmVariant: "danger",
+  });
+  if (!confirmed) return;
+  handleLogout();
+}
+
 function showLoggedIn() {
   btnLogin.classList.add("logged-in");
   const loginText = btnLogin.querySelector(".login-text");
@@ -286,7 +301,14 @@ function renderWorkspaceList() {
 
 async function handleCreateWorkspace() {
   if (!state.token) { window.location.href = "/login"; return; }
-  const title = prompt("Tên workspace mới:", "Workspace mới");
+  const title = await showPromptModal({
+    title: "Tạo Workspace",
+    message: "Nhập tên cho workspace mới.",
+    label: "Tên workspace",
+    placeholder: "Ví dụ: Kế hoạch học tập",
+    defaultValue: "Workspace mới",
+    confirmText: "Tạo mới",
+  });
   if (!title) return;
   try {
     const res = await apiFetch("/api/v1/workspace/chats", {
@@ -299,7 +321,11 @@ async function handleCreateWorkspace() {
     selectWorkspace(data.chat_id);
     renderWorkspaceList();
   } catch (err) {
-    alert("Không thể tạo workspace: " + err.message);
+    await showAlertModal({
+      title: "Tạo Workspace Thất Bại",
+      message: "Không thể tạo workspace: " + err.message,
+      confirmText: "Đã hiểu",
+    });
   }
 }
 
@@ -414,7 +440,11 @@ async function handleUploadFiles(files) {
 
   if (!state.token || !state.currentChatId) {
     if (!state.token) { window.location.href = "/login"; return; }
-    alert("Hãy chọn hoặc tạo workspace trước.");
+    await showAlertModal({
+      title: "Thiếu Workspace",
+      message: "Hãy chọn hoặc tạo workspace trước khi tải tài liệu.",
+      confirmText: "Đã rõ",
+    });
     return;
   }
 
@@ -762,7 +792,14 @@ function closeCtxMenu() {
 async function handleRenameWorkspace(chatId) {
   const chat = state.chats.find((c) => c.chat_id === chatId);
   if (!chat) return;
-  const newTitle = prompt("Đổi tên workspace:", chat.title);
+  const newTitle = await showPromptModal({
+    title: "Đổi Tên Workspace",
+    message: "Nhập tên mới cho workspace.",
+    label: "Tên mới",
+    placeholder: "Workspace của tôi",
+    defaultValue: chat.title,
+    confirmText: "Lưu thay đổi",
+  });
   if (!newTitle || newTitle.trim() === chat.title) return;
   try {
     const res = await apiFetch(`/api/v1/workspace/chats/${chatId}`, {
@@ -778,14 +815,25 @@ async function handleRenameWorkspace(chatId) {
       wsTitle.textContent = "Không gian làm việc: " + data.title;
     }
   } catch (err) {
-    alert("Không thể đổi tên: " + err.message);
+    await showAlertModal({
+      title: "Đổi Tên Thất Bại",
+      message: "Không thể đổi tên workspace: " + err.message,
+      confirmText: "Đã hiểu",
+    });
   }
 }
 
 async function handleDeleteWorkspace(chatId) {
   const chat = state.chats.find((c) => c.chat_id === chatId);
   if (!chat) return;
-  if (!confirm(`Xóa workspace "${chat.title}"? Tất cả tài liệu và tin nhắn sẽ bị mất.`)) return;
+  const confirmed = await showConfirmModal({
+    title: "Xóa Workspace",
+    message: `Xóa workspace "${chat.title}"? Tất cả tài liệu và tin nhắn sẽ bị mất.`,
+    confirmText: "Xóa ngay",
+    cancelText: "Hủy",
+    confirmVariant: "danger",
+  });
+  if (!confirmed) return;
   try {
     const res = await apiFetch(`/api/v1/workspace/chats/${chatId}`, { method: "DELETE" });
     if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Lỗi"); }
@@ -800,7 +848,11 @@ async function handleDeleteWorkspace(chatId) {
     }
     renderWorkspaceList();
   } catch (err) {
-    alert("Không thể xóa: " + err.message);
+    await showAlertModal({
+      title: "Xóa Workspace Thất Bại",
+      message: "Không thể xóa workspace: " + err.message,
+      confirmText: "Đã hiểu",
+    });
   }
 }
 
@@ -810,7 +862,14 @@ async function handleDeleteWorkspace(chatId) {
 async function handleRenameDocument(chatId, documentId) {
   const doc = state.docs.find((d) => d.document_id === documentId);
   if (!doc) return;
-  const newName = prompt("Đổi tên tài liệu:", doc.original_name);
+  const newName = await showPromptModal({
+    title: "Đổi Tên Tài Liệu",
+    message: "Nhập tên mới cho tài liệu.",
+    label: "Tên tài liệu",
+    placeholder: "Tên tài liệu",
+    defaultValue: doc.original_name,
+    confirmText: "Lưu thay đổi",
+  });
   if (!newName || newName.trim() === doc.original_name) return;
   try {
     const res = await apiFetch(`/api/v1/workspace/chats/${chatId}/documents/${documentId}`, {
@@ -823,14 +882,25 @@ async function handleRenameDocument(chatId, documentId) {
     doc.original_name = data.original_name;
     renderDocsList();
   } catch (err) {
-    alert("Không thể đổi tên: " + err.message);
+    await showAlertModal({
+      title: "Đổi Tên Thất Bại",
+      message: "Không thể đổi tên tài liệu: " + err.message,
+      confirmText: "Đã hiểu",
+    });
   }
 }
 
 async function handleDeleteDocument(chatId, documentId) {
   const doc = state.docs.find((d) => d.document_id === documentId);
   if (!doc) return;
-  if (!confirm(`Xóa tài liệu "${doc.original_name}"?`)) return;
+  const confirmed = await showConfirmModal({
+    title: "Xóa Tài Liệu",
+    message: `Xóa tài liệu "${doc.original_name}"?`,
+    confirmText: "Xóa ngay",
+    cancelText: "Hủy",
+    confirmVariant: "danger",
+  });
+  if (!confirmed) return;
   try {
     const res = await apiFetch(`/api/v1/workspace/chats/${chatId}/documents/${documentId}`, { method: "DELETE" });
     if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Lỗi"); }
@@ -838,8 +908,203 @@ async function handleDeleteDocument(chatId, documentId) {
     renderDocsList();
     renderWorkspaceList();
   } catch (err) {
-    alert("Không thể xóa: " + err.message);
+    await showAlertModal({
+      title: "Xóa Tài Liệu Thất Bại",
+      message: "Không thể xóa tài liệu: " + err.message,
+      confirmText: "Đã hiểu",
+    });
   }
+}
+
+/* ================================================================
+   UI MODAL
+   ================================================================ */
+function ensureUiModal() {
+  let modal = document.getElementById("uiModal");
+  if (modal) return modal;
+
+  modal = document.createElement("div");
+  modal.id = "uiModal";
+  modal.className = "ui-modal";
+  modal.setAttribute("aria-hidden", "true");
+  modal.innerHTML = `
+    <div class="ui-modal-backdrop" data-role="backdrop">
+      <div class="ui-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="uiModalTitle">
+        <div class="ui-modal-header">
+          <h3 id="uiModalTitle" class="ui-modal-title"></h3>
+          <button type="button" class="ui-modal-close" data-role="close" aria-label="Đóng">✕</button>
+        </div>
+        <p class="ui-modal-message" id="uiModalMessage"></p>
+        <div class="ui-modal-field-wrap" id="uiModalFieldWrap"></div>
+        <p class="ui-modal-error" id="uiModalError"></p>
+        <div class="ui-modal-actions">
+          <button type="button" class="ui-modal-btn ui-modal-btn-secondary" data-role="cancel">Hủy</button>
+          <button type="button" class="ui-modal-btn ui-modal-btn-primary" data-role="confirm">Đồng ý</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function openUiModal(options) {
+  const {
+    title,
+    message,
+    field,
+    confirmText = "Đồng ý",
+    cancelText = "Hủy",
+    hideCancel = false,
+    confirmVariant = "primary",
+  } = options;
+
+  return new Promise((resolve) => {
+    const modal = ensureUiModal();
+    const backdrop = modal.querySelector("[data-role='backdrop']");
+    const titleEl = document.getElementById("uiModalTitle");
+    const messageEl = document.getElementById("uiModalMessage");
+    const fieldWrap = document.getElementById("uiModalFieldWrap");
+    const errorEl = document.getElementById("uiModalError");
+    const closeBtn = modal.querySelector("[data-role='close']");
+    const cancelBtn = modal.querySelector("[data-role='cancel']");
+    const confirmBtn = modal.querySelector("[data-role='confirm']");
+
+    titleEl.textContent = title || "Thông báo";
+    messageEl.textContent = message || "";
+    errorEl.textContent = "";
+
+    cancelBtn.textContent = cancelText;
+    confirmBtn.textContent = confirmText;
+    cancelBtn.style.display = hideCancel ? "none" : "inline-flex";
+    confirmBtn.classList.toggle("ui-modal-btn-danger", confirmVariant === "danger");
+
+    fieldWrap.innerHTML = "";
+    let inputEl = null;
+
+    if (field) {
+      const label = document.createElement("label");
+      label.className = "ui-modal-label";
+      label.textContent = field.label || "";
+
+      inputEl = document.createElement("input");
+      inputEl.className = "ui-modal-input";
+      inputEl.type = field.type || "text";
+      inputEl.placeholder = field.placeholder || "";
+      inputEl.value = field.defaultValue || "";
+      inputEl.maxLength = field.maxLength || 255;
+
+      fieldWrap.appendChild(label);
+      fieldWrap.appendChild(inputEl);
+    }
+
+    function cleanup() {
+      modal.classList.remove("open");
+      modal.setAttribute("aria-hidden", "true");
+      closeBtn.removeEventListener("click", onCancel);
+      cancelBtn.removeEventListener("click", onCancel);
+      confirmBtn.removeEventListener("click", onConfirm);
+      backdrop.removeEventListener("click", onBackdrop);
+      document.removeEventListener("keydown", onKeydown);
+    }
+
+    function done(value) {
+      cleanup();
+      resolve(value);
+    }
+
+    function onCancel() {
+      done(null);
+    }
+
+    function onConfirm() {
+      if (!inputEl) {
+        done(true);
+        return;
+      }
+
+      const value = inputEl.value.trim();
+      if (!value) {
+        errorEl.textContent = "Vui lòng nhập thông tin trước khi tiếp tục.";
+        inputEl.focus();
+        return;
+      }
+
+      done(value);
+    }
+
+    function onBackdrop(event) {
+      if (event.target === backdrop) onCancel();
+    }
+
+    function onKeydown(event) {
+      if (!modal.classList.contains("open")) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onCancel();
+      }
+      if (event.key === "Enter" && inputEl) {
+        event.preventDefault();
+        onConfirm();
+      }
+    }
+
+    closeBtn.addEventListener("click", onCancel);
+    cancelBtn.addEventListener("click", onCancel);
+    confirmBtn.addEventListener("click", onConfirm);
+    backdrop.addEventListener("click", onBackdrop);
+    document.addEventListener("keydown", onKeydown);
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+
+    requestAnimationFrame(() => {
+      if (inputEl) {
+        inputEl.focus();
+        inputEl.select();
+      } else {
+        confirmBtn.focus();
+      }
+    });
+  });
+}
+
+function showAlertModal(options) {
+  return openUiModal({
+    title: options.title,
+    message: options.message,
+    confirmText: options.confirmText || "Đã hiểu",
+    hideCancel: true,
+    confirmVariant: options.confirmVariant || "primary",
+  });
+}
+
+function showConfirmModal(options) {
+  return openUiModal({
+    title: options.title,
+    message: options.message,
+    confirmText: options.confirmText || "Đồng ý",
+    cancelText: options.cancelText || "Hủy",
+    confirmVariant: options.confirmVariant || "primary",
+  }).then((result) => Boolean(result));
+}
+
+function showPromptModal(options) {
+  return openUiModal({
+    title: options.title,
+    message: options.message,
+    field: {
+      label: options.label || "",
+      placeholder: options.placeholder || "",
+      defaultValue: options.defaultValue || "",
+      type: "text",
+      maxLength: options.maxLength || 200,
+    },
+    confirmText: options.confirmText || "Lưu",
+    cancelText: options.cancelText || "Hủy",
+    confirmVariant: options.confirmVariant || "primary",
+  }).then((value) => (typeof value === "string" ? value : null));
 }
 
 /* ================================================================

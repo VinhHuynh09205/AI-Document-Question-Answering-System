@@ -32,6 +32,16 @@ class SqliteUserRepository(IUserRepository):
             )
             conn.commit()
 
+    def update_password_hash(self, username: str, password_hash: str) -> bool:
+        normalized = username.strip().lower()
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "UPDATE users SET password_hash = ? WHERE lower(username) = ?",
+                (password_hash, normalized),
+            )
+            conn.commit()
+            return cursor.rowcount > 0
+
     def _initialize(self) -> None:
         with self._connect() as conn:
             conn.execute(

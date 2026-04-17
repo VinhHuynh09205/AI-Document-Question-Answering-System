@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     auth_secret_key: str = "change-me-in-production"
     auth_token_expire_minutes: int = 60
     enable_registration: bool = True
+    password_reset_expire_minutes: int = 20
+    password_reset_frontend_url: str = "http://localhost:8000/login"
+    oauth_google_client_id: str = ""
+    oauth_google_client_secret: str = ""
+    oauth_github_client_id: str = ""
+    oauth_github_client_secret: str = ""
+    oauth_allowed_redirect_base: str = "http://localhost:8000"
 
     chunk_size: int = 1500
     chunk_overlap: int = 200

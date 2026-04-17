@@ -136,6 +136,13 @@ def build_container(settings: Settings) -> AppContainer:
         secret_key=settings.auth_secret_key,
         token_expire_minutes=settings.auth_token_expire_minutes,
         registration_enabled=settings.enable_registration,
+        password_reset_expire_minutes=settings.password_reset_expire_minutes,
+        password_reset_frontend_url=settings.password_reset_frontend_url,
+        oauth_google_client_id=settings.oauth_google_client_id,
+        oauth_google_client_secret=settings.oauth_google_client_secret,
+        oauth_github_client_id=settings.oauth_github_client_id,
+        oauth_github_client_secret=settings.oauth_github_client_secret,
+        oauth_allowed_redirect_base=settings.oauth_allowed_redirect_base,
     )
 
     return AppContainer(

@@ -68,6 +68,34 @@ class AuthResponse(BaseModel):
     access_token: str
     token_type: str
     expires_in: int
+    username: str | None = None
+
+
+class ForgotPasswordRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=64)
+    redirect_uri: str | None = Field(default=None, min_length=1, max_length=512)
+
+
+class ForgotPasswordResponse(BaseModel):
+    message: str
+    reset_token: str | None = None
+    reset_url: str | None = None
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(..., min_length=20, max_length=4096)
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
+class OAuthStartResponse(BaseModel):
+    authorization_url: str
+    state: str
+
+
+class OAuthCompleteRequest(BaseModel):
+    code: str = Field(..., min_length=5, max_length=4096)
+    state: str = Field(..., min_length=8, max_length=256)
+    redirect_uri: str | None = Field(default=None, min_length=1, max_length=512)
 
 
 class CreateChatRequest(BaseModel):
