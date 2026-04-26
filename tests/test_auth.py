@@ -1,5 +1,6 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import uuid
 
 from fastapi.testclient import TestClient
 
@@ -10,6 +11,7 @@ from main import app
 
 def test_register_and_login_success() -> None:
     with TemporaryDirectory() as tmp_dir:
+        username = f"alice-{uuid.uuid4().hex[:8]}"
         users_file = Path(tmp_dir) / "users.json"
         settings = Settings(
             users_file_path=str(users_file),
@@ -25,11 +27,11 @@ def test_register_and_login_success() -> None:
             client = TestClient(app)
             register_response = client.post(
                 "/api/v1/auth/register",
-                json={"username": "alice", "password": "StrongPass123"},
+                json={"username": username, "password": "StrongPass123"},
             )
             login_response = client.post(
                 "/api/v1/auth/login",
-                json={"username": "alice", "password": "StrongPass123"},
+                json={"username": username, "password": "StrongPass123"},
             )
         finally:
             app.state.container = original_container
@@ -49,6 +51,7 @@ def test_register_and_login_success() -> None:
 
 def test_register_returns_403_when_disabled() -> None:
     with TemporaryDirectory() as tmp_dir:
+        username = f"bob-{uuid.uuid4().hex[:8]}"
         users_file = Path(tmp_dir) / "users.json"
         settings = Settings(
             users_file_path=str(users_file),
@@ -64,7 +67,7 @@ def test_register_returns_403_when_disabled() -> None:
             client = TestClient(app)
             response = client.post(
                 "/api/v1/auth/register",
-                json={"username": "bob", "password": "StrongPass123"},
+                json={"username": username, "password": "StrongPass123"},
             )
         finally:
             app.state.container = original_container
@@ -76,6 +79,7 @@ def test_register_returns_403_when_disabled() -> None:
 
 def test_login_returns_401_for_invalid_credentials() -> None:
     with TemporaryDirectory() as tmp_dir:
+        username = f"missing-{uuid.uuid4().hex[:8]}"
         users_file = Path(tmp_dir) / "users.json"
         settings = Settings(
             users_file_path=str(users_file),
@@ -91,7 +95,7 @@ def test_login_returns_401_for_invalid_credentials() -> None:
             client = TestClient(app)
             response = client.post(
                 "/api/v1/auth/login",
-                json={"username": "missing", "password": "StrongPass123"},
+                json={"username": username, "password": "StrongPass123"},
             )
         finally:
             app.state.container = original_container

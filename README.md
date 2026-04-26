@@ -192,6 +192,9 @@ This repository contains a production-quality RAG backend foundation with releas
 1. Create `.env` from `.env.example`.
 2. Build and run:
    - `docker compose up --build -d`
+   - Build profile follows `LOCAL_SEMANTIC_EMBEDDINGS` in `.env`:
+     - `true`: installs local semantic dependencies (heavier image)
+     - `false`: skips those optional dependencies (faster build)
 3. Check service:
    - `http://127.0.0.1:8000/api/v1/health`
 4. Stop service:

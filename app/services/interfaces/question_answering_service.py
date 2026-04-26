@@ -9,7 +9,7 @@ class IQuestionAnsweringService(ABC):
     def ask(
         self,
         question: str,
-        metadata_filter: dict[str, str] | None = None,
+        metadata_filter: dict[str, str | list[str]] | None = None,
         top_k: int | None = None,
     ) -> AnswerResult:
         raise NotImplementedError
@@ -17,7 +17,7 @@ class IQuestionAnsweringService(ABC):
     def ask_stream(
         self,
         question: str,
-        metadata_filter: dict[str, str] | None = None,
+        metadata_filter: dict[str, str | list[str]] | None = None,
         top_k: int | None = None,
     ) -> Iterator[str]:
         """Yield answer tokens. Default: yield full answer at once."""

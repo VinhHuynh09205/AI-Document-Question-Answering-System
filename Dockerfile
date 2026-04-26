@@ -1,18 +1,24 @@
-FROM python:3.12.9-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+ARG INSTALL_LOCAL_SEMANTIC_EMBEDDINGS=false
 
 WORKDIR /app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends antiword \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends antiword ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./
+COPY requirements.local_embeddings.txt ./
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt
+    && pip install -r requirements.txt \
+    && if [ "$INSTALL_LOCAL_SEMANTIC_EMBEDDINGS" = "true" ]; then pip install -r requirements.local_embeddings.txt; fi
 
 COPY app ./app
 COPY main.py ./
@@ -20,7 +26,12 @@ COPY scripts ./scripts
 COPY web ./web
 COPY .env.example ./
 
-RUN mkdir -p /app/data/uploads /app/data/faiss_index /app/data/faiss_backups
+RUN mkdir -p /app/data/uploads /app/data/faiss_index /app/data/faiss_backups \
+    && addgroup --system app \
+    && adduser --system --ingroup app --home /app app \
+    && chown -R app:app /app
+
+USER app
 
 EXPOSE 8000
 

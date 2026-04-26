@@ -10,7 +10,7 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/style.css?v=13" />
+    <link rel="stylesheet" href="/static/style.css?v=16" />
   </head>
   <body>
     <div class="app-shell">
@@ -55,6 +55,13 @@
           <!-- Document list -->
           <div class="docs-section" id="docsSection">
             <p class="section-label" id="docsLabel">Tài liệu trong workspace</p>
+            <p class="docs-selection-guide" id="docsSelectionGuide">
+              Hướng dẫn: tick vào ô vuông ở từng tài liệu để chọn phạm vi AI trả lời.
+            </p>
+            <label class="docs-select-all" id="docsSelectAllWrap">
+              <input type="checkbox" id="docsSelectAll" />
+              <span>Chọn tất cả tài liệu</span>
+            </label>
             <div id="docsList" class="docs-list"></div>
           </div>
         </div>
@@ -167,6 +174,8 @@
       <button class="ctx-menu-item danger" data-action="delete">🗑 Xóa</button>
     </div>
 
-    <script src="/static/app.js?v=13" defer></script>
+    <script src="/static/vendor/marked.min.js" defer></script>
+    <script src="/static/vendor/mermaid.min.js" defer></script>
+    <script src="/static/app.js?v=21" defer></script>
   </body>
 </html>

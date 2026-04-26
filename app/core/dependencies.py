@@ -9,6 +9,8 @@ from app.services.interfaces.document_ingestion_service import IDocumentIngestio
 from app.services.interfaces.question_answering_service import IQuestionAnsweringService
 from app.services.interfaces.rate_limiter import IRateLimiter
 from app.services.interfaces.runtime_metrics import IRuntimeMetrics
+from app.services.interfaces.admin_service import IAdminService
+from app.services.interfaces.upload_job_service import IUploadJobService
 from app.services.interfaces.vector_store_admin_service import IVectorStoreAdminService
 from app.services.interfaces.workspace_service import IWorkspaceService
 
@@ -66,6 +68,18 @@ def get_workspace_service(
     return container.workspace_service
 
 
+def get_upload_job_service(
+    container: AppContainer = Depends(get_container),
+) -> IUploadJobService:
+    return container.upload_job_service
+
+
+def get_admin_service(
+    container: AppContainer = Depends(get_container),
+) -> IAdminService:
+    return container.admin_service
+
+
 def get_optional_current_username(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
     settings: Settings = Depends(get_settings),
@@ -99,5 +113,27 @@ def get_current_username(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required",
+        )
+    return username
+
+
+def get_current_admin_username(
+    username: str = Depends(get_current_username),
+    container: AppContainer = Depends(get_container),
+) -> str:
+    from app.repositories.interfaces.user_repository import IUserRepository
+
+    auth_service = container.auth_service
+    user_repo: IUserRepository = auth_service._user_repository  # noqa: SLF001
+    user = user_repo.get_by_username(username)
+    if user is None or user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is disabled",
         )
     return username

@@ -18,6 +18,85 @@ const btnGoogleLogin = document.getElementById("btnGoogleLogin");
 const btnGithubLogin = document.getElementById("btnGithubLogin");
 
 let currentMode = "login";
+const AUTH_ROLE_KEY = "user_role";
+
+function normalizeRole(role) {
+  return String(role || "").trim().toLowerCase() === "admin" ? "admin" : "user";
+}
+
+function getRedirectPathByRole(role) {
+  return normalizeRole(role) === "admin" ? "/admin" : "/";
+}
+
+function persistAuthSession(authPayload, fallbackUsername = "", resolvedRole = null) {
+  const token = String(authPayload?.access_token || "").trim();
+  const username = String(authPayload?.username || fallbackUsername || "").trim();
+  const role = normalizeRole(resolvedRole || authPayload?.role);
+
+  if (token) {
+    localStorage.setItem("auth_token", token);
+    if (role === "admin") {
+      localStorage.setItem("admin_token", token);
+    } else {
+      localStorage.removeItem("admin_token");
+    }
+  }
+
+  if (username) {
+    localStorage.setItem("username", username);
+  }
+  localStorage.setItem(AUTH_ROLE_KEY, role);
+
+  return role;
+}
+
+async function resolveAuthRole(authPayload) {
+  const explicitRole = String(authPayload?.role || "").trim();
+  if (explicitRole) {
+    return normalizeRole(explicitRole);
+  }
+
+  const tokenRole = getRoleFromToken(authPayload?.access_token);
+  if (tokenRole) {
+    return tokenRole;
+  }
+
+  const token = String(authPayload?.access_token || "").trim();
+  if (!token) {
+    return "user";
+  }
+
+  try {
+    const res = await fetch("/api/v1/admin/dashboard", {
+      headers: { Authorization: "Bearer " + token },
+    });
+    if (res.ok) {
+      return "admin";
+    }
+  } catch (_) {
+    /* fallback to user */
+  }
+
+  return "user";
+}
+
+function getRoleFromToken(token) {
+  try {
+    const parts = String(token || "").split(".");
+    if (parts.length < 2) return null;
+
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded));
+    if (payload && typeof payload.role === "string") {
+      return normalizeRole(payload.role);
+    }
+  } catch (_) {
+    /* ignore malformed token */
+  }
+
+  return null;
+}
 
 /* ---- Custom modal ---- */
 function ensureLoginModal() {
@@ -321,12 +400,9 @@ authForm.addEventListener("submit", async (e) => {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Thao tác thất bại");
 
-    // Store auth
-    localStorage.setItem("auth_token", data.access_token);
-    localStorage.setItem("username", data.username || username);
-
-    // Redirect to main workspace
-    window.location.href = "/";
+    const role = await resolveAuthRole(data);
+    persistAuthSession(data, username, role);
+    window.location.href = getRedirectPathByRole(role);
   } catch (err) {
     authError.textContent = err.message;
   } finally {
@@ -362,9 +438,9 @@ async function completeOAuthLogin(provider, code, state) {
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || "Đăng nhập OAuth thất bại");
 
-  localStorage.setItem("auth_token", data.access_token);
-  localStorage.setItem("username", data.username || provider);
-  window.location.href = "/";
+  const role = await resolveAuthRole(data);
+  persistAuthSession(data, provider, role);
+  window.location.href = getRedirectPathByRole(role);
 }
 
 async function runResetPasswordFlow(token, usernameHint = "") {
@@ -491,9 +567,31 @@ async function handleOAuthAndResetCallbacks() {
 }
 
 /* ---- Check if already logged in ---- */
-function checkAuth() {
+async function checkAuth() {
   const token = localStorage.getItem("auth_token") || localStorage.getItem("access_token");
   if (token) {
+    const roleFromToken = getRoleFromToken(token);
+    if (roleFromToken) {
+      localStorage.setItem(AUTH_ROLE_KEY, roleFromToken);
+      window.location.href = getRedirectPathByRole(roleFromToken);
+      return;
+    }
+
+    // Fallback for legacy tokens without role claim
+    try {
+      const res = await fetch("/api/v1/admin/dashboard", {
+        headers: { Authorization: "Bearer " + token },
+      });
+      if (res.ok) {
+        localStorage.setItem(AUTH_ROLE_KEY, "admin");
+        window.location.href = "/admin";
+        return;
+      }
+    } catch (_) {
+      /* fallback to user route */
+    }
+
+    localStorage.setItem(AUTH_ROLE_KEY, "user");
     window.location.href = "/";
   }
 }

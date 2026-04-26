@@ -18,6 +18,9 @@ class AnswerResult:
 class UserAccount:
     username: str
     password_hash: str
+    role: str = "user"
+    is_active: bool = True
+    created_at: str = ""
 
 
 @dataclass(slots=True)
@@ -25,6 +28,8 @@ class AuthTokenResult:
     access_token: str
     token_type: str = "bearer"
     expires_in: int = 0
+    username: str = ""
+    role: str = "user"
 
 
 @dataclass(slots=True)
@@ -52,4 +57,14 @@ class ChatMessage:
     username: str
     role: str
     content: str
+    created_at: str
+
+
+@dataclass(slots=True)
+class AuditLogEntry:
+    log_id: str
+    admin_username: str
+    action: str
+    target: str
+    detail: str
     created_at: str

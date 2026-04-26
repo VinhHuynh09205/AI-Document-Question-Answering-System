@@ -5,8 +5,6 @@ from app.core.config import Settings
 from app.core.embedding_factory import build_embeddings
 from app.core.llm_provider_factory import build_llm_provider
 from app.repositories.faiss_vector_store_repository import FaissVectorStoreRepository
-from app.repositories.sqlite_user_repository import SqliteUserRepository
-from app.repositories.sqlite_workspace_repository import SqliteWorkspaceRepository
 from app.repositories.interfaces.vector_store_repository import IVectorStoreRepository
 from app.services.document_ingestion_service import DocumentIngestionService
 from app.services.document_loader_registry import DocumentLoaderRegistry
@@ -27,13 +25,17 @@ from app.services.interfaces.auth_service import IAuthService
 from app.services.interfaces.question_answering_service import IQuestionAnsweringService
 from app.services.interfaces.rate_limiter import IRateLimiter
 from app.services.interfaces.runtime_metrics import IRuntimeMetrics
+from app.services.interfaces.upload_job_service import IUploadJobService
+from app.services.interfaces.admin_service import IAdminService
 from app.services.interfaces.vector_store_admin_service import IVectorStoreAdminService
 from app.services.interfaces.workspace_service import IWorkspaceService
+from app.services.admin_service import AdminService
 from app.services.auth_service import AuthService
 from app.services.llm_providers.local_grounded_llm_provider import LocalGroundedLLMProvider
 from app.services.question_answering_service import QuestionAnsweringService
 from app.services.runtime_metrics import RuntimeMetrics
 from app.services.text_chunking_service import TextChunkingService
+from app.services.upload_job_service import InMemoryUploadJobService
 from app.services.vector_store_admin_service import VectorStoreAdminService
 from app.services.workspace_service import WorkspaceService
 from app.utils.filesystem import ensure_directory
@@ -44,25 +46,26 @@ class AppContainer:
     ingestion_service: IDocumentIngestionService
     question_answering_service: IQuestionAnsweringService
     auth_service: IAuthService
+    admin_service: IAdminService
     rate_limiter: IRateLimiter
     runtime_metrics: IRuntimeMetrics
     vector_store_repository: IVectorStoreRepository
     vector_store_admin_service: IVectorStoreAdminService
     workspace_service: IWorkspaceService
+    upload_job_service: IUploadJobService
 
 
 def build_container(settings: Settings) -> AppContainer:
     ensure_directory(Path(settings.upload_dir))
     ensure_directory(Path(settings.vector_store_path))
     ensure_directory(Path(settings.vector_backup_dir))
-    if settings.get_database_backend() == "sqlite":
-        ensure_directory(Path(settings.database_path).parent)
     ensure_directory(Path(settings.users_file_path).parent)
 
     embeddings = build_embeddings(settings)
     vector_store_repository = FaissVectorStoreRepository(
         index_dir=Path(settings.vector_store_path),
         embeddings=embeddings,
+        embedding_batch_size=settings.embedding_batch_size,
     )
     loader_registry = DocumentLoaderRegistry(
         loaders=[
@@ -87,6 +90,7 @@ def build_container(settings: Settings) -> AppContainer:
         loader_registry=loader_registry,
         chunking_service=chunking_service,
         vector_store_repository=vector_store_repository,
+        max_file_workers=settings.ingestion_max_file_workers,
     )
     llm_provider = build_llm_provider(settings)
     backup_llm_provider = LocalGroundedLLMProvider(max_answer_chars=settings.max_answer_chars)
@@ -105,29 +109,29 @@ def build_container(settings: Settings) -> AppContainer:
         window_seconds=settings.rate_limit_window_seconds,
     )
     runtime_metrics = RuntimeMetrics()
+    upload_job_service = InMemoryUploadJobService(
+        retention_seconds=settings.upload_job_retention_seconds,
+    )
     vector_store_admin_service = VectorStoreAdminService(
         vector_store_repository=vector_store_repository,
         backup_root_dir=Path(settings.vector_backup_dir),
     )
 
-    if settings.get_database_backend() == "mysql":
-        from app.repositories.mysql_user_repository import MySqlUserRepository
-        from app.repositories.mysql_utils import MySqlConfig
-        from app.repositories.mysql_workspace_repository import MySqlWorkspaceRepository
+    from app.repositories.pg_admin_repository import PgAdminRepository
+    from app.repositories.pg_user_repository import PgUserRepository
+    from app.repositories.pg_utils import PgConfig
+    from app.repositories.pg_workspace_repository import PgWorkspaceRepository
 
-        mysql_config = MySqlConfig(
-            host=settings.mysql_host,
-            port=settings.mysql_port,
-            user=settings.mysql_user,
-            password=settings.mysql_password,
-            database=settings.mysql_database,
-            charset=settings.mysql_charset,
-        )
-        workspace_repository = MySqlWorkspaceRepository(config=mysql_config)
-        user_repository = MySqlUserRepository(config=mysql_config)
-    else:
-        workspace_repository = SqliteWorkspaceRepository(database_path=Path(settings.database_path))
-        user_repository = SqliteUserRepository(database_path=Path(settings.database_path))
+    pg_config = PgConfig(
+        host=settings.pg_host,
+        port=settings.pg_port,
+        user=settings.pg_user,
+        password=settings.pg_password,
+        database=settings.pg_database,
+    )
+    workspace_repository = PgWorkspaceRepository(config=pg_config)
+    user_repository = PgUserRepository(config=pg_config)
+    admin_repository = PgAdminRepository(config=pg_config)
 
     workspace_service = WorkspaceService(workspace_repository=workspace_repository)
 
@@ -145,13 +149,24 @@ def build_container(settings: Settings) -> AppContainer:
         oauth_allowed_redirect_base=settings.oauth_allowed_redirect_base,
     )
 
+    admin_service = AdminService(
+        user_repository=user_repository,
+        admin_repository=admin_repository,
+        vector_store_repository=vector_store_repository,
+        runtime_metrics=runtime_metrics,
+        settings=settings,
+        hash_password_fn=AuthService._hash_password,
+    )
+
     return AppContainer(
         ingestion_service=ingestion_service,
         question_answering_service=question_answering_service,
         auth_service=auth_service,
+        admin_service=admin_service,
         rate_limiter=rate_limiter,
         runtime_metrics=runtime_metrics,
         vector_store_repository=vector_store_repository,
         vector_store_admin_service=vector_store_admin_service,
         workspace_service=workspace_service,
+        upload_job_service=upload_job_service,
     )

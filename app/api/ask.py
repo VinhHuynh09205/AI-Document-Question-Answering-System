@@ -38,7 +38,7 @@ def ask_question(
         )
 
     try:
-        metadata_filter: dict[str, str] | None = None
+        metadata_filter: dict[str, str | list[str]] | None = None
         if payload.chat_id is not None:
             if username is None:
                 raise HTTPException(

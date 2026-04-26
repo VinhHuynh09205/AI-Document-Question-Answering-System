@@ -6,12 +6,36 @@ class UploadResponse(BaseModel):
     files_processed: int
     chunks_indexed: int
     original_names: list[str] = Field(default_factory=list)
+    job_id: str | None = None
+    status: str | None = None
+    status_url: str | None = None
+
+
+class UploadJobStatusResponse(BaseModel):
+    job_id: str
+    chat_id: str
+    status: str
+    stage: str
+    progress: int = Field(ge=0, le=100)
+    files_total: int = Field(ge=0)
+    files_processed: int = Field(ge=0)
+    chunks_total: int = Field(ge=0)
+    chunks_indexed: int = Field(ge=0)
+    original_names: list[str] = Field(default_factory=list)
+    message: str | None = None
+    error: str | None = None
+    created_at: str
+    updated_at: str
 
 
 class AskRequest(BaseModel):
-    question: str = Field(..., min_length=3, max_length=2000)
+    question: str = Field(..., min_length=1, max_length=2000)
     chat_id: str | None = Field(default=None, min_length=1, max_length=128)
     top_k: int | None = Field(default=None, ge=1, le=20, description="Number of chunks to retrieve")
+    selected_document_ids: list[str] = Field(
+        default_factory=list,
+        description="Explicit document IDs to scope retrieval in workspace ask endpoints",
+    )
 
 
 class AskResponse(BaseModel):
@@ -69,6 +93,7 @@ class AuthResponse(BaseModel):
     token_type: str
     expires_in: int
     username: str | None = None
+    role: str = "user"
 
 
 class ForgotPasswordRequest(BaseModel):
@@ -125,6 +150,7 @@ class DocumentRecordResponse(BaseModel):
     original_name: str
     stored_path: str
     created_at: str
+    upload_index: int | None = None
 
 
 class DocumentListResponse(BaseModel):

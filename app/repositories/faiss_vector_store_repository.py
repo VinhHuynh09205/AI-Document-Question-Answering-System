@@ -2,7 +2,7 @@ import json
 import logging
 from pathlib import Path
 from shutil import copy2
-from typing import Sequence
+from typing import Callable, Sequence
 
 import faiss
 import numpy as np
@@ -16,9 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class FaissVectorStoreRepository(IVectorStoreRepository):
-    def __init__(self, index_dir: Path, embeddings: Embeddings) -> None:
+    def __init__(self, index_dir: Path, embeddings: Embeddings, embedding_batch_size: int = 128) -> None:
         self._index_dir = index_dir
         self._embeddings = embeddings
+        self._embedding_batch_size = max(1, embedding_batch_size)
         self._index_file = self._index_dir / "index.faiss"
         self._metadata_file = self._index_dir / "documents.json"
         self._index_dir.mkdir(parents=True, exist_ok=True)
@@ -27,43 +28,54 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
         self._documents: list[dict] = []
         self._load_existing_store()
 
-    def add_documents(self, documents: Sequence[Document]) -> int:
+    def add_documents(
+        self,
+        documents: Sequence[Document],
+        progress_callback: Callable[[int, int], None] | None = None,
+    ) -> int:
         valid_documents = [doc for doc in documents if doc.page_content.strip()]
         if not valid_documents:
+            if progress_callback is not None:
+                progress_callback(0, 0)
             return 0
 
-        vectors = self._embeddings.embed_documents(
-            [doc.page_content for doc in valid_documents]
-        )
-        matrix = np.array(vectors, dtype="float32")
+        total_added = 0
+        for start in range(0, len(valid_documents), self._embedding_batch_size):
+            batch_documents = valid_documents[start:start + self._embedding_batch_size]
+            vectors = self._embeddings.embed_documents([doc.page_content for doc in batch_documents])
+            matrix = np.asarray(vectors, dtype="float32")
+            if matrix.size == 0:
+                continue
 
-        if self._index is None:
-            self._index = faiss.IndexFlatL2(matrix.shape[1])
-        elif matrix.shape[1] != self._index.d:
-            logger.warning(
-                "faiss_dimension_mismatch_on_add existing_dim=%s new_dim=%s resetting_index",
-                self._index.d,
-                matrix.shape[1],
-            )
-            self._reset_index(matrix.shape[1])
+            if self._index is None:
+                self._index = faiss.IndexFlatL2(matrix.shape[1])
+            elif matrix.shape[1] != self._index.d:
+                logger.warning(
+                    "faiss_dimension_mismatch_on_add existing_dim=%s new_dim=%s resetting_index",
+                    self._index.d,
+                    matrix.shape[1],
+                )
+                self._reset_index(matrix.shape[1])
 
-        self._index.add(matrix)
+            self._index.add(matrix)
+            for doc in batch_documents:
+                self._documents.append(
+                    {
+                        "page_content": doc.page_content,
+                        "metadata": doc.metadata,
+                    }
+                )
+            total_added += len(batch_documents)
+            if progress_callback is not None:
+                progress_callback(total_added, len(valid_documents))
 
-        for doc in valid_documents:
-            self._documents.append(
-                {
-                    "page_content": doc.page_content,
-                    "metadata": doc.metadata,
-                }
-            )
-
-        return len(valid_documents)
+        return total_added
 
     def similarity_search(
         self,
         query: str,
         k: int,
-        metadata_filter: dict[str, str] | None = None,
+        metadata_filter: dict[str, str | list[str]] | None = None,
     ) -> list[Document]:
         if self._index is None or not self._documents:
             return []
@@ -177,8 +189,13 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
         self._documents = json.loads(payload) if payload else []
 
     @staticmethod
-    def _match_metadata_filter(metadata: dict, metadata_filter: dict[str, str]) -> bool:
+    def _match_metadata_filter(metadata: dict, metadata_filter: dict[str, str | list[str]]) -> bool:
         for key, value in metadata_filter.items():
-            if str(metadata.get(key)) != str(value):
+            metadata_value = str(metadata.get(key))
+            if isinstance(value, list):
+                if metadata_value not in {str(item) for item in value}:
+                    return False
+                continue
+            if metadata_value != str(value):
                 return False
         return True

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ChatBoxAI Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/admin.css?v=1" />
+</head>
+<body>
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="sidebar-brand">
+        <img src="/static/logo.svg" alt="ChatBoxAI" class="sidebar-logo" />
+        <div class="sidebar-brand-text">
+          <span class="sidebar-brand-name">ChatBoxAI</span>
+          <span class="sidebar-brand-badge">Admin</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <p class="nav-group-label">Quản lý chung</p>
+        <a class="nav-item active" data-page="dashboard" href="#">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <span>Tổng quan hệ thống</span>
+        </a>
+        <a class="nav-item" data-page="users" href="#">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Quản lý người dùng</span>
+        </a>
+
+        <p class="nav-group-label">Điều phối hệ thống</p>
+        <a class="nav-item" data-page="metrics" href="#">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span>Chỉ số hệ thống</span>
+        </a>
+        <a class="nav-item" data-page="config" href="#">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Cấu hình hệ thống</span>
+        </a>
+        <a class="nav-item" data-page="analytics" href="#">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Phân tích sử dụng</span>
+        </a>
+        <a class="nav-item" data-page="audit" href="#">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Nhật ký kiểm toán</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="sidebar-user" id="sidebarUser">
+        <div class="sidebar-user-avatar" id="userAvatarEl">A</div>
+        <div class="sidebar-user-info">
+          <span class="sidebar-user-name" id="userNameEl">Admin</span>
+          <span class="sidebar-user-role">Super Admin</span>
+        </div>
+        <button class="sidebar-logout-btn" id="btnLogout" title="Đăng xuất">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== MOBILE OVERLAY ========== -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- ========== MAIN ========== -->
+  <main class="main" id="main">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="topbar-menu-btn" id="btnMenuToggle" title="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topbar-search">
+          <svg class="topbar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="topbar-search-input" id="globalSearch" type="text" placeholder="Tìm kiếm người dùng, cấu hình..." />
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="topbar-icon-btn" id="btnThemeToggle" title="Chế độ tối / sáng">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <a href="/" class="btn-workspace">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Mở Workspace
+        </a>
+      </div>
+    </header>
+
+    <!-- ========== PAGE: DASHBOARD ========== -->
+    <section class="page page-dashboard active" id="pageDashboard">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Bảng Điều Khiển Hệ Thống</h1>
+          <p class="page-subtitle">Tổng hợp toàn bộ chức năng admin cho document AI chat, từ giám sát hệ thống đến quản trị người dùng và nhật ký bảo mật.</p>
+        </div>
+      </div>
+
+      <!-- Stat Cards -->
+      <div class="stat-cards" id="statCards">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-label">Tổng Người Dùng</span>
+            <div class="stat-icon stat-icon-blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+          </div>
+          <span class="stat-value" id="statUsers">—</span>
+          <span class="stat-change stat-up" id="statUsersChange"><span class="stat-arrow">↑</span> <span id="statUsersRecent">0</span> trong 7 ngày</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-label">Tổng Tin Nhắn</span>
+            <div class="stat-icon stat-icon-teal">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+          </div>
+          <span class="stat-value" id="statMessages">—</span>
+          <span class="stat-change stat-muted">Tổng truy vấn AI</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-label">Tài Liệu Vector Store</span>
+            <div class="stat-icon stat-icon-amber">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+          </div>
+          <span class="stat-value" id="statDocuments">—</span>
+          <span class="stat-change stat-muted">Đã index trong FAISS</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-label">Uptime & Requests</span>
+            <div class="stat-icon stat-icon-green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+          </div>
+          <span class="stat-value" id="statUptime">—</span>
+          <span class="stat-change stat-muted"><span id="statRequests">0</span> requests tổng</span>
+        </div>
+      </div>
+
+      <!-- 2-col: Chart + Audit -->
+      <div class="dashboard-grid">
+        <div class="card card-chart">
+          <div class="card-header">
+            <h3 class="card-title">Phân tích mức sử dụng</h3>
+            <span class="card-subtitle">Tin nhắn theo ngày trong 7 ngày gần nhất</span>
+          </div>
+          <div class="chart-container" id="chartContainer">
+            <div class="chart-bars" id="chartBars"></div>
+            <div class="chart-labels" id="chartLabels"></div>
+          </div>
+        </div>
+        <div class="card card-audit-preview">
+          <div class="card-header">
+            <h3 class="card-title">Nhật ký kiểm toán</h3>
+            <a href="#" class="card-link" data-goto="audit">Xem tất cả →</a>
+          </div>
+          <div class="audit-preview-list" id="auditPreviewList">
+            <div class="empty-state">Đang tải...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions + Config Preview -->
+      <div class="dashboard-grid">
+        <div class="card card-actions">
+          <div class="card-header">
+            <h3 class="card-title">Trung tâm chức năng Admin API</h3>
+          </div>
+          <div class="action-list">
+            <div class="action-item" data-goto="dashboard">
+              <div class="action-icon action-icon-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+              <div class="action-text">
+                <strong>Thống kê tổng quan</strong>
+                <span>Lấy snapshot tổng quan người dùng, tài liệu, truy vấn và trạng thái hệ thống.</span>
+              </div>
+              <span class="action-badge badge-read">READ</span>
+            </div>
+            <div class="action-item" data-goto="users">
+              <div class="action-icon action-icon-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <div class="action-text">
+                <strong>Danh sách người dùng</strong>
+                <span>Xem danh sách người dùng, vai trò và tình trạng hoạt động.</span>
+              </div>
+              <span class="action-badge badge-read">READ</span>
+            </div>
+            <div class="action-item" data-goto="users">
+              <div class="action-icon action-icon-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+              <div class="action-text">
+                <strong>Cập nhật vai trò người dùng</strong>
+                <span>Nâng cấp quyền viewer, admin hoặc super admin theo chính sách.</span>
+              </div>
+              <span class="action-badge badge-write">WRITE</span>
+            </div>
+            <div class="action-item" data-goto="users">
+              <div class="action-icon action-icon-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+              <div class="action-text">
+                <strong>Cập nhật trạng thái tài khoản</strong>
+                <span>Kích hoạt, tạm dừng hoặc khóa tài khoản ngay trong giao diện admin.</span>
+              </div>
+              <span class="action-badge badge-write">WRITE</span>
+            </div>
+            <div class="action-item" data-goto="users">
+              <div class="action-icon action-icon-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+              <div class="action-text">
+                <strong>Xóa tài khoản người dùng</strong>
+                <span>Xóa tài khoản khỏi hệ thống sau khi xác minh tác động tới workspace và audit trail.</span>
+              </div>
+              <span class="action-badge badge-admin">ADMIN</span>
+            </div>
+          </div>
+        </div>
+        <div class="card card-config-preview">
+          <div class="card-header">
+            <h3 class="card-title">Cấu hình hệ thống</h3>
+            <a href="#" class="card-link" data-goto="config">Chi tiết →</a>
+          </div>
+          <div class="config-preview-list" id="configPreviewList">
+            <div class="empty-state">Đang tải...</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAGE: USERS ========== -->
+    <section class="page page-users" id="pageUsers">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Quản lý người dùng</h1>
+          <p class="page-subtitle">Quản trị trực tiếp người dùng, vai trò, trạng thái và các hành động nhạy cảm.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header card-header-users">
+          <div class="user-filters">
+            <select class="filter-select" id="filterRole">
+              <option value="">Tất cả vai trò</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+            <select class="filter-select" id="filterStatus">
+              <option value="">Tất cả trạng thái</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+          <button class="btn-export" id="btnExportUsers">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Xuất danh sách
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table" id="usersTable">
+            <thead>
+              <tr>
+                <th>Người dùng</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="5" class="empty-state">Đang tải...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer" id="usersTableFooter">
+          <span class="table-count" id="usersCount"></span>
+          <div class="table-pagination" id="usersPagination"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAGE: METRICS ========== -->
+    <section class="page page-metrics" id="pageMetrics">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Chỉ số hệ thống</h1>
+          <p class="page-subtitle">Giám sát thời gian thực hiệu suất, request counts và error rates.</p>
+        </div>
+        <button class="btn-refresh" id="btnRefreshMetrics">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Làm mới
+        </button>
+      </div>
+
+      <div class="metrics-grid" id="metricsGrid">
+        <div class="card metric-card">
+          <h4 class="metric-label">Uptime</h4>
+          <span class="metric-value" id="metricUptime">—</span>
+        </div>
+        <div class="card metric-card">
+          <h4 class="metric-label">Tổng Requests</h4>
+          <span class="metric-value" id="metricRequests">—</span>
+        </div>
+        <div class="card metric-card">
+          <h4 class="metric-label">Fallback Answers</h4>
+          <span class="metric-value" id="metricFallback">—</span>
+        </div>
+        <div class="card metric-card">
+          <h4 class="metric-label">Rate Limited</h4>
+          <span class="metric-value" id="metricRateLimited">—</span>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Phân bố HTTP Status</h3></div>
+          <div class="status-bars" id="statusBars"></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3 class="card-title">Top Endpoints</h3></div>
+          <div class="endpoint-list" id="endpointList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAGE: CONFIG ========== -->
+    <section class="page page-config" id="pageConfig">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Cấu hình hệ thống</h1>
+          <p class="page-subtitle">Trạng thái cấu hình vận hành hiện tại. Chỉnh sửa thông qua file .env và khởi động lại server.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="config-grid" id="configGrid">
+          <div class="empty-state">Đang tải...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAGE: ANALYTICS ========== -->
+    <section class="page page-analytics" id="pageAnalytics">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Phân tích sử dụng</h1>
+          <p class="page-subtitle">Biểu đồ truy vấn AI, tải nạp vào và mức sử dụng theo 30 ngày gần nhất.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Tin nhắn theo ngày (30 ngày)</h3></div>
+        <div class="chart-container chart-large" id="analyticsChartContainer">
+          <div class="chart-bars" id="analyticsChartBars"></div>
+          <div class="chart-labels" id="analyticsChartLabels"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3 class="card-title">Top người dùng hoạt động</h3></div>
+        <div class="top-users-list" id="topUsersList">
+          <div class="empty-state">Đang tải...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== PAGE: AUDIT ========== -->
+    <section class="page page-audit" id="pageAudit">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Nhật ký kiểm toán</h1>
+          <p class="page-subtitle">Hoạt động bảo mật và thay đổi quan trọng trong hệ thống.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table class="data-table" id="auditTable">
+            <thead>
+              <tr>
+                <th>Thời gian</th>
+                <th>Admin</th>
+                <th>Hành động</th>
+                <th>Đối tượng</th>
+                <th>Chi tiết</th>
+              </tr>
+            </thead>
+            <tbody id="auditTableBody">
+              <tr><td colspan="5" class="empty-state">Đang tải...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-footer" id="auditTableFooter">
+          <span class="table-count" id="auditCount"></span>
+          <div class="table-pagination" id="auditPagination"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== MODAL: User Actions ========== -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Thao tác</h3>
+        <button class="modal-close" id="modalClose">×</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer" id="modalFooter"></div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="/static/admin.js?v=1" defer></script>
+</body>
+</html>

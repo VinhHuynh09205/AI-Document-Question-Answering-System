@@ -8,8 +8,15 @@ const state = {
   currentChatId: null,
   chats: [],
   docs: [],
+  selectedDocIdsByChat: {},
   hasChatActivity: false,
 };
+
+let markedConfigured = false;
+let mermaidThemeMode = "";
+let mermaidSequence = 0;
+const UPLOAD_JOB_POLL_INTERVAL_MS = 800;
+const UPLOAD_JOB_POLL_TIMEOUT_MS = 180000;
 
 const UNSAVED_ANONYMOUS_WARNING =
   "Bạn chưa đăng nhập. Nếu thoát trang, cuộc hội thoại và tài liệu tạm sẽ bị mất.";
@@ -26,6 +33,8 @@ const statusPill = document.getElementById("statusPill");
 const docsList = document.getElementById("docsList");
 const docsSection = document.getElementById("docsSection");
 const docsLabel = document.getElementById("docsLabel");
+const docsSelectionGuide = document.getElementById("docsSelectionGuide");
+const docsSelectAll = document.getElementById("docsSelectAll");
 const btnUploadLabel = document.getElementById("btnUploadLabel");
 const btnLogin = document.getElementById("btnLogin");
 const sidebarClose = document.getElementById("sidebarClose");
@@ -49,6 +58,7 @@ const quickActionsToggle = document.getElementById("quickActionsToggle");
    INIT
    ================================================================ */
 (function init() {
+  configureMarkdownRenderer();
   restoreSession();
   bindEvents();
   applyStoredQuickActionsState();
@@ -205,12 +215,20 @@ function handleLogout() {
   state.currentChatId = null;
   state.chats = [];
   state.docs = [];
+  state.selectedDocIdsByChat = {};
   localStorage.removeItem("auth_token");
+  localStorage.removeItem("admin_token");
   localStorage.removeItem("username");
+  localStorage.removeItem("user_role");
   showLoggedOut();
   workspaceList.innerHTML = "";
   docsList.innerHTML = "";
   docsSection.classList.remove("visible");
+  if (docsSelectAll) {
+    docsSelectAll.checked = false;
+    docsSelectAll.indeterminate = false;
+    docsSelectAll.disabled = true;
+  }
   clearChat();
   wsTitle.textContent = "Chọn hoặc tạo workspace để bắt đầu";
   statusPill.textContent = "";
@@ -355,8 +373,13 @@ async function loadDocsForChat(chatId) {
     const res = await apiFetch(`/api/v1/workspace/chats/${chatId}/documents`);
     const data = await res.json();
     state.docs = data.documents || [];
+    syncAskFromSelectionForCurrentChat();
     renderDocsList();
-  } catch { state.docs = []; renderDocsList(); }
+  } catch {
+    state.docs = [];
+    syncAskFromSelectionForCurrentChat();
+    renderDocsList();
+  }
 }
 
 async function loadMessagesForChat(chatId) {
@@ -382,29 +405,82 @@ function renderDocsList() {
   docsList.innerHTML = "";
   if (!state.docs.length) {
     docsSection.classList.remove("visible");
+    if (docsSelectAll) {
+      docsSelectAll.checked = false;
+      docsSelectAll.indeterminate = false;
+      docsSelectAll.disabled = true;
+      docsSelectAll.onchange = null;
+    }
     return;
   }
+
   docsSection.classList.add("visible");
   const idx = state.chats.findIndex((c) => c.chat_id === state.currentChatId);
   docsLabel.textContent = `Tài liệu trong workspace ${String(idx + 1).padStart(2, "0")} (${state.docs.length})`;
+  if (docsSelectionGuide) {
+    docsSelectionGuide.textContent = "Hướng dẫn: tick vào ô vuông ở từng tài liệu để AI chỉ trả lời trong tài liệu đã chọn.";
+  }
 
-  state.docs.forEach((doc) => {
+  const selectedSet = new Set(getSelectedDocIdsForCurrentChat());
+  if (docsSelectAll) {
+    docsSelectAll.disabled = false;
+    docsSelectAll.checked = selectedSet.size === state.docs.length;
+    docsSelectAll.indeterminate = selectedSet.size > 0 && selectedSet.size < state.docs.length;
+    docsSelectAll.onchange = () => {
+      if (docsSelectAll.checked) {
+        setSelectedDocIdsForCurrentChat(state.docs.map((doc) => doc.document_id));
+      } else {
+        setSelectedDocIdsForCurrentChat([]);
+      }
+      renderDocsList();
+      updateStatusPill();
+    };
+  }
+
+  state.docs.forEach((doc, index) => {
+    const uploadIndex = Number(doc.upload_index) || index + 1;
     const el = document.createElement("div");
     el.className = "doc-item";
     el.innerHTML = `
+      <div class="doc-scope-wrap">
+        <input type="checkbox" class="doc-scope-checkbox" aria-label="Chọn tài liệu ${escapeHtml(doc.original_name)}" />
+      </div>
       <div class="doc-icon-wrap">
         <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="doc-meta">
         <div class="doc-name">${escapeHtml(doc.original_name)}</div>
-        <div class="doc-status">Đã phân tích</div>
+        <div class="doc-status">Tài liệu ${String(uploadIndex).padStart(2, "0")} · Đã phân tích</div>
       </div>
       <button class="doc-item-actions" title="Tùy chọn">⋯</button>
     `;
+
+    const scopeCheckbox = el.querySelector(".doc-scope-checkbox");
+    scopeCheckbox.checked = selectedSet.has(doc.document_id);
+    scopeCheckbox.addEventListener("change", () => {
+      const nextSelection = new Set(getSelectedDocIdsForCurrentChat());
+      if (scopeCheckbox.checked) {
+        nextSelection.add(doc.document_id);
+      } else {
+        nextSelection.delete(doc.document_id);
+      }
+      setSelectedDocIdsForCurrentChat(Array.from(nextSelection));
+      renderDocsList();
+      updateStatusPill();
+    });
+
+    const toggleScope = () => {
+      scopeCheckbox.checked = !scopeCheckbox.checked;
+      scopeCheckbox.dispatchEvent(new Event("change"));
+    };
+    el.querySelector(".doc-icon-wrap").addEventListener("click", toggleScope);
+    el.querySelector(".doc-meta").addEventListener("click", toggleScope);
+
     el.querySelector(".doc-item-actions").addEventListener("click", (e) => {
       e.stopPropagation();
       openCtxMenu(e, "document", doc.document_id, state.currentChatId);
     });
+
     docsList.appendChild(el);
   });
 
@@ -417,9 +493,44 @@ function renderDocsList() {
 function updateStatusPill() {
   const docCount = state.docs.length;
   if (docCount > 0) {
-    statusPill.textContent = `Sẵn sàng trả lời từ ${docCount} tài liệu`;
+    const selectedCount = getSelectedDocIdsForCurrentChat().length;
+    statusPill.textContent = `Sẵn sàng trả lời từ ${selectedCount}/${docCount} tài liệu`;
   } else {
     statusPill.textContent = "";
+  }
+}
+
+function getSelectedDocIdsForCurrentChat() {
+  if (!state.currentChatId) return [];
+  const selected = state.selectedDocIdsByChat[state.currentChatId];
+  if (!Array.isArray(selected)) return [];
+  return selected;
+}
+
+function setSelectedDocIdsForCurrentChat(documentIds) {
+  if (!state.currentChatId) return;
+  const validIds = new Set(state.docs.map((doc) => String(doc.document_id || "").trim()).filter(Boolean));
+  const normalized = [];
+  const seen = new Set();
+
+  for (const rawId of documentIds || []) {
+    const id = String(rawId || "").trim();
+    if (!id || !validIds.has(id) || seen.has(id)) continue;
+    seen.add(id);
+    normalized.push(id);
+  }
+
+  state.selectedDocIdsByChat[state.currentChatId] = normalized;
+}
+
+function syncAskFromSelectionForCurrentChat() {
+  if (!state.currentChatId) return;
+
+  const currentSelected = getSelectedDocIdsForCurrentChat();
+  setSelectedDocIdsForCurrentChat(currentSelected);
+
+  if (!getSelectedDocIdsForCurrentChat().length && state.docs.length) {
+    setSelectedDocIdsForCurrentChat(state.docs.map((doc) => doc.document_id));
   }
 }
 
@@ -448,6 +559,8 @@ async function handleUploadFiles(files) {
     return;
   }
 
+  const uploadChatId = state.currentChatId;
+
   // Add temp doc items
   files.forEach((f) => addTempDoc(f.name));
 
@@ -455,22 +568,114 @@ async function handleUploadFiles(files) {
   files.forEach((f) => formData.append("files", f));
 
   try {
-    const res = await apiFetch(`/api/v1/workspace/chats/${state.currentChatId}/upload`, {
+    const res = await apiFetch(`/api/v1/workspace/chats/${uploadChatId}/upload`, {
       method: "POST",
       body: formData,
     });
-    const payload = await res.json();
-    if (!res.ok) throw new Error(payload.detail || "Upload thất bại");
+    const { payload, text } = await parseApiPayload(res);
+    if (!res.ok) {
+      throw new Error(
+        payload?.detail || payload?.message || text || `Upload thất bại (HTTP ${res.status})`
+      );
+    }
+
+    const originalNames = (payload?.original_names && payload.original_names.length)
+      ? payload.original_names
+      : files.map((file) => file.name);
+
+    if (payload?.job_id) {
+      const progressMessageId = appendAssistantMessage(buildUploadQueuedMessage(originalNames));
+      const jobStatus = await pollUploadJob({
+        chatId: uploadChatId,
+        jobId: payload.job_id,
+        originalNames,
+        messageId: progressMessageId,
+      });
+
+      if (jobStatus === "completed") {
+        state.hasChatActivity = true;
+      }
+
+      if (state.currentChatId === uploadChatId) {
+        await loadDocsForChat(uploadChatId);
+      }
+      await loadAllDocCounts();
+      return;
+    }
 
     appendAssistantMessage(
-      buildUploadSuccessMessage(payload.original_names || [])
+      buildUploadSuccessMessage(originalNames)
     );
     state.hasChatActivity = true;
-    await loadDocsForChat(state.currentChatId);
-    renderWorkspaceList();
+    if (state.currentChatId === uploadChatId) {
+      await loadDocsForChat(uploadChatId);
+    }
+    await loadAllDocCounts();
   } catch (err) {
     appendAssistantMessage(`Không thể tải tài liệu: ${err.message}`);
+    if (state.currentChatId === uploadChatId) {
+      await loadDocsForChat(uploadChatId);
+    }
   }
+}
+
+async function pollUploadJob({ chatId, jobId, originalNames, messageId }) {
+  const startedAt = Date.now();
+  let lastMessage = "";
+
+  while (Date.now() - startedAt < UPLOAD_JOB_POLL_TIMEOUT_MS) {
+    await wait(UPLOAD_JOB_POLL_INTERVAL_MS);
+
+    const res = await apiFetch(`/api/v1/workspace/chats/${chatId}/upload-jobs/${jobId}`);
+    const { payload, text } = await parseApiPayload(res);
+    if (!res.ok) {
+      throw new Error(
+        payload?.detail || payload?.message || text || `Không đọc được tiến độ upload (HTTP ${res.status})`
+      );
+    }
+
+    const status = String(payload?.status || "processing");
+    const progress = Number.isFinite(payload?.progress) ? payload.progress : 0;
+
+    if (status === "completed") {
+      replaceAssistantMessage(messageId, buildUploadSuccessMessage(payload?.original_names || originalNames));
+      return "completed";
+    }
+
+    if (status === "failed") {
+      const detail = payload?.error || payload?.message || "Upload thất bại";
+      replaceAssistantMessage(messageId, `Không thể tải tài liệu: ${detail}`);
+      return "failed";
+    }
+
+    const progressText = `${mapUploadStage(payload?.stage || status)} (${Math.max(0, Math.min(100, progress))}%)`;
+    if (progressText !== lastMessage) {
+      replaceAssistantMessage(messageId, progressText);
+      lastMessage = progressText;
+    }
+  }
+
+  replaceAssistantMessage(
+    messageId,
+    "Tài liệu vẫn đang xử lý trên nền. Danh sách tài liệu sẽ cập nhật khi hoàn tất."
+  );
+  return "timeout";
+}
+
+function mapUploadStage(stage) {
+  const value = String(stage || "").toLowerCase();
+  if (value === "queued") return "Đang chờ xử lý";
+  if (value === "loading") return "Đang đọc file";
+  if (value === "chunking") return "Đang chia nội dung";
+  if (value === "indexing") return "Đang lập chỉ mục";
+  if (value === "saving") return "Đang lưu chỉ mục";
+  return "Đang xử lý tài liệu";
+}
+
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
 }
 
 function addTempDoc(name) {
@@ -478,6 +683,7 @@ function addTempDoc(name) {
   const el = document.createElement("div");
   el.className = "doc-item";
   el.innerHTML = `
+    <div class="doc-scope-wrap doc-scope-placeholder"></div>
     <div class="doc-icon-wrap">
       <svg viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
@@ -498,6 +704,18 @@ async function handleAsk(event) {
   const question = questionInput.value.trim();
   if (!question) return;
 
+  const selectedDocumentIds =
+    state.token && state.currentChatId ? getSelectedDocIdsForCurrentChat() : [];
+
+  if (state.token && state.currentChatId && state.docs.length && !selectedDocumentIds.length) {
+    await showAlertModal({
+      title: "Chưa chọn tài liệu",
+      message: "Hãy chọn ít nhất 1 tài liệu trong mục Ask from trước khi đặt câu hỏi.",
+      confirmText: "Đã rõ",
+    });
+    return;
+  }
+
   appendUserMessage(question);
   state.hasChatActivity = true;
   questionInput.value = "";
@@ -508,7 +726,7 @@ async function handleAsk(event) {
   try {
     /* ---- Try streaming first (workspace chat only) ---- */
     if (state.token && state.currentChatId) {
-      const ok = await handleAskStream(question, loadingId);
+      const ok = await handleAskStream(question, loadingId, selectedDocumentIds);
       if (ok) return;
     }
 
@@ -518,7 +736,7 @@ async function handleAsk(event) {
       res = await apiFetch(`/api/v1/workspace/chats/${state.currentChatId}/ask`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, selected_document_ids: selectedDocumentIds }),
       });
     } else {
       res = await fetch("/api/v1/ask", {
@@ -528,10 +746,14 @@ async function handleAsk(event) {
       });
     }
 
-    const payload = await res.json();
-    if (!res.ok) throw new Error(payload.detail || "Không thể trả lời");
+    const { payload, text } = await parseApiPayload(res);
+    if (!res.ok) {
+      throw new Error(
+        payload?.detail || payload?.message || text || `Không thể trả lời (HTTP ${res.status})`
+      );
+    }
 
-    replaceAssistantMessage(loadingId, payload.answer, payload.sources || []);
+    replaceAssistantMessage(loadingId, payload?.answer || "", payload?.sources || []);
   } catch (err) {
     replaceAssistantMessage(loadingId, `Lỗi khi hỏi đáp: ${err.message}`);
   }
@@ -540,7 +762,7 @@ async function handleAsk(event) {
 /**
  * Stream answer via SSE. Returns true if streaming succeeded, false to fallback.
  */
-async function handleAskStream(question, loadingId) {
+async function handleAskStream(question, loadingId, selectedDocumentIds = []) {
   try {
     const headers = { "Content-Type": "application/json" };
     if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
@@ -550,7 +772,7 @@ async function handleAskStream(question, loadingId) {
       {
         method: "POST",
         headers,
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, selected_document_ids: selectedDocumentIds }),
       }
     );
 
@@ -559,6 +781,7 @@ async function handleAskStream(question, loadingId) {
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let fullText = "";
+    let streamSources = [];
     let firstChunk = true;
 
     while (true) {
@@ -576,7 +799,12 @@ async function handleAskStream(question, loadingId) {
         let payload;
         try { payload = JSON.parse(jsonStr); } catch { continue; }
 
-        if (payload.done) break;
+        if (payload.done) {
+          if (Array.isArray(payload.sources)) {
+            streamSources = payload.sources;
+          }
+          break;
+        }
         if (payload.token !== undefined) {
           fullText += payload.token;
           if (firstChunk) {
@@ -592,7 +820,7 @@ async function handleAskStream(question, loadingId) {
 
     if (!fullText.trim()) return false;
 
-    replaceAssistantMessage(loadingId, fullText);
+    replaceAssistantMessage(loadingId, fullText, streamSources);
     return true;
   } catch {
     return false;
@@ -606,8 +834,7 @@ function streamUpdateMessage(messageId, text) {
   const message = chatTimeline.querySelector(`[data-msg-id="${messageId}"]`);
   if (!message) return;
   const bubble = message.querySelector(".bubble");
-  const safeText = formatMessageHtml(text);
-  bubble.innerHTML = `<p>${safeText}</p>`;
+  void setAssistantBubbleContent(bubble, text, { streaming: true });
   scrollTimeline();
 }
 
@@ -635,14 +862,15 @@ function appendAssistantMessage(text) {
   const article = document.createElement("article");
   article.className = "message assistant";
   article.dataset.msgId = id;
-  const formatted = formatMessageHtml(text);
   article.innerHTML = `
     <div class="avatar assistant-avatar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div class="bubble"><p>${formatted}</p></div>
+    <div class="bubble"><div class="bubble-content"></div></div>
   `;
   chatTimeline.append(article);
+  const bubble = article.querySelector(".bubble");
+  void setAssistantBubbleContent(bubble, text, { streaming: false });
   scrollTimeline();
   return id;
 }
@@ -674,25 +902,36 @@ function replaceAssistantMessage(messageId, text, sources = []) {
   const message = chatTimeline.querySelector(`[data-msg-id="${messageId}"]`);
   if (!message) return;
   const bubble = message.querySelector(".bubble");
-  const safeText = formatMessageHtml(text);
+  const uniqueSources = Array.from(
+    new Set(
+      (Array.isArray(sources) ? sources : [])
+        .map((value) => String(value || "").trim())
+        .filter(Boolean)
+    )
+  );
 
-  if (!sources.length) {
-    bubble.innerHTML = `<p>${safeText}</p>`;
+  if (!uniqueSources.length) {
+    bubble.innerHTML = `<div class="bubble-content"></div>`;
+    void setAssistantBubbleContent(bubble, text, { streaming: false });
     scrollTimeline();
     return;
   }
 
-  const chips = sources
-    .map((s) => `<span class="source-chip">📎 ${escapeHtml(s)}</span>`)
+  const chips = uniqueSources
+    .map(
+      (s) =>
+        `<span class="source-chip"><span class="source-chip-icon" aria-hidden="true">📄</span>${escapeHtml(s)}</span>`
+    )
     .join("");
 
   bubble.innerHTML = `
-    <p>${safeText}</p>
+    <div class="bubble-content"></div>
     <div class="source-list">
       <span class="source-label">Trích dẫn từ:</span>
       ${chips}
     </div>
   `;
+  void setAssistantBubbleContent(bubble, text, { streaming: false });
   scrollTimeline();
 }
 
@@ -711,6 +950,27 @@ async function apiFetch(url, opts = {}) {
     throw new Error("Phiên hết hạn, vui lòng đăng nhập lại.");
   }
   return res;
+}
+
+async function parseApiPayload(response) {
+  const contentType = (response.headers.get("content-type") || "").toLowerCase();
+
+  if (contentType.includes("application/json")) {
+    try {
+      return { payload: await response.json(), text: "" };
+    } catch {
+      return { payload: null, text: "" };
+    }
+  }
+
+  const text = await response.text();
+  if (!text) return { payload: null, text: "" };
+
+  try {
+    return { payload: JSON.parse(text), text };
+  } catch {
+    return { payload: null, text };
+  }
 }
 
 function shouldWarnAnonymousDataLoss() {
@@ -738,6 +998,414 @@ function formatMessageHtml(text) {
     .replace(/\n/g, "<br />");
 }
 
+function configureMarkdownRenderer() {
+  if (markedConfigured) return;
+  if (!window.marked || typeof window.marked.setOptions !== "function") return;
+
+  window.marked.setOptions({
+    gfm: true,
+    breaks: true,
+    mangle: false,
+    headerIds: false,
+  });
+  markedConfigured = true;
+}
+
+function renderAssistantMarkdown(text) {
+  const markdown = String(text ?? "").replace(/\r\n/g, "\n");
+  if (!markdown.trim()) return "<p></p>";
+
+  configureMarkdownRenderer();
+
+  if (!window.marked || typeof window.marked.parse !== "function") {
+    return `<p>${formatMessageHtml(markdown)}</p>`;
+  }
+
+  const rawHtml = window.marked.parse(markdown);
+  return sanitizeRichHtml(rawHtml);
+}
+
+function sanitizeRichHtml(html) {
+  const template = document.createElement("template");
+  template.innerHTML = html;
+
+  const allowedTags = new Set([
+    "p", "br", "strong", "em", "ul", "ol", "li", "code", "pre", "blockquote", "hr",
+    "table", "thead", "tbody", "tr", "th", "td", "a", "h1", "h2", "h3", "h4", "h5", "h6",
+  ]);
+
+  const allowedAttrs = {
+    a: new Set(["href", "title"]),
+    th: new Set(["align", "colspan", "rowspan"]),
+    td: new Set(["align", "colspan", "rowspan"]),
+    code: new Set(["class"]),
+  };
+
+  const nodes = Array.from(template.content.querySelectorAll("*"));
+  for (const el of nodes) {
+    const tag = el.tagName.toLowerCase();
+    if (!allowedTags.has(tag)) {
+      const textNode = document.createTextNode(el.textContent || "");
+      el.replaceWith(textNode);
+      continue;
+    }
+
+    for (const attr of Array.from(el.attributes)) {
+      const name = attr.name.toLowerCase();
+      const allowed = allowedAttrs[tag];
+      if (!allowed || !allowed.has(name)) {
+        el.removeAttribute(attr.name);
+      }
+    }
+
+    if (tag === "a") {
+      const href = el.getAttribute("href") || "";
+      if (!isSafeLinkHref(href)) {
+        el.removeAttribute("href");
+      } else {
+        el.setAttribute("target", "_blank");
+        el.setAttribute("rel", "noopener noreferrer nofollow");
+      }
+    }
+
+    if (tag === "code") {
+      const classes = (el.getAttribute("class") || "").split(/\s+/).filter(Boolean);
+      const safeClasses = classes.filter((cls) => /^(language|lang)-[a-z0-9_-]+$/i.test(cls));
+      if (safeClasses.length) {
+        el.setAttribute("class", safeClasses.join(" "));
+      } else {
+        el.removeAttribute("class");
+      }
+    }
+  }
+
+  return template.innerHTML;
+}
+
+function isSafeLinkHref(href) {
+  const value = String(href || "").trim();
+  if (!value) return false;
+  if (value.startsWith("#")) return true;
+  try {
+    const parsed = new URL(value, window.location.origin);
+    return ["http:", "https:", "mailto:"].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
+
+async function setAssistantBubbleContent(bubble, text, options = {}) {
+  if (!bubble) return;
+
+  const { streaming = false } = options;
+  let contentEl = bubble.querySelector(".bubble-content");
+  if (!contentEl) {
+    contentEl = document.createElement("div");
+    contentEl.className = "bubble-content";
+    bubble.prepend(contentEl);
+  }
+
+  const rawText = String(text ?? "");
+  contentEl.dataset.rawText = rawText;
+
+  if (streaming) {
+    bubble.classList.add("is-streaming");
+    contentEl.innerHTML = `<p>${formatMessageHtml(rawText)}</p>`;
+    return;
+  }
+
+  bubble.classList.remove("is-streaming");
+  const renderToken = `${Date.now()}_${Math.random()}`;
+  contentEl.dataset.renderToken = renderToken;
+
+  contentEl.innerHTML = renderAssistantMarkdown(rawText);
+  wrapMarkdownTables(contentEl);
+  await renderMermaidDiagrams(contentEl);
+
+  if (contentEl.dataset.renderToken !== renderToken) return;
+  scrollTimeline();
+}
+
+function wrapMarkdownTables(container) {
+  const tables = Array.from(container.querySelectorAll("table"));
+  for (const table of tables) {
+    if (table.parentElement && table.parentElement.classList.contains("table-scroll")) continue;
+    const wrap = document.createElement("div");
+    wrap.className = "table-scroll";
+    table.parentNode?.insertBefore(wrap, table);
+    wrap.appendChild(table);
+  }
+}
+
+function ensureMermaidRenderer() {
+  if (!window.mermaid || typeof window.mermaid.initialize !== "function") return false;
+
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  const targetTheme = isDark ? "dark" : "default";
+  if (mermaidThemeMode === targetTheme) return true;
+
+  window.mermaid.initialize({
+    startOnLoad: false,
+    securityLevel: "strict",
+    suppressErrorRendering: true,
+    theme: targetTheme,
+    fontFamily: "Plus Jakarta Sans, sans-serif",
+    flowchart: { useMaxWidth: true, htmlLabels: false },
+  });
+
+  mermaidThemeMode = targetTheme;
+  return true;
+}
+
+async function renderMermaidDiagrams(container) {
+  const codeBlocks = Array.from(container.querySelectorAll("pre code.language-mermaid, pre code.lang-mermaid"));
+  if (!codeBlocks.length) return;
+  if (!ensureMermaidRenderer() || typeof window.mermaid.render !== "function") return;
+
+  for (const block of codeBlocks) {
+    const pre = block.closest("pre");
+    if (!pre) continue;
+
+    const source = (block.textContent || "").trim();
+    if (!source) continue;
+
+    const diagramContainer = document.createElement("div");
+    diagramContainer.className = "diagram-card";
+    pre.replaceWith(diagramContainer);
+
+    const candidates = buildMermaidCandidates(source);
+    let rendered = false;
+    let lastError = null;
+
+    try {
+      for (const candidate of candidates) {
+        try {
+          const renderResult = await window.mermaid.render(
+            `mermaid_${Date.now()}_${++mermaidSequence}`,
+            candidate,
+          );
+          diagramContainer.innerHTML = renderResult.svg;
+          rendered = true;
+          break;
+        } catch (error) {
+          lastError = error;
+          /* Try next repaired candidate */
+        }
+      }
+
+      if (rendered) continue;
+
+      const errorDetails = formatMermaidError(lastError);
+      diagramContainer.classList.add("diagram-error");
+      diagramContainer.innerHTML = `
+        <div class="diagram-error-title">Không thể vẽ sơ đồ Mermaid từ nội dung hiện tại (cú pháp Mermaid chưa hợp lệ).</div>
+        <div class="diagram-error-detail">${escapeHtml(errorDetails)}</div>
+        <pre><code>${escapeHtml(source)}</code></pre>
+      `;
+    } catch (error) {
+      const errorDetails = formatMermaidError(error);
+      diagramContainer.classList.add("diagram-error");
+      diagramContainer.innerHTML = `
+        <div class="diagram-error-title">Không thể vẽ sơ đồ Mermaid từ nội dung hiện tại (cú pháp Mermaid chưa hợp lệ).</div>
+        <div class="diagram-error-detail">${escapeHtml(errorDetails)}</div>
+        <pre><code>${escapeHtml(source)}</code></pre>
+      `;
+    }
+  }
+}
+
+function formatMermaidError(error) {
+  if (!error) return "Không có chi tiết parser.";
+  if (typeof error === "string") return error;
+
+  const details = [error.str, error.message, error.name]
+    .map((value) => String(value || "").trim())
+    .find(Boolean);
+  if (details) return details;
+
+  try {
+    return JSON.stringify(error);
+  } catch {
+    return String(error);
+  }
+}
+
+function buildMermaidCandidates(source) {
+  const original = String(source || "").trim();
+  if (!original) return [];
+
+  const normalized = normalizeMermaidSource(original);
+  const aliasRepaired = repairMermaidGraphAliases(normalized);
+  const edgeRepaired = repairMermaidLabeledEdges(aliasRepaired);
+  const mindmapRepaired = repairMermaidMindmapLayout(edgeRepaired);
+  const quotedLabels = quoteMermaidBracketLabels(mindmapRepaired);
+  const repaired = repairDanglingMermaidEdges(quotedLabels);
+  const fallbackAsciiLabels = deaccentMermaidBracketLabels(repaired);
+
+  const candidates = [
+    original,
+    normalized,
+    aliasRepaired,
+    edgeRepaired,
+    mindmapRepaired,
+    quotedLabels,
+    repaired,
+    fallbackAsciiLabels,
+  ]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  return Array.from(new Set(candidates));
+}
+
+function normalizeMermaidSource(source) {
+  let text = String(source || "").replace(/\r\n/g, "\n");
+
+  // Remove invisible chars that often appear in copied/generated content.
+  text = text.replace(/[\u200B\u200C\u200D\uFEFF]/g, "");
+  text = text.replace(/\u00A0/g, " ");
+  text = text.replace(/[ \t]+$/gm, "");
+  text = text.replace(/\n{3,}/g, "\n\n");
+
+  return text.trim();
+}
+
+function repairMermaidGraphAliases(source) {
+  const lines = String(source || "").split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line.trim()) continue;
+    if (/^\s*graph\b/i.test(line)) {
+      lines[i] = line.replace(/^\s*graph\b/i, (match) => match.replace(/graph/i, "flowchart"));
+    }
+    break;
+  }
+  return lines.join("\n").trim();
+}
+
+function repairMermaidLabeledEdges(source) {
+  let text = String(source || "");
+
+  // Common malformed output: "-->|Label|> B" or "--> |Label|> B".
+  // Mermaid expects "-->|Label| B" (without the extra ">" after label pipe).
+  text = text.replace(
+    /(-->|==>|-.->|---|~~>|--o|o--|--x|x--)[ \t]*\|([^|\n]+)\|[ \t]*>[ \t]*/g,
+    (_, edge, label) => `${edge}|${String(label || "").trim()}| `,
+  );
+
+  // Also repair malformed edge labels without pipes, e.g. "-->Label> B[1]".
+  text = text.replace(
+    /(-->|==>|-.->|---|~~>|--o|o--|--x|x--)[ \t]*([^|\n][^>\n]{1,120}?)[ \t]*>[ \t]*(?=[A-Za-z0-9_\u00C0-\u024F\u3040-\u30FF\u4E00-\u9FFF-]+[ \t]*[\[(])/g,
+    (_, edge, label) => `${edge}|${String(label || "").trim()}| `,
+  );
+
+  // Normalize spacing around valid labeled edges for parser stability.
+  text = text.replace(
+    /(-->|==>|-.->|---|~~>|--o|o--|--x|x--)[ \t]*\|([^|\n]+)\|[ \t]*/g,
+    (_, edge, label) => `${edge}|${String(label || "").trim()}| `,
+  );
+
+  // Repair merged lines like: "B[1] A -->|x| C[2]".
+  text = text.replace(
+    /([\]\)])[ \t]+([A-Za-z0-9_][A-Za-z0-9_]*[ \t]*(?:-->|==>|-.->|---|~~>|--o|o--|--x|x--))/g,
+    "$1\n$2",
+  );
+
+  return text.trim();
+}
+
+function repairMermaidMindmapLayout(source) {
+  const text = String(source || "");
+  const firstNonEmpty = text.split("\n").find((line) => line.trim());
+  if (!firstNonEmpty || !/^\s*mindmap\b/i.test(firstNonEmpty)) {
+    return text.trim();
+  }
+
+  const output = ["mindmap"];
+  let hasRoot = false;
+
+  const lines = text.split("\n");
+  for (const rawLine of lines) {
+    const line = String(rawLine || "")
+      .replace(/\u00A0/g, " ")
+      .replace(/\t/g, "  ")
+      .replace(/[ \t]+$/g, "");
+    const trimmed = line.trim();
+    if (!trimmed || /^mindmap\b/i.test(trimmed)) continue;
+
+    const inlineRoot = trimmed.match(/^(root\(\(.+?\)\))\s+(.+)$/i);
+    if (inlineRoot) {
+      output.push(`  ${inlineRoot[1]}`);
+      output.push(`    ${inlineRoot[2].trim()}`);
+      hasRoot = true;
+      continue;
+    }
+
+    if (/^root\(\(.+\)\)$/i.test(trimmed)) {
+      output.push(`  ${trimmed}`);
+      hasRoot = true;
+      continue;
+    }
+
+    if (!hasRoot) {
+      output.push(`  root((${trimmed}))`);
+      hasRoot = true;
+      continue;
+    }
+
+    const leadingSpaces = (line.match(/^\s*/) || [""])[0].length;
+    const normalizedIndent = Math.max(4, Math.ceil(leadingSpaces / 2) * 2);
+    output.push(`${" ".repeat(normalizedIndent)}${trimmed}`);
+  }
+
+  return output.join("\n").trim();
+}
+
+function quoteMermaidBracketLabels(source) {
+  const text = String(source || "");
+  const firstNonEmpty = text.split("\n").find((line) => line.trim());
+  if (!firstNonEmpty || !/^\s*(flowchart|graph)\b/i.test(firstNonEmpty)) {
+    return text.trim();
+  }
+
+  return text
+    .replace(/\[([^\]\n]*)\]/g, (full, label) => {
+      const content = String(label || "").trim();
+      if (!content) return full;
+      if ((content.startsWith('"') && content.endsWith('"')) || content.includes('"')) return full;
+      return `[\"${content.replace(/\"/g, "\\\"")}\"]`;
+    })
+    .trim();
+}
+
+function deaccentMermaidBracketLabels(source) {
+  return String(source || "")
+    .replace(/\[([^\]\n]*)\]/g, (full, label) => {
+      const content = String(label || "").trim();
+      if (!content) return full;
+      return `[\"${removeDiacritics(content).replace(/\"/g, "\\\"")}\"]`;
+    })
+    .trim();
+}
+
+function removeDiacritics(value) {
+  try {
+    return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  } catch {
+    return String(value || "");
+  }
+}
+
+function repairDanglingMermaidEdges(source) {
+  let text = String(source || "");
+
+  // Fix common broken pattern: line ends with arrow (with/without label) but no target node.
+  const danglingEdgePattern = /(?:-->|---|==>|-.->|~~>|--o|o--|--x|x--)\s*(?:\|[^|\n]*\|\s*)?$/gm;
+  text = text.replace(danglingEdgePattern, "");
+
+  return text.trim();
+}
+
 function buildUploadSuccessMessage(names) {
   if (!names.length) return "Đã xử lý xong tài liệu. Bạn có thể bắt đầu đặt câu hỏi!";
   const nameList = names.map((n) => `"${n}"`).join(", ");
@@ -745,6 +1413,14 @@ function buildUploadSuccessMessage(names) {
     return `Đã xử lý xong tài liệu ${nameList} ✅\nBạn có thể đặt câu hỏi về tài liệu này ngay bây giờ!`;
   }
   return `Đã xử lý xong ${names.length} tài liệu: ${nameList} ✅\nBạn có thể đặt câu hỏi về các tài liệu này ngay bây giờ!`;
+}
+
+function buildUploadQueuedMessage(names) {
+  if (!names.length) return "Đã nhận tài liệu. Hệ thống đang lập chỉ mục trên nền...";
+  if (names.length === 1) {
+    return `Đã nhận tài liệu "${names[0]}". Hệ thống đang lập chỉ mục trên nền...`;
+  }
+  return `Đã nhận ${names.length} tài liệu. Hệ thống đang lập chỉ mục trên nền...`;
 }
 
 function scrollTimeline() {
@@ -904,9 +1580,14 @@ async function handleDeleteDocument(chatId, documentId) {
   try {
     const res = await apiFetch(`/api/v1/workspace/chats/${chatId}/documents/${documentId}`, { method: "DELETE" });
     if (!res.ok) { const err = await res.json(); throw new Error(err.detail || "Lỗi"); }
-    state.docs = state.docs.filter((d) => d.document_id !== documentId);
-    renderDocsList();
-    renderWorkspaceList();
+    if (state.currentChatId === chatId) {
+      // Reload from server so upload_index is compacted immediately after delete.
+      await loadDocsForChat(chatId);
+    } else {
+      state.docs = state.docs.filter((d) => d.document_id !== documentId);
+      renderDocsList();
+    }
+    await loadAllDocCounts();
   } catch (err) {
     await showAlertModal({
       title: "Xóa Tài Liệu Thất Bại",
@@ -1128,40 +1809,38 @@ function performSearch() {
   const query = searchInput.value.trim().toLowerCase();
   if (!query) { searchCount.textContent = ""; return; }
 
-  const bubbles = chatTimeline.querySelectorAll(".bubble p");
+  const blocks = chatTimeline.querySelectorAll(".message.assistant .bubble-content, .message.user .bubble p");
   let total = 0;
+  let firstMatchBubble = null;
 
-  bubbles.forEach((p) => {
-    const text = p.textContent;
+  blocks.forEach((block) => {
+    const text = block.dataset.rawText || block.textContent || "";
     const lower = text.toLowerCase();
     if (!lower.includes(query)) return;
 
-    let result = "";
-    let idx = 0;
+    const bubble = block.closest(".bubble");
+    if (bubble) {
+      bubble.classList.add("search-hit");
+      if (!firstMatchBubble) firstMatchBubble = bubble;
+    }
+
+    let idx = -1;
     let searchIdx;
-    while ((searchIdx = lower.indexOf(query, idx)) !== -1) {
-      result += escapeHtml(text.slice(idx, searchIdx));
-      result += `<mark class="search-highlight">${escapeHtml(text.slice(searchIdx, searchIdx + query.length))}</mark>`;
-      idx = searchIdx + query.length;
+    while ((searchIdx = lower.indexOf(query, idx + 1)) !== -1) {
       total++;
     }
-    result += escapeHtml(text.slice(idx));
-    p.innerHTML = result;
   });
 
   if (total > 0) {
-    const firstMark = chatTimeline.querySelector(".search-highlight");
-    if (firstMark) firstMark.scrollIntoView({ behavior: "smooth", block: "center" });
+    firstMatchBubble?.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
   searchCount.textContent = total > 0 ? `${total} kết quả` : "Không tìm thấy";
 }
 
 function clearSearchHighlights() {
-  chatTimeline.querySelectorAll(".search-highlight").forEach((mark) => {
-    const parent = mark.parentNode;
-    mark.replaceWith(mark.textContent);
-    parent.normalize();
+  chatTimeline.querySelectorAll(".bubble.search-hit").forEach((bubble) => {
+    bubble.classList.remove("search-hit");
   });
 }
 

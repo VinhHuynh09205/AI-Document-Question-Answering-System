@@ -1,8 +1,11 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Sequence
+from typing import Callable, Sequence
 
 from app.models.entities import UploadResult
+
+
+IngestionProgressCallback = Callable[[dict[str, int | str]], None]
 
 
 class IDocumentIngestionService(ABC):
@@ -11,5 +14,6 @@ class IDocumentIngestionService(ABC):
         self,
         file_paths: Sequence[Path],
         metadata: dict[str, str] | None = None,
+        progress_callback: IngestionProgressCallback | None = None,
     ) -> UploadResult:
         raise NotImplementedError

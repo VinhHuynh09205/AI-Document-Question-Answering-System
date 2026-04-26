@@ -23,9 +23,13 @@ class GroqLLMProvider(ILLMProvider):
                         "Trả lời bằng CÙNG ngôn ngữ với câu hỏi của người dùng. "
                         "Chỉ dùng thông tin trong CONTEXT bên dưới. "
                         "Hướng dẫn trả lời:\n"
+                        "- Ưu tiên câu trả lời trực quan: kết hợp bullet list + bảng Markdown + sơ đồ Mermaid khi phù hợp.\n"
+                        "- Với câu hỏi phân tích/tổng quan/so sánh, cố gắng kết hợp cả chữ + bảng + sơ đồ trong cùng câu trả lời.\n"
                         "- Nếu câu hỏi yêu cầu tóm tắt: tóm tắt toàn bộ CONTEXT thành 5-10 gạch đầu dòng rõ ràng.\n"
                         "- Nếu câu hỏi hỏi về chi tiết cụ thể: trích dẫn chính xác thông tin từ CONTEXT.\n"
-                        "- Nếu câu hỏi yêu cầu so sánh: tạo bảng hoặc danh sách so sánh.\n"
+                        "- Nếu câu hỏi yêu cầu so sánh: tạo bảng Markdown chuẩn hoặc danh sách so sánh (không dùng bảng ASCII text).\n"
+                        "- Nếu câu hỏi yêu cầu mindmap/sơ đồ/biểu đồ/đồ thị: phải trả về ít nhất 1 khối ```mermaid``` hợp lệ để hiển thị trực quan.\n"
+                        "- Không mô phỏng hình vẽ bằng ký tự text ASCII.\n"
                         "- Nếu câu hỏi yêu cầu liệt kê: liệt kê đầy đủ các mục tìm thấy.\n"
                         "- Luôn trả lời chi tiết, đầy đủ nhưng không bịa thêm dữ liệu ngoài CONTEXT.\n"
                         "- Trích dẫn số liệu, tên, ngày tháng chính xác từ CONTEXT khi có.\n"
@@ -34,7 +38,7 @@ class GroqLLMProvider(ILLMProvider):
                     (
                         "human",
                         "QUESTION:\n{question}\n\nCONTEXT:\n{context}\n\n"
-                        "Trả lời đầy đủ, chính xác dựa trên tài liệu. Sử dụng định dạng phù hợp (bullet list, bảng, đoạn văn) tùy theo câu hỏi.",
+                        "Trả lời đầy đủ, chính xác dựa trên tài liệu. Ưu tiên định dạng trực quan (bullet list, bảng Markdown, Mermaid) để người dùng dễ hiểu.",
                     ),
                 ]
             )

@@ -7,7 +7,7 @@ class StubQuestionAnsweringService(IQuestionAnsweringService):
     def ask(
         self,
         question: str,
-        metadata_filter: dict[str, str] | None = None,
+        metadata_filter: dict[str, str | list[str]] | None = None,
         top_k: int | None = None,
     ) -> AnswerResult:
         return AnswerResult(

@@ -22,19 +22,17 @@ class Settings(BaseSettings):
     vector_store_path: str = "data/faiss_index"
     vector_backup_dir: str = "data/faiss_backups"
     upload_dir: str = "data/uploads"
-    database_backend: str = "sqlite"
-    database_path: str = "data/app.db"
-    mysql_host: str = "localhost"
-    mysql_port: int = 3306
-    mysql_database: str = "aichatbox"
-    mysql_user: str = "aichatbox"
-    mysql_password: str = "aichatbox"
-    mysql_charset: str = "utf8mb4"
+    pg_host: str = "localhost"
+    pg_port: int = 5432
+    pg_database: str = "aichatbox"
+    pg_user: str = "aichatbox"
+    pg_password: str = "aichatbox"
     users_file_path: str = "data/users.json"
     supported_upload_extensions: str = ".pdf,.doc,.docx,.xlsx,.xls,.pptx,.html,.htm,.json,.xml,.txt,.md,.csv"
     replace_existing_documents_on_upload: bool = True
 
     auth_secret_key: str = "change-me-in-production"
+    admin_setup_secret: str = ""
     auth_token_expire_minutes: int = 60
     enable_registration: bool = True
     password_reset_expire_minutes: int = 20
@@ -53,8 +51,13 @@ class Settings(BaseSettings):
     max_answer_chars: int = 2500
     qa_cache_ttl_seconds: int = 300
     qa_cache_max_size: int = 128
+    ingestion_max_file_workers: int = 4
+    embedding_batch_size: int = 128
+    upload_job_retention_seconds: int = 3600
     log_level: str = "INFO"
     rate_limit_window_seconds: int = 60
+    login_rate_limit_per_window: int = 20
+    register_rate_limit_per_window: int = 10
     ask_rate_limit_per_window: int = 60
     upload_rate_limit_per_window: int = 30
     cors_allow_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
@@ -80,6 +83,8 @@ class Settings(BaseSettings):
 
     def get_rate_limit_config(self) -> dict[str, int]:
         return {
+            "login": self.login_rate_limit_per_window,
+            "register": self.register_rate_limit_per_window,
             "ask": self.ask_rate_limit_per_window,
             "upload": self.upload_rate_limit_per_window,
         }
@@ -92,9 +97,6 @@ class Settings(BaseSettings):
 
     def get_cors_allow_headers(self) -> list[str]:
         return self._split_csv(self.cors_allow_headers)
-
-    def get_database_backend(self) -> str:
-        return self.database_backend.strip().lower() or "sqlite"
 
     @staticmethod
     def _split_csv(raw_value: str) -> list[str]:

@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
-from app.core.dependencies import get_auth_service
+from app.core.dependencies import get_auth_service, get_rate_limiter, get_runtime_metrics
 from app.models.schemas import (
     AuthResponse,
     ForgotPasswordRequest,
@@ -21,15 +21,33 @@ from app.services.auth_exceptions import (
     UserAlreadyExistsError,
 )
 from app.services.interfaces.auth_service import IAuthService
+from app.services.interfaces.rate_limiter import IRateLimiter
+from app.services.interfaces.runtime_metrics import IRuntimeMetrics
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
+def _client_key(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
 @router.post("/register", response_model=AuthResponse)
 def register(
+    request: Request,
     payload: RegisterRequest,
     auth_service: IAuthService = Depends(get_auth_service),
+    rate_limiter: IRateLimiter = Depends(get_rate_limiter),
+    runtime_metrics: IRuntimeMetrics = Depends(get_runtime_metrics),
 ) -> AuthResponse:
+    allowed, retry_after = rate_limiter.consume("register", _client_key(request))
+    if not allowed:
+        runtime_metrics.increment_rate_limited_requests()
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded",
+            headers={"Retry-After": str(retry_after)},
+        )
+
     try:
         result = auth_service.register(payload.username, payload.password)
     except RegistrationDisabledError as exc:
@@ -48,14 +66,27 @@ def register(
         token_type=result.token_type,
         expires_in=result.expires_in,
         username=payload.username.strip().lower(),
+        role=result.role,
     )
 
 
 @router.post("/login", response_model=AuthResponse)
 def login(
+    request: Request,
     payload: LoginRequest,
     auth_service: IAuthService = Depends(get_auth_service),
+    rate_limiter: IRateLimiter = Depends(get_rate_limiter),
+    runtime_metrics: IRuntimeMetrics = Depends(get_runtime_metrics),
 ) -> AuthResponse:
+    allowed, retry_after = rate_limiter.consume("login", _client_key(request))
+    if not allowed:
+        runtime_metrics.increment_rate_limited_requests()
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Rate limit exceeded",
+            headers={"Retry-After": str(retry_after)},
+        )
+
     try:
         result = auth_service.login(payload.username, payload.password)
     except InvalidCredentialsError as exc:
@@ -69,6 +100,7 @@ def login(
         token_type=result.token_type,
         expires_in=result.expires_in,
         username=payload.username.strip().lower(),
+        role=result.role,
     )
 
 
@@ -151,4 +183,5 @@ def oauth_complete(
         token_type=token.token_type,
         expires_in=token.expires_in,
         username=username,
+        role=token.role,
     )

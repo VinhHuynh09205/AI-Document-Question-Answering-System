@@ -25,14 +25,18 @@ class OpenAILLMProvider(ILLMProvider):
                         "Hướng dẫn:\n"
                         "- Trả lời chi tiết, đầy đủ dựa trên CONTEXT.\n"
                         "- Trích dẫn số liệu, tên, ngày tháng chính xác.\n"
-                        "- Sử dụng bullet list cho tóm tắt, bảng cho so sánh.\n"
+                        "- Ưu tiên trả lời trực quan: kết hợp bullet list + bảng Markdown + sơ đồ Mermaid khi phù hợp.\n"
+                        "- Với câu hỏi phân tích/tổng quan/so sánh, cố gắng kết hợp cả chữ + bảng + sơ đồ trong cùng câu trả lời.\n"
+                        "- Sử dụng bullet list cho tóm tắt, bảng Markdown chuẩn cho so sánh (không dùng bảng ASCII thuần text).\n"
+                        "- Nếu người dùng yêu cầu mindmap/sơ đồ/biểu đồ/đồ thị: phải trả về ít nhất 1 khối ```mermaid``` hợp lệ để frontend vẽ trực quan.\n"
+                        "- Không mô phỏng hình vẽ bằng ký tự text như gạch ngang hoặc mũi tên ASCII.\n"
                         "- Không bịa thêm dữ liệu ngoài CONTEXT.\n"
                         f"- Nếu không tìm thấy câu trả lời trong CONTEXT, trả đúng: {FALLBACK_ANSWER}",
                     ),
                     (
                         "human",
                         "QUESTION:\n{question}\n\nCONTEXT:\n{context}\n\n"
-                        "Trả lời đầy đủ, chính xác. Sử dụng định dạng phù hợp với câu hỏi.",
+                        "Trả lời đầy đủ, chính xác. Ưu tiên định dạng trực quan và dễ hiểu (bullet, bảng Markdown, Mermaid khi phù hợp).",
                     ),
                 ]
             )

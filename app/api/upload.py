@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from pathlib import Path
 from uuid import uuid4
@@ -20,6 +21,27 @@ from app.services.interfaces.vector_store_admin_service import IVectorStoreAdmin
 
 router = APIRouter(tags=["documents"])
 logger = logging.getLogger(__name__)
+_UPLOAD_CHUNK_SIZE_BYTES = 1024 * 1024
+
+
+async def _save_upload_file(upload: UploadFile, output_path: Path) -> None:
+    try:
+        with output_path.open("wb") as handle:
+            while True:
+                chunk = await upload.read(_UPLOAD_CHUNK_SIZE_BYTES)
+                if not chunk:
+                    break
+                handle.write(chunk)
+    finally:
+        await upload.close()
+
+
+def _cleanup_saved_files(paths: list[Path]) -> None:
+    for path in paths:
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            logger.warning("upload_cleanup_failed path=%s", path)
 
 
 @router.post("/upload", response_model=UploadResponse)
@@ -56,6 +78,15 @@ async def upload_documents(
     allowed_extensions = settings.get_supported_upload_extensions()
     saved_paths: list[Path] = []
 
+    try:
+        Path(settings.upload_dir).mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        logger.exception("upload_storage_error path=%s", settings.upload_dir)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Upload storage is unavailable. Please try again later.",
+        ) from exc
+
     for upload in files:
         original_name = upload.filename or "unknown"
         extension = Path(original_name).suffix.lower()
@@ -68,14 +99,34 @@ async def upload_documents(
 
         safe_name = f"{uuid4().hex}_{Path(original_name).name}"
         output_path = Path(settings.upload_dir) / safe_name
-        content = await upload.read()
-        output_path.write_bytes(content)
+        try:
+            await _save_upload_file(upload, output_path)
+        except OSError as exc:
+            logger.exception("upload_file_write_failed path=%s", output_path)
+            _cleanup_saved_files(saved_paths)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to write uploaded file: {original_name}",
+            ) from exc
         saved_paths.append(output_path)
 
     try:
-        result = ingestion_service.ingest(saved_paths)
+        result = await asyncio.to_thread(ingestion_service.ingest, saved_paths)
+    except RuntimeError as exc:
+        logger.exception("upload_ingestion_failed")
+        _cleanup_saved_files(saved_paths)
+        if "sentence-transformers" in str(exc):
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Local semantic embeddings are not available. "
+                    "Set LOCAL_SEMANTIC_EMBEDDINGS=false or rebuild with local embedding dependencies."
+                ),
+            ) from exc
+        raise HTTPException(status_code=500, detail="Failed to process uploaded files") from exc
     except Exception as exc:
         logger.exception("upload_ingestion_failed")
+        _cleanup_saved_files(saved_paths)
         raise HTTPException(status_code=500, detail="Failed to process uploaded files") from exc
 
     logger.info(

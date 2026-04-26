@@ -62,6 +62,10 @@ def create_app() -> FastAPI:
     def login_page() -> FileResponse:
         return FileResponse(web_dir / "login.html")
 
+    @app.get("/admin", include_in_schema=False)
+    def admin_page() -> FileResponse:
+        return FileResponse(web_dir / "admin.html")
+
     app.include_router(api_router, prefix=settings.api_v1_prefix)
 
     return app

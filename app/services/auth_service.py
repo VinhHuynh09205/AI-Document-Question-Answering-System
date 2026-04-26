@@ -78,7 +78,7 @@ class AuthService(IAuthService):
             UserAccount(username=normalized_username, password_hash=password_hash)
         )
 
-        return self._create_token(normalized_username)
+        return self._create_token(normalized_username, role="user")
 
     def login(self, username: str, password: str) -> AuthTokenResult:
         normalized_username = username.strip()
@@ -86,10 +86,13 @@ class AuthService(IAuthService):
         if user is None:
             raise InvalidCredentialsError("Invalid username or password")
 
+        if not user.is_active:
+            raise InvalidCredentialsError("Account is disabled")
+
         if not self._verify_password(password, user.password_hash):
             raise InvalidCredentialsError("Invalid username or password")
 
-        return self._create_token(user.username)
+        return self._create_token(user.username, role=user.role)
 
     def forgot_password(self, username: str, redirect_uri: str) -> ForgotPasswordResult:
         generic_message = "Nếu tài khoản tồn tại, bạn sẽ nhận được liên kết đặt lại mật khẩu."
@@ -179,22 +182,27 @@ class AuthService(IAuthService):
 
         username = oauth_email.strip().lower()
         user = self._user_repository.get_by_username(username)
+        user_role = "user"
         if user is None:
             if not self._registration_enabled:
                 raise RegistrationDisabledError("Registration is disabled")
 
             password_hash = self._hash_password(secrets.token_urlsafe(48))
             self._user_repository.add(UserAccount(username=username, password_hash=password_hash))
+        else:
+            user_role = user.role
 
-        token = self._create_token(username)
+        token = self._create_token(username, role=user_role)
         return username, token
 
-    def _create_token(self, username: str) -> AuthTokenResult:
+    def _create_token(self, username: str, role: str = "user") -> AuthTokenResult:
+        normalized_role = "admin" if str(role).strip().lower() == "admin" else "user"
         expires_delta = timedelta(minutes=self._token_expire_minutes)
         expiration = datetime.now(UTC) + expires_delta
         payload = {
             "sub": username,
             "exp": expiration,
+            "role": normalized_role,
         }
         token = jwt.encode(payload, self._secret_key, algorithm=JWT_ALGORITHM)
 
@@ -202,6 +210,8 @@ class AuthService(IAuthService):
             access_token=token,
             token_type="bearer",
             expires_in=int(expires_delta.total_seconds()),
+            username=username,
+            role=normalized_role,
         )
 
     def _create_password_reset_token(self, username: str) -> str:

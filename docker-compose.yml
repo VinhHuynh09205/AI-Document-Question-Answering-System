@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        INSTALL_LOCAL_SEMANTIC_EMBEDDINGS: ${LOCAL_SEMANTIC_EMBEDDINGS:-false}
     container_name: aichatbox-api
     restart: unless-stopped
     ports:
@@ -12,19 +14,16 @@ services:
     environment:
       APP_ENV: production
       API_V1_PREFIX: /api/v1
-      DATABASE_BACKEND: mysql
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_DATABASE: aichatbox
-      MYSQL_USER: aichatbox
-      MYSQL_PASSWORD: aichatbox
-      MYSQL_CHARSET: utf8mb4
+      PG_HOST: postgres
+      PG_PORT: 5432
+      PG_DATABASE: aichatbox
+      PG_USER: aichatbox
+      PG_PASSWORD: aichatbox
       VECTOR_STORE_PATH: /app/data/faiss_index
       VECTOR_BACKUP_DIR: /app/data/faiss_backups
       UPLOAD_DIR: /app/data/uploads
-      USERS_FILE_PATH: /app/data/users.json
     depends_on:
-      mysql:
+      postgres:
         condition: service_healthy
     volumes:
       - ./data:/app/data
@@ -35,35 +34,24 @@ services:
       retries: 3
       start_period: 20s
 
-  mysql:
-    image: mysql:8.4
-    container_name: aichatbox-mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: aichatbox-postgres
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: aichatbox
-      MYSQL_USER: aichatbox
-      MYSQL_PASSWORD: aichatbox
-      MYSQL_ROOT_PASSWORD: root
+      POSTGRES_DB: aichatbox
+      POSTGRES_USER: aichatbox
+      POSTGRES_PASSWORD: aichatbox
     ports:
-      - "3307:3306"
+      - "5433:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-proot"]
+      test: ["CMD-SHELL", "pg_isready -U aichatbox -d aichatbox"]
       interval: 10s
       timeout: 5s
       retries: 10
-      start_period: 20s
-
-  adminer:
-    image: adminer:4
-    container_name: aichatbox-adminer
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    depends_on:
-      mysql:
-        condition: service_healthy
+      start_period: 10s
 
 volumes:
-  mysql_data:
+  postgres_data:

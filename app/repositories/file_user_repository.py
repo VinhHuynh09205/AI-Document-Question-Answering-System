@@ -20,6 +20,9 @@ class FileUserRepository(IUserRepository):
                 return UserAccount(
                     username=row["username"],
                     password_hash=row["password_hash"],
+                    role=row.get("role", "user"),
+                    is_active=row.get("is_active", True),
+                    created_at=row.get("created_at", ""),
                 )
         return None
 
@@ -37,6 +40,8 @@ class FileUserRepository(IUserRepository):
                 {
                     "username": user.username,
                     "password_hash": user.password_hash,
+                    "role": user.role,
+                    "is_active": user.is_active,
                 }
             )
             self._write_all(users)
@@ -56,6 +61,56 @@ class FileUserRepository(IUserRepository):
                 self._write_all(users)
 
             return updated
+
+    def list_all(self, offset: int = 0, limit: int = 50) -> list[UserAccount]:
+        users = self._read_all()
+        sliced = users[offset: offset + limit]
+        return [
+            UserAccount(
+                username=row["username"],
+                password_hash=row["password_hash"],
+                role=row.get("role", "user"),
+                is_active=row.get("is_active", True),
+                created_at=row.get("created_at", ""),
+            )
+            for row in sliced
+        ]
+
+    def count_all(self) -> int:
+        return len(self._read_all())
+
+    def update_role(self, username: str, role: str) -> bool:
+        normalized = username.strip().lower()
+        with self._lock:
+            users = self._read_all()
+            for row in users:
+                if row.get("username", "").lower() == normalized:
+                    row["role"] = role
+                    self._write_all(users)
+                    return True
+        return False
+
+    def update_active(self, username: str, is_active: bool) -> bool:
+        normalized = username.strip().lower()
+        with self._lock:
+            users = self._read_all()
+            for row in users:
+                if row.get("username", "").lower() == normalized:
+                    row["is_active"] = is_active
+                    self._write_all(users)
+                    return True
+        return False
+
+    def delete(self, username: str) -> bool:
+        normalized = username.strip().lower()
+        with self._lock:
+            users = self._read_all()
+            original_len = len(users)
+            users = [row for row in users if row.get("username", "").lower() != normalized]
+            if len(users) < original_len:
+                self._write_all(users)
+                return True
+        return False
 
     def _ensure_file_exists(self) -> None:
         self._users_file_path.parent.mkdir(parents=True, exist_ok=True)

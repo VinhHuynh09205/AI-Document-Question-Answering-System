@@ -12,6 +12,10 @@
 docker compose up --build -d
 ```
 
+Notes:
+- If `LOCAL_SEMANTIC_EMBEDDINGS=true` in `.env`, image build will also install local semantic model dependencies.
+- If `LOCAL_SEMANTIC_EMBEDDINGS=false` (recommended for most production deployments), build is faster and image size is smaller.
+
 ## 3. Validate Service
 ```bash
 curl http://127.0.0.1:8000/api/v1/health
