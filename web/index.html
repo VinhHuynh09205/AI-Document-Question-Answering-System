@@ -10,7 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/static/style.css?v=16" />
+    <link rel="icon" type="image/svg+xml" href="/static/logo.svg" />
+    <link rel="stylesheet" href="/static/style.css?v=22" />
   </head>
   <body>
     <div class="app-shell">
@@ -58,16 +59,22 @@
             <p class="docs-selection-guide" id="docsSelectionGuide">
               Hướng dẫn: tick vào ô vuông ở từng tài liệu để chọn phạm vi AI trả lời.
             </p>
-            <label class="docs-select-all" id="docsSelectAllWrap">
-              <input type="checkbox" id="docsSelectAll" />
-              <span>Chọn tất cả tài liệu</span>
-            </label>
+            <div class="docs-actions-row">
+              <label class="docs-select-all" id="docsSelectAllWrap">
+                <input type="checkbox" id="docsSelectAll" />
+                <span>Chọn tất cả</span>
+              </label>
+              <button type="button" class="docs-delete-all-btn" id="docsDeleteAllBtn">Xóa tất cả tài liệu</button>
+            </div>
             <div id="docsList" class="docs-list"></div>
           </div>
         </div>
 
         <!-- Login / user button at bottom -->
         <div class="panel-bottom" id="panelBottom">
+          <div class="guest-warning" id="guestWarning" hidden>
+            Bạn đang dùng chế độ khách. Hãy đăng nhập để lưu toàn bộ hội thoại và tài liệu. Nếu tải lại hoặc thoát trang, dữ liệu tạm sẽ bị mất.
+          </div>
           <button class="btn-login" id="btnLogin">
             <img src="/static/logo.svg" alt="" class="login-logo" />
             <div class="login-info">
@@ -88,6 +95,20 @@
             <span class="status-pill" id="statusPill"></span>
           </div>
           <div class="header-actions">
+            <div class="export-wrap">
+              <button
+                class="icon-btn export-btn"
+                id="btnExportChat"
+                title="Xuất toàn bộ đoạn chat"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 3v12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 21h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+              <div class="export-menu" id="exportMenu" role="menu" aria-label="Xuất PDF">
+                <button type="button" class="export-menu-item" data-format="pdf" role="menuitem">Xuất PDF</button>
+              </div>
+            </div>
             <button class="icon-btn search-btn" id="btnSearch" title="Tìm kiếm trong đoạn chat">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
@@ -170,12 +191,14 @@
     <!-- Context menu (shared) -->
     <div class="ctx-menu" id="ctxMenu">
       <button class="ctx-menu-item" data-action="rename">✏️ Đổi tên</button>
+      <button class="ctx-menu-item" data-action="clear-messages">🧹 Xóa tin nhắn</button>
       <div class="ctx-menu-divider"></div>
       <button class="ctx-menu-item danger" data-action="delete">🗑 Xóa</button>
     </div>
 
     <script src="/static/vendor/marked.min.js" defer></script>
     <script src="/static/vendor/mermaid.min.js" defer></script>
-    <script src="/static/app.js?v=21" defer></script>
+    <script src="/static/vendor/html2pdf.bundle.min.js" defer></script>
+    <script src="/static/app.js?v=41" defer></script>
   </body>
 </html>

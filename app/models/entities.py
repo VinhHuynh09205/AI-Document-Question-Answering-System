@@ -48,6 +48,10 @@ class StoredDocument:
     original_name: str
     stored_path: str
     created_at: str
+    file_hash: str = ""
+    file_size: int = 0
+    version: int = 1
+    updated_at: str = ""
 
 
 @dataclass(slots=True)

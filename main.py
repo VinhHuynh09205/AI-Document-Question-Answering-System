@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.container import build_container
+from app.core.frontend_cache_control_middleware import FrontendCacheControlMiddleware
 from app.core.logging_config import configure_logging
 from app.core.request_context_middleware import RequestContextMiddleware
 from app.core.security_headers_middleware import SecurityHeadersMiddleware
@@ -25,7 +26,20 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
+        try:
+            container.upload_job_service.start_worker()
+            logger.info("upload_worker_started")
+        except Exception:
+            logger.exception("upload_worker_start_failed")
+
         yield
+
+        try:
+            container.upload_job_service.stop_worker()
+            logger.info("upload_worker_stopped")
+        except Exception:
+            logger.exception("upload_worker_stop_failed")
+
         try:
             container.vector_store_repository.save()
             logger.info("graceful_shutdown_vector_store_saved")
@@ -49,6 +63,7 @@ def create_app() -> FastAPI:
     if settings.enable_security_headers:
         app.add_middleware(SecurityHeadersMiddleware, enable_hsts=settings.enable_hsts)
 
+    app.add_middleware(FrontendCacheControlMiddleware)
     app.add_middleware(RequestContextMiddleware)
     app.state.container = container
     web_dir = Path(__file__).resolve().parent / "web"

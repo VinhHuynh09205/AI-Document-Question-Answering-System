@@ -31,14 +31,18 @@ class _UploadJob:
     chunks_total: int
     chunks_indexed: int
     original_names: list[str] = field(default_factory=list)
+    file_paths: list[str] = field(default_factory=list)
     message: str | None = None
     error: str | None = None
+    retry_count: int = 0
+    max_retries: int = 3
     created_at: str = field(default_factory=_utc_now_iso)
     updated_at: str = field(default_factory=_utc_now_iso)
 
     def snapshot(self) -> dict[str, Any]:
         return {
             "job_id": self.job_id,
+            "username": self.username,
             "chat_id": self.chat_id,
             "status": self.status,
             "stage": self.stage,
@@ -48,20 +52,35 @@ class _UploadJob:
             "chunks_total": self.chunks_total,
             "chunks_indexed": self.chunks_indexed,
             "original_names": list(self.original_names),
+            "file_paths": list(self.file_paths),
             "message": self.message,
             "error": self.error,
+            "retry_count": self.retry_count,
+            "max_retries": self.max_retries,
+            "can_retry": self.status == "failed" and self.retry_count < self.max_retries,
             "created_at": self.created_at,
             "updated_at": self.updated_at,
         }
 
 
 class InMemoryUploadJobService(IUploadJobService):
-    def __init__(self, retention_seconds: int = 3600) -> None:
+    def __init__(self, retention_seconds: int = 3600, max_retries: int = 3) -> None:
         self._retention_seconds = max(60, retention_seconds)
+        self._max_retries = max(0, int(max_retries))
         self._jobs: dict[str, _UploadJob] = {}
         self._lock = Lock()
 
-    def create_job(self, username: str, chat_id: str, original_names: Sequence[str]) -> dict[str, Any]:
+    def create_job(
+        self,
+        username: str,
+        chat_id: str,
+        original_names: Sequence[str],
+        file_paths: Sequence[str],
+        *,
+        max_retries: int | None = None,
+    ) -> dict[str, Any]:
+        resolved_max_retries = self._max_retries if max_retries is None else max(0, int(max_retries))
+
         with self._lock:
             self._purge_expired_locked()
             job = _UploadJob(
@@ -76,10 +95,67 @@ class InMemoryUploadJobService(IUploadJobService):
                 chunks_total=0,
                 chunks_indexed=0,
                 original_names=list(original_names),
+                file_paths=[str(path) for path in file_paths],
                 message="Đã nhận file, đang chờ xử lý",
+                retry_count=0,
+                max_retries=resolved_max_retries,
             )
             self._jobs[job.job_id] = job
             return job.snapshot()
+
+    def list_jobs(
+        self,
+        username: str,
+        chat_id: str,
+        *,
+        limit: int = 20,
+        include_terminal: bool = True,
+    ) -> list[dict[str, Any]]:
+        safe_limit = max(1, min(int(limit), 200))
+
+        with self._lock:
+            self._purge_expired_locked()
+            jobs = [
+                job
+                for job in self._jobs.values()
+                if job.username == username and job.chat_id == chat_id
+            ]
+            if not include_terminal:
+                jobs = [job for job in jobs if job.status in {"queued", "processing"}]
+
+            jobs.sort(key=lambda item: item.created_at, reverse=True)
+            return [job.snapshot() for job in jobs[:safe_limit]]
+
+    def retry_job(self, job_id: str, username: str, chat_id: str) -> dict[str, Any]:
+        with self._lock:
+            self._purge_expired_locked()
+            job = self._jobs.get(job_id)
+            if job is None or job.username != username or job.chat_id != chat_id:
+                raise ValueError("Upload job not found")
+            if job.status != "failed":
+                raise ValueError("Only failed jobs can be retried")
+            if job.retry_count >= job.max_retries:
+                raise ValueError("Retry limit exceeded")
+
+            job.status = "queued"
+            job.stage = "queued"
+            job.progress = 0
+            job.files_processed = 0
+            job.chunks_total = 0
+            job.chunks_indexed = 0
+            job.message = "Đã lên lịch thử lại"
+            job.error = None
+            job.retry_count += 1
+            job.updated_at = _utc_now_iso()
+            return job.snapshot()
+
+    def start_worker(self) -> None:
+        # In-memory implementation has no background worker thread.
+        return
+
+    def stop_worker(self) -> None:
+        # In-memory implementation has no background worker thread.
+        return
 
     def mark_processing(self, job_id: str, message: str | None = None) -> dict[str, Any] | None:
         with self._lock:

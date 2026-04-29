@@ -1,4 +1,5 @@
-import asyncio
+import base64
+import hashlib
 import json
 import logging
 import re
@@ -7,21 +8,21 @@ import unicodedata
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from pathlib import Path
-from threading import Lock, Thread
+from threading import Lock
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile, status
 from fastapi.responses import StreamingResponse
 
 from app.core.config import Settings
 from app.core.dependencies import (
     get_app_settings,
-    get_current_username,
-    get_ingestion_service,
     get_question_answering_service,
     get_rate_limiter,
     get_runtime_metrics,
     get_upload_job_service,
+    get_vector_store_repository,
+    get_workspace_username,
     get_workspace_service,
 )
 from app.models.entities import StoredDocument
@@ -31,31 +32,34 @@ from app.models.schemas import (
     ChatListResponse,
     ChatResponse,
     CreateChatRequest,
+    DuplicateDocumentResponse,
     DocumentListResponse,
     DocumentRecordResponse,
     MessageListResponse,
     MessageRecordResponse,
     RenameChatRequest,
     RenameDocumentRequest,
+    UploadJobListResponse,
     UploadJobStatusResponse,
     UploadResponse,
 )
-from app.services.interfaces.document_ingestion_service import IDocumentIngestionService
 from app.services.interfaces.question_answering_service import IQuestionAnsweringService
 from app.services.interfaces.rate_limiter import IRateLimiter
 from app.services.interfaces.runtime_metrics import IRuntimeMetrics
 from app.services.interfaces.upload_job_service import IUploadJobService
+from app.repositories.interfaces.vector_store_repository import IVectorStoreRepository
 from app.services.interfaces.workspace_service import IWorkspaceService
 from app.services.qa_constants import FALLBACK_ANSWER
+from app.utils.file_hash import compute_file_sha256
 
 
 router = APIRouter(prefix="/workspace", tags=["workspace"])
 logger = logging.getLogger(__name__)
 _UPLOAD_CHUNK_SIZE_BYTES = 1024 * 1024
-_UPLOAD_JOB_EXECUTION_LOCK = Lock()
 _PENDING_SCOPE_LOCK = Lock()
 _PENDING_SCOPE_TTL_SECONDS = 15 * 60
 _PENDING_SCOPE_REQUESTS: dict[str, tuple[str, float]] = {}
+_SUPPORTED_DUPLICATE_ACTIONS = {"cancel", "replace", "keep_both"}
 
 _DOC_ALL_RE = re.compile(r"\b(tat\s*ca|toan\s*bo|all\s*(documents?|docs?|files?|tai\s*lieu))\b", re.IGNORECASE)
 _DOC_CONTEXT_INDEX_RE = re.compile(
@@ -78,6 +82,8 @@ _CROSS_DOCUMENT_COMPARE_RE = re.compile(
     r"tong\s*hop|tổng\s*hợp)\b",
     re.IGNORECASE,
 )
+_SOURCES_META_PREFIX = "<!--aichatbox:sources:"
+_SOURCES_META_SUFFIX = "-->"
 
 
 @dataclass(slots=True)
@@ -99,6 +105,28 @@ class _AskRoutingDecision:
     scoped_document_numbers: list[int] | None = None
     # True when question requires one combined answer across selected docs (e.g. comparisons).
     prefer_combined_answer: bool = False
+
+
+@dataclass(slots=True)
+class _SavedUploadFile:
+    original_name: str
+    path: Path
+    file_hash: str
+    file_size: int
+
+
+@dataclass(slots=True)
+class _DuplicateUploadMatch:
+    upload: _SavedUploadFile
+    existing: StoredDocument
+
+
+@dataclass(slots=True)
+class _PendingDuplicateUploadMatch:
+    upload: _SavedUploadFile
+    existing_job_id: str
+    existing_original_name: str
+    existing_created_at: str
 
 
 def _normalize_scope_text(value: str) -> str:
@@ -408,7 +436,9 @@ def _resolve_ask_routing(
     )
 
 
-async def _save_upload_file(upload: UploadFile, output_path: Path) -> None:
+async def _save_upload_file(upload: UploadFile, output_path: Path) -> tuple[str, int]:
+    hasher = hashlib.sha256()
+    total_size = 0
     try:
         with output_path.open("wb") as handle:
             while True:
@@ -416,8 +446,12 @@ async def _save_upload_file(upload: UploadFile, output_path: Path) -> None:
                 if not chunk:
                     break
                 handle.write(chunk)
+                hasher.update(chunk)
+                total_size += len(chunk)
     finally:
         await upload.close()
+
+    return hasher.hexdigest(), total_size
 
 
 def _cleanup_saved_files(paths: list[Path]) -> None:
@@ -428,80 +462,189 @@ def _cleanup_saved_files(paths: list[Path]) -> None:
             logger.warning("workspace_upload_cleanup_failed path=%s", path)
 
 
-def _extract_upload_error_detail(exc: Exception) -> str:
-    if isinstance(exc, RuntimeError) and "sentence-transformers" in str(exc):
-        return (
-            "Local semantic embeddings are not available. "
-            "Set LOCAL_SEMANTIC_EMBEDDINGS=false or rebuild with local embedding dependencies."
+def _normalize_duplicate_action(raw_action: str | None) -> str:
+    action = str(raw_action or "cancel").strip().lower()
+    if action not in _SUPPORTED_DUPLICATE_ACTIONS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported duplicate action: {action}",
         )
-    return "Failed to process uploaded files"
+    return action
 
 
-def _run_upload_job(
+def _find_pending_upload_duplicates(
     *,
-    job_id: str,
     username: str,
     chat_id: str,
-    saved_paths: list[Path],
-    original_names: list[str],
-    ingestion_service: IDocumentIngestionService,
-    workspace_service: IWorkspaceService,
+    uploads: list[_SavedUploadFile],
     upload_job_service: IUploadJobService,
-) -> None:
-    upload_job_service.mark_processing(job_id, message="Đang xử lý tài liệu")
+) -> list[_PendingDuplicateUploadMatch]:
+    if not uploads:
+        return []
 
-    def _on_progress(progress_payload: dict[str, int | str]) -> None:
-        raw_progress = progress_payload.get("progress")
-        raw_files_processed = progress_payload.get("files_processed")
-        raw_chunks_total = progress_payload.get("chunks_total")
-        raw_chunks_indexed = progress_payload.get("chunks_indexed")
-        upload_job_service.update_progress(
-            job_id,
-            stage=str(progress_payload.get("stage", "processing")),
-            progress=int(raw_progress) if isinstance(raw_progress, int) else None,
-            files_processed=(
-                int(raw_files_processed)
-                if isinstance(raw_files_processed, int)
-                else None
-            ),
-            chunks_total=int(raw_chunks_total) if isinstance(raw_chunks_total, int) else None,
-            chunks_indexed=int(raw_chunks_indexed) if isinstance(raw_chunks_indexed, int) else None,
-        )
+    hashes_to_match = {
+        str(item.file_hash or "").strip().lower()
+        for item in uploads
+        if str(item.file_hash or "").strip()
+    }
+    if not hashes_to_match:
+        return []
 
-    try:
-        # FAISS in-memory state is shared, so writes are serialized to avoid race conditions.
-        with _UPLOAD_JOB_EXECUTION_LOCK:
-            result = ingestion_service.ingest(
-                saved_paths,
-                {"owner": username, "chat_id": chat_id},
-                _on_progress,
+    pending_jobs = upload_job_service.list_jobs(
+        username=username,
+        chat_id=chat_id,
+        limit=200,
+        include_terminal=False,
+    )
+
+    pending_by_hash: dict[str, tuple[str, str, str]] = {}
+    for job in pending_jobs:
+        job_id = str(job.get("job_id") or "").strip()
+        if not job_id:
+            continue
+
+        created_at = str(job.get("created_at") or "").strip()
+        original_names = [str(name or "").strip() for name in list(job.get("original_names") or [])]
+        file_paths = [str(path or "").strip() for path in list(job.get("file_paths") or [])]
+
+        for index, raw_path in enumerate(file_paths):
+            if not raw_path:
+                continue
+
+            path = Path(raw_path)
+            if not path.exists() or not path.is_file():
+                continue
+
+            try:
+                pending_hash, _ = compute_file_sha256(path)
+            except OSError:
+                logger.warning(
+                    "workspace_upload_pending_hash_read_failed job_id=%s path=%s",
+                    job_id,
+                    path,
+                )
+                continue
+
+            normalized_hash = str(pending_hash or "").strip().lower()
+            if normalized_hash not in hashes_to_match or normalized_hash in pending_by_hash:
+                continue
+
+            existing_name = original_names[index] if index < len(original_names) else ""
+            if not existing_name:
+                existing_name = path.name
+
+            pending_by_hash[normalized_hash] = (
+                job_id,
+                existing_name,
+                created_at,
             )
-        workspace_service.record_documents(
-            username=username,
-            chat_id=chat_id,
-            saved_paths=saved_paths,
-            original_names=original_names,
+
+            if len(pending_by_hash) >= len(hashes_to_match):
+                break
+
+        if len(pending_by_hash) >= len(hashes_to_match):
+            break
+
+    matches: list[_PendingDuplicateUploadMatch] = []
+    for upload in uploads:
+        normalized_hash = str(upload.file_hash or "").strip().lower()
+        pending_match = pending_by_hash.get(normalized_hash)
+        if pending_match is None:
+            continue
+
+        existing_job_id, existing_original_name, existing_created_at = pending_match
+        matches.append(
+            _PendingDuplicateUploadMatch(
+                upload=upload,
+                existing_job_id=existing_job_id,
+                existing_original_name=existing_original_name,
+                existing_created_at=existing_created_at,
+            )
         )
-        upload_job_service.mark_completed(
-            job_id,
-            files_processed=result.files_processed,
-            chunks_indexed=result.chunks_indexed,
-            message="Files uploaded successfully",
+
+    return matches
+
+
+def _build_duplicate_payload(
+    duplicates: list[_DuplicateUploadMatch],
+    pending_duplicates: list[_PendingDuplicateUploadMatch] | None = None,
+) -> list[DuplicateDocumentResponse]:
+    payload: list[DuplicateDocumentResponse] = []
+    for match in duplicates:
+        payload.append(
+            DuplicateDocumentResponse(
+                uploaded_name=match.upload.original_name,
+                file_hash=match.upload.file_hash,
+                existing_document_id=match.existing.document_id,
+                existing_original_name=match.existing.original_name,
+                existing_version=max(1, int(match.existing.version or 1)),
+                existing_created_at=match.existing.created_at,
+            )
         )
-    except Exception as exc:
-        logger.exception("workspace_upload_background_job_failed job_id=%s", job_id)
-        _cleanup_saved_files(saved_paths)
-        upload_job_service.mark_failed(
-            job_id,
-            error=_extract_upload_error_detail(exc),
-            message="Upload processing failed",
+
+    for pending_match in pending_duplicates or []:
+        payload.append(
+            DuplicateDocumentResponse(
+                uploaded_name=pending_match.upload.original_name,
+                file_hash=pending_match.upload.file_hash,
+                existing_document_id=f"upload-job:{pending_match.existing_job_id}",
+                existing_original_name=pending_match.existing_original_name,
+                existing_version=1,
+                existing_created_at=pending_match.existing_created_at,
+            )
         )
+
+    return payload
+
+
+def _apply_replace_for_duplicates(
+    *,
+    username: str,
+    chat_id: str,
+    duplicates: list[_DuplicateUploadMatch],
+    workspace_service: IWorkspaceService,
+    vector_store_repository: IVectorStoreRepository,
+) -> None:
+    if not duplicates:
+        return
+
+    removed_vector_chunks = 0
+    handled_document_ids: set[str] = set()
+
+    for match in duplicates:
+        existing_doc = match.existing
+        if existing_doc.document_id in handled_document_ids:
+            continue
+        handled_document_ids.add(existing_doc.document_id)
+
+        removed_vector_chunks += vector_store_repository.delete_documents_by_metadata(
+            {
+                "owner": username,
+                "chat_id": chat_id,
+                "source": existing_doc.stored_path,
+            }
+        )
+
+        workspace_service.delete_document(username=username, document_id=existing_doc.document_id)
+
+        if existing_doc.stored_path:
+            try:
+                Path(existing_doc.stored_path).unlink(missing_ok=True)
+            except OSError:
+                logger.warning(
+                    "workspace_replace_cleanup_old_file_failed document_id=%s path=%s",
+                    existing_doc.document_id,
+                    existing_doc.stored_path,
+                )
+
+    if removed_vector_chunks > 0:
+        vector_store_repository.save()
 
 
 @router.post("/chats", response_model=ChatResponse)
 def create_chat(
     payload: CreateChatRequest,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
 ) -> ChatResponse:
     chat = workspace_service.create_chat(username=username, title=payload.title)
@@ -510,7 +653,7 @@ def create_chat(
 
 @router.get("/chats", response_model=ChatListResponse)
 def list_chats(
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
 ) -> ChatListResponse:
     chats = workspace_service.list_chats(username)
@@ -525,7 +668,7 @@ def list_chats(
 @router.get("/chats/{chat_id}/documents", response_model=DocumentListResponse)
 def list_chat_documents(
     chat_id: str,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
 ) -> DocumentListResponse:
     try:
@@ -541,6 +684,10 @@ def list_chat_documents(
                 original_name=doc.original_name,
                 stored_path=doc.stored_path,
                 created_at=doc.created_at,
+                updated_at=doc.updated_at or doc.created_at,
+                file_hash=doc.file_hash or None,
+                file_size=max(0, int(doc.file_size or 0)),
+                version=max(1, int(doc.version or 1)),
                 upload_index=index,
             )
             for index, doc in enumerate(documents, start=1)
@@ -551,7 +698,7 @@ def list_chat_documents(
 @router.get("/chats/{chat_id}/messages", response_model=MessageListResponse)
 def list_chat_messages(
     chat_id: str,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
 ) -> MessageListResponse:
     try:
@@ -578,10 +725,11 @@ async def upload_to_chat(
     chat_id: str,
     request: Request,
     files: list[UploadFile] = File(...),
-    username: str = Depends(get_current_username),
-    ingestion_service: IDocumentIngestionService = Depends(get_ingestion_service),
+    duplicate_action: str = Form("cancel"),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
     upload_job_service: IUploadJobService = Depends(get_upload_job_service),
+    vector_store_repository: IVectorStoreRepository = Depends(get_vector_store_repository),
     rate_limiter: IRateLimiter = Depends(get_rate_limiter),
     runtime_metrics: IRuntimeMetrics = Depends(get_runtime_metrics),
     settings: Settings = Depends(get_app_settings),
@@ -603,6 +751,13 @@ async def upload_to_chat(
 
     if not files:
         raise HTTPException(status_code=400, detail="No files uploaded")
+
+    resolved_duplicate_action = _normalize_duplicate_action(duplicate_action)
+    if resolved_duplicate_action == "keep_both" and not settings.allow_duplicate_keep_both_uploads:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Keep both uploads are disabled by server policy",
+        )
 
     allowed_extensions = settings.get_supported_upload_extensions()
     primary_upload_root = Path(settings.upload_dir) / username / chat_id
@@ -634,57 +789,114 @@ async def upload_to_chat(
             detail="Upload storage is unavailable. Please try again later.",
         ) from exc
 
-    saved_paths: list[Path] = []
-    original_names: list[str] = []
+    saved_uploads: list[_SavedUploadFile] = []
 
     for upload in files:
         original_name = upload.filename or "unknown"
         extension = Path(original_name).suffix.lower()
         if extension not in allowed_extensions:
+            await upload.close()
             raise HTTPException(status_code=400, detail=f"Unsupported file type: {extension}")
 
         safe_name = f"{uuid4().hex}_{Path(original_name).name}"
         output_path = upload_root / safe_name
         try:
-            await _save_upload_file(upload, output_path)
+            file_hash, file_size = await _save_upload_file(upload, output_path)
         except OSError as exc:
             logger.exception("workspace_upload_file_write_failed path=%s", output_path)
-            _cleanup_saved_files(saved_paths)
+            _cleanup_saved_files([item.path for item in saved_uploads])
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Failed to write uploaded file: {original_name}",
             ) from exc
-        saved_paths.append(output_path)
-        original_names.append(original_name)
+
+        saved_uploads.append(
+            _SavedUploadFile(
+                original_name=original_name,
+                path=output_path,
+                file_hash=file_hash,
+                file_size=file_size,
+            )
+        )
+
+    duplicate_matches: list[_DuplicateUploadMatch] = []
+    for upload_file in saved_uploads:
+        existing_doc = workspace_service.find_document_by_hash(
+            username=username,
+            chat_id=chat_id,
+            file_hash=upload_file.file_hash,
+        )
+        if existing_doc is None:
+            continue
+        duplicate_matches.append(_DuplicateUploadMatch(upload=upload_file, existing=existing_doc))
+
+    pending_duplicate_matches = _find_pending_upload_duplicates(
+        username=username,
+        chat_id=chat_id,
+        uploads=saved_uploads,
+        upload_job_service=upload_job_service,
+    )
+
+    if pending_duplicate_matches:
+        _cleanup_saved_files([item.path for item in saved_uploads])
+        duplicate_payload = _build_duplicate_payload(duplicate_matches, pending_duplicate_matches)
+        return UploadResponse(
+            message=(
+                "Duplicate document detected in active upload queue. "
+                "Please wait until the existing upload finishes."
+            ),
+            files_processed=0,
+            chunks_indexed=0,
+            original_names=[item.original_name for item in saved_uploads],
+            status="duplicate",
+            duplicates=duplicate_payload,
+            allow_keep_both=False,
+        )
+
+    if duplicate_matches:
+        if resolved_duplicate_action == "cancel":
+            _cleanup_saved_files([item.path for item in saved_uploads])
+            duplicate_payload = _build_duplicate_payload(duplicate_matches)
+            return UploadResponse(
+                message="Duplicate document detected. Upload was not queued.",
+                files_processed=0,
+                chunks_indexed=0,
+                original_names=[item.original_name for item in saved_uploads],
+                status="duplicate",
+                duplicates=duplicate_payload,
+                allow_keep_both=settings.allow_duplicate_keep_both_uploads,
+            )
+
+        if resolved_duplicate_action == "replace":
+            try:
+                _apply_replace_for_duplicates(
+                    username=username,
+                    chat_id=chat_id,
+                    duplicates=duplicate_matches,
+                    workspace_service=workspace_service,
+                    vector_store_repository=vector_store_repository,
+                )
+            except Exception as exc:
+                logger.exception("workspace_upload_replace_failed username=%s chat_id=%s", username, chat_id)
+                _cleanup_saved_files([item.path for item in saved_uploads])
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to replace existing duplicate document",
+                ) from exc
 
     job = upload_job_service.create_job(
         username=username,
         chat_id=chat_id,
-        original_names=original_names,
+        original_names=[item.original_name for item in saved_uploads],
+        file_paths=[str(item.path) for item in saved_uploads],
+        max_retries=settings.upload_job_max_retries,
     )
-
-    worker = Thread(
-        target=_run_upload_job,
-        kwargs={
-            "job_id": job["job_id"],
-            "username": username,
-            "chat_id": chat_id,
-            "saved_paths": saved_paths,
-            "original_names": original_names,
-            "ingestion_service": ingestion_service,
-            "workspace_service": workspace_service,
-            "upload_job_service": upload_job_service,
-        },
-        daemon=True,
-        name=f"upload-job-{job['job_id'][:8]}",
-    )
-    worker.start()
 
     return UploadResponse(
         message="Files accepted for background indexing",
         files_processed=0,
         chunks_indexed=0,
-        original_names=original_names,
+        original_names=[item.original_name for item in saved_uploads],
         job_id=job["job_id"],
         status=job["status"],
         status_url=f"/api/v1/workspace/chats/{chat_id}/upload-jobs/{job['job_id']}",
@@ -739,11 +951,33 @@ def _deduplicate_sources(sources: list[str]) -> list[str]:
     return unique_sources
 
 
+def _encode_sources_metadata(sources: list[str]) -> str:
+    payload = json.dumps(sources, ensure_ascii=False)
+    encoded = base64.b64encode(payload.encode("utf-8")).decode("ascii")
+    return f"{_SOURCES_META_PREFIX}{encoded}{_SOURCES_META_SUFFIX}"
+
+
+def _attach_sources_metadata_to_message(answer: str, sources: list[str] | None) -> str:
+    normalized_answer = str(answer or "").strip()
+    normalized_sources = _deduplicate_sources(list(sources or []))
+    if not normalized_sources:
+        return normalized_answer
+
+    marker = _encode_sources_metadata(normalized_sources)
+    if marker in normalized_answer:
+        return normalized_answer
+
+    if not normalized_answer:
+        return marker
+
+    return f"{normalized_answer}\n\n{marker}"
+
+
 @router.get("/chats/{chat_id}/upload-jobs/{job_id}", response_model=UploadJobStatusResponse)
 def get_upload_job_status(
     chat_id: str,
     job_id: str,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
     upload_job_service: IUploadJobService = Depends(get_upload_job_service),
 ) -> UploadJobStatusResponse:
@@ -759,12 +993,59 @@ def get_upload_job_status(
     return UploadJobStatusResponse(**job)
 
 
+@router.get("/chats/{chat_id}/upload-jobs", response_model=UploadJobListResponse)
+def list_upload_jobs(
+    chat_id: str,
+    limit: int = 20,
+    include_terminal: bool = True,
+    username: str = Depends(get_workspace_username),
+    workspace_service: IWorkspaceService = Depends(get_workspace_service),
+    upload_job_service: IUploadJobService = Depends(get_upload_job_service),
+) -> UploadJobListResponse:
+    try:
+        workspace_service.ensure_chat(username=username, chat_id=chat_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found") from exc
+
+    jobs = upload_job_service.list_jobs(
+        username=username,
+        chat_id=chat_id,
+        limit=limit,
+        include_terminal=include_terminal,
+    )
+    return UploadJobListResponse(jobs=[UploadJobStatusResponse(**job) for job in jobs])
+
+
+@router.post("/chats/{chat_id}/upload-jobs/{job_id}/retry", response_model=UploadJobStatusResponse)
+def retry_upload_job(
+    chat_id: str,
+    job_id: str,
+    username: str = Depends(get_workspace_username),
+    workspace_service: IWorkspaceService = Depends(get_workspace_service),
+    upload_job_service: IUploadJobService = Depends(get_upload_job_service),
+) -> UploadJobStatusResponse:
+    try:
+        workspace_service.ensure_chat(username=username, chat_id=chat_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found") from exc
+
+    try:
+        job = upload_job_service.retry_job(job_id=job_id, username=username, chat_id=chat_id)
+    except ValueError as exc:
+        detail = str(exc)
+        if detail == "Upload job not found":
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail) from exc
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail) from exc
+
+    return UploadJobStatusResponse(**job)
+
+
 @router.post("/chats/{chat_id}/ask", response_model=AskResponse)
 def ask_in_chat(
     chat_id: str,
     request: Request,
     payload: AskRequest,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     question_answering_service: IQuestionAnsweringService = Depends(get_question_answering_service),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
     rate_limiter: IRateLimiter = Depends(get_rate_limiter),
@@ -828,7 +1109,7 @@ def ask_in_chat(
             username=username,
             chat_id=chat_id,
             role="assistant",
-            content=combined_answer,
+            content=_attach_sources_metadata_to_message(combined_answer, combined_sources),
         )
         return AskResponse(answer=combined_answer, sources=combined_sources)
 
@@ -861,7 +1142,7 @@ def ask_in_chat(
         username=username,
         chat_id=chat_id,
         role="assistant",
-        content=result.answer,
+        content=_attach_sources_metadata_to_message(result.answer, result.sources),
     )
 
     return AskResponse(answer=result.answer, sources=result.sources)
@@ -872,7 +1153,7 @@ async def ask_in_chat_stream(
     chat_id: str,
     request: Request,
     payload: AskRequest,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     question_answering_service: IQuestionAnsweringService = Depends(get_question_answering_service),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
     rate_limiter: IRateLimiter = Depends(get_rate_limiter),
@@ -996,14 +1277,16 @@ async def ask_in_chat_stream(
             full_answer = FALLBACK_ANSWER
             runtime_metrics.increment_fallback_answers()
 
+        unique_sources = _deduplicate_sources(collected_sources)
+
         workspace_service.add_message(
             username=username,
             chat_id=chat_id,
             role="assistant",
-            content=full_answer,
+            content=_attach_sources_metadata_to_message(full_answer, unique_sources),
         )
 
-        yield f"data: {json.dumps({'done': True, 'sources': _deduplicate_sources(collected_sources)})}\n\n"
+        yield f"data: {json.dumps({'done': True, 'sources': unique_sources})}\n\n"
 
     return StreamingResponse(
         _event_generator(),
@@ -1016,7 +1299,7 @@ async def ask_in_chat_stream(
 def rename_chat(
     chat_id: str,
     payload: RenameChatRequest,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
 ) -> ChatResponse:
     try:
@@ -1029,13 +1312,70 @@ def rename_chat(
 @router.delete("/chats/{chat_id}")
 def delete_chat(
     chat_id: str,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
 ):
     deleted = workspace_service.delete_chat(username=username, chat_id=chat_id)
     if not deleted:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found")
+    _clear_pending_scope_question(username=username, chat_id=chat_id)
     return {"ok": True}
+
+
+@router.delete("/chats/{chat_id}/messages")
+def delete_chat_messages(
+    chat_id: str,
+    username: str = Depends(get_workspace_username),
+    workspace_service: IWorkspaceService = Depends(get_workspace_service),
+):
+    try:
+        workspace_service.ensure_chat(username=username, chat_id=chat_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found") from exc
+
+    deleted_messages = workspace_service.delete_messages_for_chat(username=username, chat_id=chat_id)
+    _clear_pending_scope_question(username=username, chat_id=chat_id)
+    return {"ok": True, "deleted_messages": max(0, int(deleted_messages))}
+
+
+@router.delete("/chats/{chat_id}/documents")
+def delete_chat_documents(
+    chat_id: str,
+    username: str = Depends(get_workspace_username),
+    workspace_service: IWorkspaceService = Depends(get_workspace_service),
+    vector_store_repository: IVectorStoreRepository = Depends(get_vector_store_repository),
+):
+    try:
+        workspace_service.ensure_chat(username=username, chat_id=chat_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found") from exc
+
+    documents = workspace_service.list_documents(username=username, chat_id=chat_id)
+    if not documents:
+        _clear_pending_scope_question(username=username, chat_id=chat_id)
+        return {"ok": True, "deleted_documents": 0}
+
+    removed_chunks = vector_store_repository.delete_documents_by_metadata(
+        {
+            "owner": username,
+            "chat_id": chat_id,
+        }
+    )
+    if removed_chunks > 0:
+        vector_store_repository.save()
+
+    deleted_documents = workspace_service.delete_documents_for_chat(username=username, chat_id=chat_id)
+
+    for document in documents:
+        if not document.stored_path:
+            continue
+        try:
+            Path(document.stored_path).unlink(missing_ok=True)
+        except OSError:
+            logger.warning("workspace_delete_all_documents_file_cleanup_failed path=%s", document.stored_path)
+
+    _clear_pending_scope_question(username=username, chat_id=chat_id)
+    return {"ok": True, "deleted_documents": max(0, int(deleted_documents))}
 
 
 @router.put("/chats/{chat_id}/documents/{document_id}", response_model=DocumentRecordResponse)
@@ -1043,7 +1383,7 @@ def rename_document(
     chat_id: str,
     document_id: str,
     payload: RenameDocumentRequest,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
 ) -> DocumentRecordResponse:
     try:
@@ -1057,6 +1397,10 @@ def rename_document(
     return DocumentRecordResponse(
         document_id=doc.document_id, original_name=doc.original_name,
         stored_path=doc.stored_path, created_at=doc.created_at,
+        updated_at=doc.updated_at or doc.created_at,
+        file_hash=doc.file_hash or None,
+        file_size=max(0, int(doc.file_size or 0)),
+        version=max(1, int(doc.version or 1)),
     )
 
 
@@ -1064,14 +1408,38 @@ def rename_document(
 def delete_document(
     chat_id: str,
     document_id: str,
-    username: str = Depends(get_current_username),
+    username: str = Depends(get_workspace_username),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
+    vector_store_repository: IVectorStoreRepository = Depends(get_vector_store_repository),
 ):
     try:
         workspace_service.ensure_chat(username=username, chat_id=chat_id)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat not found") from exc
+
+    document = workspace_service.get_document(username=username, document_id=document_id)
+    if document is None or document.chat_id != chat_id:
+        # Keep DELETE idempotent so stale UI entries do not fail hard.
+        return {"ok": True, "deleted": False}
+
+    removed_chunks = vector_store_repository.delete_documents_by_metadata(
+        {
+            "owner": username,
+            "chat_id": chat_id,
+            "source": document.stored_path,
+        }
+    )
+    if removed_chunks > 0:
+        vector_store_repository.save()
+
     deleted = workspace_service.delete_document(username=username, document_id=document_id)
     if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-    return {"ok": True}
+        return {"ok": True, "deleted": False}
+
+    if document.stored_path:
+        try:
+            Path(document.stored_path).unlink(missing_ok=True)
+        except OSError:
+            logger.warning("workspace_delete_document_file_cleanup_failed path=%s", document.stored_path)
+
+    return {"ok": True, "deleted": True}

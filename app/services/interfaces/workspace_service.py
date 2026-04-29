@@ -25,7 +25,18 @@ class IWorkspaceService(ABC):
         chat_id: str,
         saved_paths: Sequence[Path],
         original_names: Sequence[str],
+        *,
+        file_hashes: Sequence[str] | None = None,
+        file_sizes: Sequence[int] | None = None,
     ) -> list[StoredDocument]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_document(self, username: str, document_id: str) -> StoredDocument | None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def find_document_by_hash(self, username: str, chat_id: str, file_hash: str) -> StoredDocument | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -46,6 +57,14 @@ class IWorkspaceService(ABC):
 
     @abstractmethod
     def delete_chat(self, username: str, chat_id: str) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_documents_for_chat(self, username: str, chat_id: str) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def delete_messages_for_chat(self, username: str, chat_id: str) -> int:
         raise NotImplementedError
 
     @abstractmethod

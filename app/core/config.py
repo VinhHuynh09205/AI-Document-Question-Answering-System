@@ -30,6 +30,7 @@ class Settings(BaseSettings):
     users_file_path: str = "data/users.json"
     supported_upload_extensions: str = ".pdf,.doc,.docx,.xlsx,.xls,.pptx,.html,.htm,.json,.xml,.txt,.md,.csv"
     replace_existing_documents_on_upload: bool = True
+    allow_duplicate_keep_both_uploads: bool = True
 
     auth_secret_key: str = "change-me-in-production"
     admin_setup_secret: str = ""
@@ -54,6 +55,9 @@ class Settings(BaseSettings):
     ingestion_max_file_workers: int = 4
     embedding_batch_size: int = 128
     upload_job_retention_seconds: int = 3600
+    upload_job_max_retries: int = 3
+    upload_job_worker_poll_seconds: float = 0.8
+    upload_job_stale_processing_seconds: int = 120
     log_level: str = "INFO"
     rate_limit_window_seconds: int = 60
     login_rate_limit_per_window: int = 20

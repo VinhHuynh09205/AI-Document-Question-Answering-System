@@ -1,6 +1,15 @@
 from pydantic import BaseModel, Field
 
 
+class DuplicateDocumentResponse(BaseModel):
+    uploaded_name: str
+    file_hash: str
+    existing_document_id: str
+    existing_original_name: str
+    existing_version: int = Field(default=1, ge=1)
+    existing_created_at: str
+
+
 class UploadResponse(BaseModel):
     message: str
     files_processed: int
@@ -9,6 +18,8 @@ class UploadResponse(BaseModel):
     job_id: str | None = None
     status: str | None = None
     status_url: str | None = None
+    duplicates: list[DuplicateDocumentResponse] = Field(default_factory=list)
+    allow_keep_both: bool | None = None
 
 
 class UploadJobStatusResponse(BaseModel):
@@ -24,8 +35,15 @@ class UploadJobStatusResponse(BaseModel):
     original_names: list[str] = Field(default_factory=list)
     message: str | None = None
     error: str | None = None
+    retry_count: int = Field(default=0, ge=0)
+    max_retries: int = Field(default=0, ge=0)
+    can_retry: bool = False
     created_at: str
     updated_at: str
+
+
+class UploadJobListResponse(BaseModel):
+    jobs: list[UploadJobStatusResponse] = Field(default_factory=list)
 
 
 class AskRequest(BaseModel):
@@ -150,6 +168,10 @@ class DocumentRecordResponse(BaseModel):
     original_name: str
     stored_path: str
     created_at: str
+    updated_at: str | None = None
+    file_hash: str | None = None
+    file_size: int = 0
+    version: int = Field(default=1, ge=1)
     upload_index: int | None = None
 
 

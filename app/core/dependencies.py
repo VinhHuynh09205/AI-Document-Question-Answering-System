@@ -1,9 +1,12 @@
+import re
+
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 import jwt
 
 from app.core.config import Settings, get_settings
 from app.core.container import AppContainer
+from app.repositories.interfaces.vector_store_repository import IVectorStoreRepository
 from app.services.interfaces.auth_service import IAuthService
 from app.services.interfaces.document_ingestion_service import IDocumentIngestionService
 from app.services.interfaces.question_answering_service import IQuestionAnsweringService
@@ -16,6 +19,9 @@ from app.services.interfaces.workspace_service import IWorkspaceService
 
 
 bearer_scheme = HTTPBearer(auto_error=False)
+_GUEST_SESSION_HEADER = "X-Guest-Session"
+_GUEST_USERNAME_PREFIX = "__guest__-"
+_GUEST_SESSION_ID_RE = re.compile(r"^[A-Za-z0-9_-]{8,64}$")
 
 
 def get_container(request: Request) -> AppContainer:
@@ -74,6 +80,12 @@ def get_upload_job_service(
     return container.upload_job_service
 
 
+def get_vector_store_repository(
+    container: AppContainer = Depends(get_container),
+) -> IVectorStoreRepository:
+    return container.vector_store_repository
+
+
 def get_admin_service(
     container: AppContainer = Depends(get_container),
 ) -> IAdminService:
@@ -115,6 +127,23 @@ def get_current_username(
             detail="Authentication required",
         )
     return username
+
+
+def get_workspace_username(
+    request: Request,
+    username: str | None = Depends(get_optional_current_username),
+) -> str:
+    if username is not None:
+        return username
+
+    raw_guest_session_id = str(request.headers.get(_GUEST_SESSION_HEADER, "")).strip()
+    if not _GUEST_SESSION_ID_RE.fullmatch(raw_guest_session_id):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required or invalid guest session",
+        )
+
+    return f"{_GUEST_USERNAME_PREFIX}{raw_guest_session_id}"
 
 
 def get_current_admin_username(

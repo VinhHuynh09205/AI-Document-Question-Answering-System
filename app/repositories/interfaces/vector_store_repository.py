@@ -42,3 +42,8 @@ class IVectorStoreRepository(ABC):
     @abstractmethod
     def clear(self) -> dict:
         raise NotImplementedError
+
+    @abstractmethod
+    def delete_documents_by_metadata(self, metadata_filter: dict[str, str | list[str]]) -> int:
+        """Delete chunks matching metadata filter and return removed chunk count."""
+        raise NotImplementedError

@@ -1,5 +1,9 @@
+import base64
+import json
+
 from app.api.workspace import (
     _ask_per_document,
+    _attach_sources_metadata_to_message,
     _clear_pending_scope_question,
     _extract_document_selection,
     _get_pending_scope_question,
@@ -253,3 +257,22 @@ def test_resolve_ask_routing_uses_compacted_numbers_after_deletion() -> None:
     assert routing.clarification_answer is None
     assert routing.scoped_documents is None
     assert routing.metadata_filter.get("source") == "/tmp/doc-3.md"
+
+
+def test_attach_sources_metadata_to_message_appends_hidden_marker() -> None:
+    persisted = _attach_sources_metadata_to_message(
+        "Noi dung tra loi",
+        ["/tmp/doc-1.pdf", "/tmp/doc-1.pdf", " /tmp/doc-2.xlsx "],
+    )
+
+    assert persisted.startswith("Noi dung tra loi")
+    assert "<!--aichatbox:sources:" in persisted
+
+    encoded = persisted.split("<!--aichatbox:sources:", 1)[1].split("-->", 1)[0]
+    decoded = base64.b64decode(encoded.encode("ascii")).decode("utf-8")
+    assert json.loads(decoded) == ["/tmp/doc-1.pdf", "/tmp/doc-2.xlsx"]
+
+
+def test_attach_sources_metadata_to_message_keeps_plain_answer_without_sources() -> None:
+    assert _attach_sources_metadata_to_message("Tra loi", []) == "Tra loi"
+    assert _attach_sources_metadata_to_message("Tra loi", None) == "Tra loi"

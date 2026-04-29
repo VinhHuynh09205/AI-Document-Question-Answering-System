@@ -164,6 +164,66 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
     def document_count(self) -> int:
         return len(self._documents)
 
+    def delete_documents_by_metadata(self, metadata_filter: dict[str, str | list[str]]) -> int:
+        if not metadata_filter or not self._documents:
+            return 0
+
+        kept_payloads: list[dict] = []
+        kept_indices: list[int] = []
+        removed_count = 0
+
+        for index, payload in enumerate(self._documents):
+            metadata = payload.get("metadata", {})
+            if self._match_metadata_filter(metadata, metadata_filter):
+                removed_count += 1
+                continue
+            kept_payloads.append(payload)
+            kept_indices.append(index)
+
+        if removed_count == 0:
+            return 0
+
+        if not kept_payloads:
+            self._reset_index(None)
+            return removed_count
+
+        matrix = self._reconstruct_vectors_for_indices(kept_indices)
+        if matrix is None:
+            vectors = self._embeddings.embed_documents([payload["page_content"] for payload in kept_payloads])
+            matrix = np.asarray(vectors, dtype="float32")
+
+        if matrix.size == 0:
+            self._reset_index(None)
+            return removed_count
+
+        rebuilt_index = faiss.IndexFlatL2(matrix.shape[1])
+        rebuilt_index.add(matrix)
+
+        self._index = rebuilt_index
+        self._documents = kept_payloads
+        return removed_count
+
+    def _reconstruct_vectors_for_indices(self, indices: list[int]) -> np.ndarray | None:
+        if not indices or self._index is None:
+            return None
+
+        if self._index.ntotal != len(self._documents):
+            logger.warning(
+                "faiss_reconstruct_index_size_mismatch ntotal=%s payloads=%s",
+                self._index.ntotal,
+                len(self._documents),
+            )
+            return None
+
+        try:
+            matrix = np.empty((len(indices), self._index.d), dtype="float32")
+            for out_index, source_index in enumerate(indices):
+                matrix[out_index] = self._index.reconstruct(int(source_index))
+            return matrix
+        except Exception:
+            logger.warning("faiss_reconstruct_failed_fallback_to_reembed", exc_info=True)
+            return None
+
     def _reset_index(self, dimension: int | None) -> None:
         """Reset index when embedding provider changes or explicit clear is requested."""
         self._index = faiss.IndexFlatL2(dimension) if dimension is not None else None

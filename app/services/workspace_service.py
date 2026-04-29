@@ -29,18 +29,41 @@ class WorkspaceService(IWorkspaceService):
         chat_id: str,
         saved_paths: Sequence[Path],
         original_names: Sequence[str],
+        *,
+        file_hashes: Sequence[str] | None = None,
+        file_sizes: Sequence[int] | None = None,
     ) -> list[StoredDocument]:
         records: list[StoredDocument] = []
-        for path, original_name in zip(saved_paths, original_names, strict=False):
+        safe_hashes = list(file_hashes or [])
+        safe_sizes = list(file_sizes or [])
+
+        for index, (path, original_name) in enumerate(zip(saved_paths, original_names, strict=False)):
+            file_hash = safe_hashes[index] if index < len(safe_hashes) else None
+            file_size = safe_sizes[index] if index < len(safe_sizes) else None
             records.append(
                 self._workspace_repository.add_document(
                     username=username,
                     chat_id=chat_id,
                     original_name=original_name,
                     stored_path=str(path),
+                    file_hash=file_hash,
+                    file_size=file_size,
                 )
             )
         return records
+
+    def get_document(self, username: str, document_id: str) -> StoredDocument | None:
+        return self._workspace_repository.get_document(username=username, document_id=document_id)
+
+    def find_document_by_hash(self, username: str, chat_id: str, file_hash: str) -> StoredDocument | None:
+        normalized_hash = str(file_hash or "").strip().lower()
+        if not normalized_hash:
+            return None
+        return self._workspace_repository.find_document_by_hash(
+            username=username,
+            chat_id=chat_id,
+            file_hash=normalized_hash,
+        )
 
     def list_documents(self, username: str, chat_id: str) -> list[StoredDocument]:
         return self._workspace_repository.list_documents(username, chat_id)
@@ -67,6 +90,12 @@ class WorkspaceService(IWorkspaceService):
 
     def delete_chat(self, username: str, chat_id: str) -> bool:
         return self._workspace_repository.delete_chat(username, chat_id)
+
+    def delete_documents_for_chat(self, username: str, chat_id: str) -> int:
+        return self._workspace_repository.delete_documents_for_chat(username, chat_id)
+
+    def delete_messages_for_chat(self, username: str, chat_id: str) -> int:
+        return self._workspace_repository.delete_messages_for_chat(username, chat_id)
 
     def rename_document(self, username: str, document_id: str, new_name: str) -> StoredDocument:
         clean_name = new_name.strip()

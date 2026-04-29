@@ -33,9 +33,9 @@ from app.services.admin_service import AdminService
 from app.services.auth_service import AuthService
 from app.services.llm_providers.local_grounded_llm_provider import LocalGroundedLLMProvider
 from app.services.question_answering_service import QuestionAnsweringService
+from app.services.pg_upload_job_service import PgUploadJobService
 from app.services.runtime_metrics import RuntimeMetrics
 from app.services.text_chunking_service import TextChunkingService
-from app.services.upload_job_service import InMemoryUploadJobService
 from app.services.vector_store_admin_service import VectorStoreAdminService
 from app.services.workspace_service import WorkspaceService
 from app.utils.filesystem import ensure_directory
@@ -109,15 +109,13 @@ def build_container(settings: Settings) -> AppContainer:
         window_seconds=settings.rate_limit_window_seconds,
     )
     runtime_metrics = RuntimeMetrics()
-    upload_job_service = InMemoryUploadJobService(
-        retention_seconds=settings.upload_job_retention_seconds,
-    )
     vector_store_admin_service = VectorStoreAdminService(
         vector_store_repository=vector_store_repository,
         backup_root_dir=Path(settings.vector_backup_dir),
     )
 
     from app.repositories.pg_admin_repository import PgAdminRepository
+    from app.repositories.pg_upload_job_repository import PgUploadJobRepository
     from app.repositories.pg_user_repository import PgUserRepository
     from app.repositories.pg_utils import PgConfig
     from app.repositories.pg_workspace_repository import PgWorkspaceRepository
@@ -132,8 +130,18 @@ def build_container(settings: Settings) -> AppContainer:
     workspace_repository = PgWorkspaceRepository(config=pg_config)
     user_repository = PgUserRepository(config=pg_config)
     admin_repository = PgAdminRepository(config=pg_config)
+    upload_job_repository = PgUploadJobRepository(config=pg_config)
 
     workspace_service = WorkspaceService(workspace_repository=workspace_repository)
+    upload_job_service = PgUploadJobService(
+        upload_job_repository=upload_job_repository,
+        ingestion_service=ingestion_service,
+        workspace_service=workspace_service,
+        retention_seconds=settings.upload_job_retention_seconds,
+        max_retries=settings.upload_job_max_retries,
+        worker_poll_interval_seconds=settings.upload_job_worker_poll_seconds,
+        stale_processing_seconds=settings.upload_job_stale_processing_seconds,
+    )
 
     auth_service = AuthService(
         user_repository=user_repository,
