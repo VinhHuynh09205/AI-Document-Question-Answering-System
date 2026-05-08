@@ -22,6 +22,7 @@ const state = {
 let markedConfigured = false;
 let mermaidThemeMode = "";
 let mermaidSequence = 0;
+let mermaidRerenderToken = 0;
 const UPLOAD_JOB_POLL_INTERVAL_MS = 800;
 const UPLOAD_JOB_POLL_TIMEOUT_MS = 180000;
 const UPLOAD_JOB_STORAGE_KEY = "nectar_upload_jobs_v1";
@@ -1601,8 +1602,14 @@ function mapUploadStage(stage) {
   if (value === "queued") return "Đang chờ xử lý";
   if (value === "processing") return "Đang xử lý tài liệu";
   if (value === "loading") return "Đang đọc file";
+  if (value === "detecting_file_type") return "Đang nhận diện loại file";
+  if (value === "extracting_content") return "Đang trích xuất nội dung";
+  if (value === "running_ocr") return "Đang chạy OCR (khi cần)";
+  if (value === "cleaning_text") return "Đang làm sạch văn bản";
   if (value === "chunking") return "Đang chia nội dung";
+  if (value === "generating_embeddings") return "Đang tạo embeddings";
   if (value === "indexing") return "Đang lập chỉ mục";
+  if (value === "saving_vector_index") return "Đang lưu vector index";
   if (value === "saving") return "Đang lưu chỉ mục";
   if (value === "completed") return "Đã hoàn tất";
   if (value === "failed") return "Xử lý thất bại";
@@ -2163,21 +2170,217 @@ function ensureMermaidRenderer() {
   const targetTheme = isDark ? "dark" : "default";
   if (mermaidThemeMode === targetTheme) return true;
 
+  const themeConfig = getMermaidThemeConfig(targetTheme);
+
   window.mermaid.initialize({
     startOnLoad: false,
     securityLevel: "strict",
     suppressErrorRendering: true,
-    theme: targetTheme,
+    theme: "base",
     fontFamily: "Plus Jakarta Sans, sans-serif",
-    flowchart: { useMaxWidth: true, htmlLabels: false },
+    themeVariables: themeConfig.themeVariables,
+    themeCSS: themeConfig.themeCSS,
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: false,
+      curve: "basis",
+      nodeSpacing: 46,
+      rankSpacing: 64,
+      diagramPadding: 14,
+    },
+    pie: { textPosition: 0.72 },
   });
 
   mermaidThemeMode = targetTheme;
   return true;
 }
 
+function getMermaidThemeConfig(themeMode) {
+  const isDark = themeMode === "dark";
+
+  return {
+    themeVariables: {
+      fontFamily: "Plus Jakarta Sans, sans-serif",
+      background: isDark ? "#07131b" : "#ecf3f9",
+      mainBkg: isDark ? "#10212d" : "#f7fbff",
+      secondBkg: isDark ? "#132836" : "#e5eef8",
+      tertiaryColor: isDark ? "#0e202c" : "#edf5fb",
+      primaryColor: isDark ? "#134e4a" : "#c9e8de",
+      primaryTextColor: isDark ? "#eafffb" : "#102331",
+      primaryBorderColor: isDark ? "#5eead4" : "#0f6174",
+      secondaryColor: isDark ? "#17354a" : "#d7e9f8",
+      secondaryTextColor: isDark ? "#e6f3ff" : "#102331",
+      secondaryBorderColor: isDark ? "#7dd3fc" : "#0f6d90",
+      tertiaryTextColor: isDark ? "#dce8f3" : "#102331",
+      tertiaryBorderColor: isDark ? "#94a3b8" : "#94a3b8",
+      clusterBkg: isDark ? "#102734" : "#e5f0fa",
+      clusterBorder: isDark ? "#34d399" : "#5a91b6",
+      edgeLabelBackground: isDark ? "#0f2531" : "#ffffff",
+      lineColor: isDark ? "#7ee4d6" : "#0f6174",
+      textColor: isDark ? "#e6f4ff" : "#102331",
+      pie1: isDark ? "#2dd4bf" : "#0f6174",
+      pie2: isDark ? "#38bdf8" : "#0369a1",
+      pie3: isDark ? "#fbbf24" : "#f59e0b",
+      pie4: isDark ? "#fb7185" : "#c2410c",
+      pie5: isDark ? "#c084fc" : "#7c3aed",
+      pie6: isDark ? "#a3e635" : "#4d7c0f",
+      pieOuterStrokeColor: isDark ? "#07131b" : "#f7fbff",
+      pieOpacity: 0.96,
+    },
+    themeCSS: buildMermaidThemeCss(isDark),
+  };
+}
+
+function buildMermaidThemeCss(isDark) {
+  const nodeShadow = isDark ? "rgba(8, 47, 73, 0.38)" : "rgba(15, 23, 42, 0.18)";
+  const edgeLabelFill = isDark ? "#11262d" : "#ffffff";
+  const clusterFill = isDark ? "#0f2a34" : "#e5f0fa";
+  const clusterStroke = isDark ? "#2dd4bf" : "#5a91b6";
+  const textColor = isDark ? "#e6f4ff" : "#102331";
+  const edgeTextColor = isDark ? "#d5f8f1" : "#0f2230";
+  const lineStroke = isDark ? "#7ee4d6" : "#0f6174";
+
+  return `
+    svg {
+      font-family: "Plus Jakarta Sans", sans-serif;
+    }
+
+    .node rect,
+    .node circle,
+    .node ellipse,
+    .node polygon,
+    .node path {
+      stroke-width: 1.8px;
+      filter: drop-shadow(0 10px 18px ${nodeShadow});
+    }
+
+    .nodeLabel,
+    .label text,
+    .edgeLabel text,
+    .cluster-label text,
+    .legend text,
+    .sectionTitle text,
+    .taskText,
+    .taskTextOutsideRight,
+    .taskTextOutsideLeft {
+      font-size: 15px !important;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      fill: ${textColor};
+    }
+
+    .edgeLabel text {
+      font-size: 14px !important;
+      font-weight: 700;
+      fill: ${edgeTextColor};
+    }
+
+    .cluster-label text,
+    .legend text,
+    .sectionTitle text {
+      font-size: 14px !important;
+    }
+
+    .edgePath .path,
+    .flowchart-link,
+    .relationshipLine,
+    .messageLine0,
+    .messageLine1 {
+      stroke: ${lineStroke};
+      stroke-width: 2.2px;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .edgeLabel rect {
+      fill: ${edgeLabelFill};
+      opacity: 0.96;
+    }
+
+    .cluster rect {
+      fill: ${clusterFill};
+      stroke: ${clusterStroke};
+      stroke-dasharray: 0;
+      rx: 18px;
+      ry: 18px;
+    }
+  `;
+}
+
+function encodeMermaidSource(source) {
+  try {
+    return encodeURIComponent(String(source || ""));
+  } catch {
+    return "";
+  }
+}
+
+function decodeMermaidSource(encodedSource) {
+  try {
+    return decodeURIComponent(String(encodedSource || ""));
+  } catch {
+    return "";
+  }
+}
+
+async function rerenderExistingMermaidDiagrams() {
+  const cards = Array.from(document.querySelectorAll(".diagram-card[data-mermaid-source]"));
+  if (!cards.length) return;
+  if (!ensureMermaidRenderer() || typeof window.mermaid.render !== "function") return;
+
+  const currentToken = ++mermaidRerenderToken;
+
+  for (const diagramContainer of cards) {
+    if (currentToken !== mermaidRerenderToken) return;
+
+    const source = decodeMermaidSource(diagramContainer.dataset.mermaidSource);
+    if (!source) continue;
+
+    const viewport = diagramContainer.querySelector(".diagram-viewport");
+    if (!viewport) continue;
+
+    const badge = diagramContainer.querySelector(".diagram-badge");
+    const hint = diagramContainer.querySelector(".diagram-hint");
+
+    try {
+      const renderResult = await window.mermaid.render(
+        `mermaid_${Date.now()}_${++mermaidSequence}`,
+        source,
+      );
+
+      if (currentToken !== mermaidRerenderToken) return;
+
+      viewport.innerHTML = renderResult.svg;
+      if (typeof renderResult.bindFunctions === "function") {
+        renderResult.bindFunctions(viewport);
+      }
+      finalizeRenderedMermaid(viewport);
+
+      const diagramType = detectMermaidDiagramType(source);
+      const diagramDensity = detectMermaidDiagramDensity(source);
+      diagramContainer.dataset.diagramType = diagramType;
+      diagramContainer.dataset.diagramDensity = diagramDensity;
+
+      if (badge) {
+        badge.textContent = getMermaidDiagramLabel(diagramType);
+      }
+      if (hint) {
+        hint.textContent = getMermaidDiagramHint(diagramType, diagramDensity);
+      }
+    } catch (error) {
+      console.warn("mermaid_theme_rerender_failed", error);
+    }
+  }
+}
+
 async function renderMermaidDiagrams(container) {
-  const codeBlocks = Array.from(container.querySelectorAll("pre code.language-mermaid, pre code.lang-mermaid"));
+  const codeBlocks = Array.from(container.querySelectorAll("pre code")).filter((block) => {
+    const className = String(block.className || "");
+    if (className.includes("language-mermaid") || className.includes("lang-mermaid")) {
+      return true;
+    }
+    return isLikelyMermaidSource(block.textContent || "");
+  });
   if (!codeBlocks.length) return;
   if (!ensureMermaidRenderer() || typeof window.mermaid.render !== "function") return;
 
@@ -2190,10 +2393,28 @@ async function renderMermaidDiagrams(container) {
 
     const diagramContainer = document.createElement("div");
     diagramContainer.className = "diagram-card";
+    const header = document.createElement("div");
+    header.className = "diagram-card-header";
+    const badge = document.createElement("span");
+    badge.className = "diagram-badge";
+    const hint = document.createElement("span");
+    hint.className = "diagram-hint";
+    header.append(badge, hint);
+
+    const viewport = document.createElement("div");
+    viewport.className = "diagram-viewport";
+    diagramContainer.append(header, viewport);
+
+    const initialDiagramType = detectMermaidDiagramType(source);
+    diagramContainer.dataset.diagramType = initialDiagramType;
+    diagramContainer.dataset.diagramDensity = detectMermaidDiagramDensity(source);
+    badge.textContent = getMermaidDiagramLabel(initialDiagramType);
+    hint.textContent = getMermaidDiagramHint(initialDiagramType, diagramContainer.dataset.diagramDensity);
     pre.replaceWith(diagramContainer);
 
     const candidates = buildMermaidCandidates(source);
     let rendered = false;
+    let renderedCandidate = source;
     let lastError = null;
 
     try {
@@ -2203,7 +2424,18 @@ async function renderMermaidDiagrams(container) {
             `mermaid_${Date.now()}_${++mermaidSequence}`,
             candidate,
           );
-          diagramContainer.innerHTML = renderResult.svg;
+          renderedCandidate = candidate;
+          viewport.innerHTML = renderResult.svg;
+          if (typeof renderResult.bindFunctions === "function") {
+            renderResult.bindFunctions(viewport);
+          }
+          finalizeRenderedMermaid(viewport);
+          const finalDiagramType = detectMermaidDiagramType(renderedCandidate);
+          diagramContainer.dataset.diagramType = finalDiagramType;
+          diagramContainer.dataset.diagramDensity = detectMermaidDiagramDensity(renderedCandidate);
+          diagramContainer.dataset.mermaidSource = encodeMermaidSource(renderedCandidate);
+          badge.textContent = getMermaidDiagramLabel(finalDiagramType);
+          hint.textContent = getMermaidDiagramHint(finalDiagramType, diagramContainer.dataset.diagramDensity);
           rendered = true;
           break;
         } catch (error) {
@@ -2233,6 +2465,87 @@ async function renderMermaidDiagrams(container) {
   }
 }
 
+function isLikelyMermaidSource(source) {
+  const text = String(source || "").trim();
+  if (!text) return false;
+
+  const lines = text.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  if (!lines.length) return false;
+
+  if (/^(flowchart|graph|mindmap|sequencediagram|classdiagram|erdiagram|gantt|journey|statediagram(?:-v2)?|pie|timeline|xychart(?:-beta)?)\b/i.test(lines[0])) {
+    return true;
+  }
+
+  const edgeLineCount = lines.filter((line) =>
+    /^[A-Za-z0-9_\-]+\s*(-->|==>|-.->|---|~~>|--o|o--|--x|x--|<--|<==|<-.->)\s*.+$/.test(line),
+  ).length;
+  const nodeLineCount = lines.filter((line) =>
+    /^[A-Za-z0-9_\-]+\s*[\[(].*[\])]\s*$/.test(line),
+  ).length;
+
+  return edgeLineCount >= 2 || (edgeLineCount >= 1 && nodeLineCount >= 1);
+}
+
+function detectMermaidDiagramType(source) {
+  const lines = String(source || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  const firstLine = String(lines[0] || "").toLowerCase();
+
+  if (firstLine.startsWith("mindmap")) return "mindmap";
+  if (firstLine.startsWith("timeline")) return "timeline";
+  if (firstLine.startsWith("pie")) return "pie";
+  if (firstLine.startsWith("journey")) return "journey";
+  if (firstLine.startsWith("flowchart") || firstLine.startsWith("graph")) return "flowchart";
+  if (firstLine.startsWith("sequencediagram")) return "sequence";
+  return "diagram";
+}
+
+function detectMermaidDiagramDensity(source) {
+  const normalized = String(source || "");
+  const nodeCount = (normalized.match(/\[[^\]]+\]|\([^)]+\)|\{[^}]+\}/g) || []).length;
+  const edgeCount = (normalized.match(/-->|==>|-.->|---|~~>|--o|o--|--x|x--/g) || []).length;
+  const lineCount = normalized.split(/\r?\n/).filter((line) => line.trim()).length;
+  const score = nodeCount + edgeCount + lineCount;
+
+  if (score >= 22) return "dense";
+  if (score >= 10) return "balanced";
+  return "compact";
+}
+
+function getMermaidDiagramLabel(type) {
+  switch (String(type || "")) {
+    case "mindmap":
+      return "Mindmap";
+    case "timeline":
+      return "Timeline";
+    case "pie":
+      return "Biểu đồ";
+    case "journey":
+      return "Hành trình";
+    case "flowchart":
+      return "Sơ đồ luồng";
+    case "sequence":
+      return "Tuần tự";
+    default:
+      return "Sơ đồ";
+  }
+}
+
+function getMermaidDiagramHint(type, density) {
+  if (density === "dense") {
+    return "Kéo ngang để đọc đầy đủ nhãn và chi tiết.";
+  }
+
+  if (type === "mindmap") {
+    return "Đọc từ trung tâm ra các nhánh chính.";
+  }
+
+  if (type === "timeline") {
+    return "Đọc từ trái sang phải theo các mốc.";
+  }
+
+  return "Nhãn được tối ưu để đọc rõ trên cả dark/light mode.";
+}
+
 function formatMermaidError(error) {
   if (!error) return "Không có chi tiết parser.";
   if (typeof error === "string") return error;
@@ -2259,22 +2572,172 @@ function buildMermaidCandidates(source) {
   const mindmapRepaired = repairMermaidMindmapLayout(edgeRepaired);
   const quotedLabels = quoteMermaidBracketLabels(mindmapRepaired);
   const repaired = repairDanglingMermaidEdges(quotedLabels);
-  const fallbackAsciiLabels = deaccentMermaidBracketLabels(repaired);
+  const beautified = beautifyMermaidSource(repaired);
+  const declarationEnsured = ensureMermaidDeclaration(beautified);
+  const fallbackAsciiLabels = deaccentMermaidBracketLabels(declarationEnsured);
 
   const candidates = [
+    declarationEnsured,
+    beautified,
+    repaired,
+    fallbackAsciiLabels,
     original,
     normalized,
     aliasRepaired,
     edgeRepaired,
     mindmapRepaired,
     quotedLabels,
-    repaired,
-    fallbackAsciiLabels,
   ]
     .map((value) => String(value || "").trim())
     .filter(Boolean);
 
   return Array.from(new Set(candidates));
+}
+
+function ensureMermaidDeclaration(source) {
+  const text = String(source || "").trim();
+  if (!text) return "";
+
+  const lines = text.split("\n");
+  const firstNonEmptyIndex = lines.findIndex((line) => line.trim());
+  if (firstNonEmptyIndex < 0) return "";
+
+  const firstLine = lines[firstNonEmptyIndex].trim();
+  if (/^(flowchart|graph|mindmap|sequencediagram|classdiagram|erdiagram|gantt|journey|statediagram(?:-v2)?|pie|timeline|xychart(?:-beta)?)\b/i.test(firstLine)) {
+    return text;
+  }
+
+  const nonEmptyLines = lines.map((line) => line.trim()).filter(Boolean);
+  const hasEdgeOrNode = nonEmptyLines.some((line) =>
+    /^[A-Za-z0-9_\-]+\s*(?:-->|==>|-.->|---|~~>|--o|o--|--x|x--|<--|<==|<-.->)\s*.*$/.test(line)
+    || /^[A-Za-z0-9_\-]+\s*[\[(].*[\])]\s*$/.test(line),
+  );
+
+  if (!hasEdgeOrNode) {
+    return text;
+  }
+
+  return ["flowchart LR", ...nonEmptyLines].join("\n").trim();
+}
+
+function beautifyMermaidSource(source) {
+  const text = String(source || "").trim();
+  if (!text) return "";
+
+  const diagramType = detectMermaidDiagramType(text);
+  if (diagramType !== "flowchart") {
+    return text;
+  }
+
+  return wrapFlowchartNodeLabels(text);
+}
+
+function rebalanceFlowchartDirection(source) {
+  const text = String(source || "").trim();
+  const lines = text.split("\n");
+  const firstNonEmptyIndex = lines.findIndex((line) => line.trim());
+  if (firstNonEmptyIndex < 0 || !/^\s*(flowchart|graph)\b/i.test(lines[firstNonEmptyIndex])) {
+    return text;
+  }
+
+  const directionMatch = lines[firstNonEmptyIndex].match(/\b(TB|TD|BT|LR|RL)\b/i);
+  const direction = String(directionMatch?.[1] || "TD").toUpperCase();
+  if (direction !== "LR" && direction !== "RL") {
+    return text;
+  }
+
+  if (!shouldPreferVerticalFlowchart(text)) {
+    return text;
+  }
+
+  lines[firstNonEmptyIndex] = "flowchart TB";
+  return lines.join("\n").trim();
+}
+
+function shouldPreferVerticalFlowchart(source) {
+  const edgePattern = /^\s*([A-Za-z][\w-]*)[^\n]*?(-->|==>|-.->|---|~~>|--o|o--|--x|x--)\s*(?:\|[^|\n]+\|\s*)?([A-Za-z][\w-]*)/gm;
+  const incoming = new Map();
+  const outgoing = new Map();
+  const nodes = new Set();
+  let edgeCount = 0;
+
+  for (const match of String(source || "").matchAll(edgePattern)) {
+    const fromId = String(match[1] || "").trim();
+    const toId = String(match[3] || "").trim();
+    if (!fromId || !toId) continue;
+
+    edgeCount += 1;
+    nodes.add(fromId);
+    nodes.add(toId);
+    outgoing.set(fromId, (outgoing.get(fromId) || 0) + 1);
+    incoming.set(toId, (incoming.get(toId) || 0) + 1);
+  }
+
+  if (nodes.size < 5 || edgeCount < 4) {
+    return false;
+  }
+
+  const maxOutgoing = Math.max(0, ...outgoing.values());
+  const maxIncoming = Math.max(0, ...incoming.values());
+  return maxOutgoing <= 1 && maxIncoming <= 1 && edgeCount >= nodes.size - 2;
+}
+
+function wrapFlowchartNodeLabels(source, width = 16) {
+  const wrapLabel = (content) => {
+    const label = String(content || "").trim();
+    if (!label || label.includes("<br/>") || label.length <= width || !/\s/.test(label)) {
+      return null;
+    }
+
+    const wrapped = wrapMermaidLabelText(label, width);
+    return wrapped && wrapped !== label ? `["${wrapped.replace(/"/g, '\\"')}"]` : null;
+  };
+
+  return String(source || "")
+    .replace(/\["([^"\n]{18,})"\]/g, (full, label) => wrapLabel(label) || full)
+    .replace(/\[([^"\]\n]{18,})\]/g, (full, label) => wrapLabel(label) || full)
+    .trim();
+}
+
+function wrapMermaidLabelText(value, width = 16) {
+  const text = String(value || "").trim();
+  if (!text || text.length <= width) return text;
+
+  const words = text.split(/\s+/).filter(Boolean);
+  if (words.length < 2) return text;
+
+  const lines = [];
+  let currentLine = "";
+  for (const word of words) {
+    const candidate = currentLine ? `${currentLine} ${word}` : word;
+    if (candidate.length <= width) {
+      currentLine = candidate;
+      continue;
+    }
+
+    if (currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+      continue;
+    }
+
+    lines.push(word);
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines.length > 1 ? lines.join("<br/>") : text;
+}
+
+function finalizeRenderedMermaid(viewport) {
+  const svg = viewport.querySelector("svg");
+  if (!svg) return;
+
+  svg.classList.add("diagram-svg");
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  svg.removeAttribute("height");
 }
 
 function normalizeMermaidSource(source) {
@@ -3744,6 +4207,9 @@ function setTheme(theme) {
     sun.style.display = "";
     moon.style.display = "none";
   }
+
+  // Re-render existing Mermaid SVG blocks so colors always match the selected theme.
+  void rerenderExistingMermaidDiagrams();
 }
 
 function applyStoredQuickActionsState() {

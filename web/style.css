@@ -1125,11 +1125,22 @@ a:hover { text-decoration: underline; }
 
 .bubble-content {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+  line-height: 1.7;
 }
 
 .bubble-content > * {
   margin: 0;
+}
+
+.bubble-content p,
+.bubble-content li,
+.bubble-content th,
+.bubble-content td,
+.bubble-content blockquote {
+  line-height: 1.72;
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
 .bubble-content h1,
@@ -1204,17 +1215,19 @@ a:hover { text-decoration: underline; }
 }
 
 .table-scroll {
-  overflow-x: auto;
+  overflow: auto;
   border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fff;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(242,251,252,0.95));
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
 }
 
 .bubble-content table {
   width: 100%;
-  min-width: 420px;
-  border-collapse: collapse;
-  font-size: 13px;
+  min-width: 560px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
 }
 
 .bubble-content thead th {
@@ -1227,8 +1240,12 @@ a:hover { text-decoration: underline; }
 .bubble-content td {
   text-align: left;
   vertical-align: top;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--line);
+}
+
+.bubble-content tbody tr:nth-child(even) td {
+  background: rgba(214, 241, 243, 0.28);
 }
 
 .bubble-content tbody tr:last-child td {
@@ -1236,17 +1253,226 @@ a:hover { text-decoration: underline; }
 }
 
 .diagram-card {
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: #fff;
-  padding: 10px;
-  overflow-x: auto;
+  position: relative;
+  border: 1px solid rgba(14, 165, 233, 0.14);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at top left, rgba(14, 116, 144, 0.10), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(13, 148, 136, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(248,252,255,0.98), rgba(235,244,251,0.98));
+  padding: 14px;
+  display: grid;
+  gap: 14px;
+  overflow: hidden;
+  box-shadow: 0 18px 32px rgba(15, 23, 42, 0.11);
+}
+
+.diagram-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.45), transparent 58%);
+  pointer-events: none;
+}
+
+.diagram-card-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.diagram-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(14, 165, 233, 0.14);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(45, 212, 191, 0.18));
+  color: var(--teal-dark);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+.diagram-hint {
+  font-size: 13px;
+  color: #4c6978;
+  max-width: 42ch;
+}
+
+.diagram-viewport {
+  position: relative;
+  z-index: 1;
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(100, 116, 139, 0.26);
+  background:
+    radial-gradient(circle at top, rgba(210, 226, 238, 0.54), rgba(235, 244, 251, 0.58) 54%, rgba(216, 235, 228, 0.52)),
+    linear-gradient(180deg, rgba(244,249,253,0.98), rgba(228,239,248,0.98));
+  padding: 22px 22px 24px;
+}
+
+.diagram-viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(100, 116, 139, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 116, 139, 0.13) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: linear-gradient(180deg, rgba(255,255,255,0.70), transparent 100%);
+}
+
+.diagram-viewport > * {
+  position: relative;
+  z-index: 1;
+}
+
+.diagram-card[data-diagram-type="flowchart"] .diagram-viewport {
+  background:
+    radial-gradient(circle at top, rgba(14, 116, 144, 0.16), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(13, 148, 136, 0.14), transparent 44%),
+    linear-gradient(180deg, rgba(239,247,252,0.98), rgba(226,238,248,0.98));
+}
+
+.diagram-card[data-diagram-type="mindmap"] .diagram-viewport {
+  background:
+    radial-gradient(circle at top left, rgba(22, 163, 74, 0.15), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(37, 99, 235, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(241,249,246,0.98), rgba(229,242,236,0.98));
+}
+
+.diagram-card[data-diagram-type="timeline"] .diagram-viewport {
+  background:
+    radial-gradient(circle at right top, rgba(234, 88, 12, 0.14), transparent 34%),
+    radial-gradient(circle at left bottom, rgba(14, 165, 233, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(249,247,242,0.98), rgba(241,234,224,0.98));
+}
+
+.diagram-card[data-diagram-type="pie"] .diagram-viewport {
+  background:
+    radial-gradient(circle at center, rgba(202, 138, 4, 0.16), transparent 34%),
+    radial-gradient(circle at bottom, rgba(13, 148, 136, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(252,249,240,0.98), rgba(245,238,216,0.98));
 }
 
 .diagram-card svg {
-  width: 100%;
+  width: max(100%, 760px);
+  max-width: none;
   height: auto;
   display: block;
+  margin: 0 auto;
+  filter: drop-shadow(0 14px 24px rgba(15, 23, 42, 0.08));
+}
+
+.diagram-card[data-diagram-density="compact"] svg {
+  width: max(100%, 560px);
+}
+
+.diagram-card[data-diagram-density="dense"] svg,
+.diagram-card[data-diagram-type="timeline"] svg {
+  width: max(100%, 980px);
+}
+
+.diagram-card[data-diagram-type="flowchart"] svg {
+  width: max(100%, 920px);
+}
+
+.diagram-card[data-diagram-type="mindmap"] svg {
+  width: max(100%, 860px);
+}
+
+.diagram-card[data-diagram-type="pie"] svg {
+  width: max(100%, 540px);
+}
+
+.diagram-card svg .nodeLabel,
+.diagram-card svg text,
+.diagram-card svg tspan {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.diagram-card svg .edgeLabel text {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.diagram-card[data-diagram-type="flowchart"] svg .node rect,
+.diagram-card[data-diagram-type="flowchart"] svg .node circle,
+.diagram-card[data-diagram-type="flowchart"] svg .node ellipse,
+.diagram-card[data-diagram-type="flowchart"] svg .node polygon,
+.diagram-card[data-diagram-type="flowchart"] svg .node path {
+  stroke-width: 1.8px !important;
+}
+
+.diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) rect,
+.diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) circle,
+.diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) ellipse,
+.diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) polygon,
+.diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) path {
+  fill: #0f766e !important;
+  stroke: #115e59 !important;
+}
+
+.diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) .nodeLabel,
+.diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) text {
+  fill: #f8fafc !important;
+}
+
+.diagram-card[data-diagram-type="flowchart"] svg .edgePath path,
+.diagram-card[data-diagram-type="flowchart"] svg .flowchart-link {
+  stroke: #0f766e !important;
+  stroke-width: 2.3px !important;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.88;
+}
+
+.diagram-card[data-diagram-type="flowchart"] svg .arrowheadPath {
+  fill: #0f766e !important;
+  stroke: #0f766e !important;
+}
+
+.diagram-card[data-diagram-type="flowchart"] svg .edgeLabel rect {
+  fill: rgba(236, 253, 245, 0.92) !important;
+}
+
+html:not([data-theme="dark"]) .diagram-card svg .nodeLabel,
+html:not([data-theme="dark"]) .diagram-card svg .label text,
+html:not([data-theme="dark"]) .diagram-card svg .edgeLabel text,
+html:not([data-theme="dark"]) .diagram-card svg .cluster-label text,
+html:not([data-theme="dark"]) .diagram-card svg .legend text,
+html:not([data-theme="dark"]) .diagram-card svg .sectionTitle text,
+html:not([data-theme="dark"]) .diagram-card svg .taskText,
+html:not([data-theme="dark"]) .diagram-card svg .taskTextOutsideRight,
+html:not([data-theme="dark"]) .diagram-card svg .taskTextOutsideLeft {
+  fill: #102331 !important;
+}
+
+html:not([data-theme="dark"]) .diagram-card[data-diagram-type="flowchart"] svg .edgePath path,
+html:not([data-theme="dark"]) .diagram-card[data-diagram-type="flowchart"] svg .flowchart-link {
+  stroke: #0f6174 !important;
+  stroke-width: 2.6px !important;
+  opacity: 1;
+}
+
+html:not([data-theme="dark"]) .diagram-card[data-diagram-type="flowchart"] svg .arrowheadPath {
+  fill: #0f6174 !important;
+  stroke: #0f6174 !important;
+}
+
+html:not([data-theme="dark"]) .diagram-card[data-diagram-type="flowchart"] svg .edgeLabel rect {
+  fill: rgba(255, 255, 255, 0.98) !important;
+  stroke: #9fb6c9 !important;
+  stroke-width: 1px !important;
 }
 
 .diagram-error-title {
@@ -1567,6 +1793,7 @@ a:hover { text-decoration: underline; }
 [data-theme="dark"] .table-scroll {
   background: #15262c;
   border-color: var(--line);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.22);
 }
 
 [data-theme="dark"] .bubble-content thead th {
@@ -1580,9 +1807,101 @@ a:hover { text-decoration: underline; }
   color: #d0e4e8;
 }
 
+[data-theme="dark"] .bubble-content tbody tr:nth-child(even) td {
+  background: rgba(23, 50, 58, 0.4);
+}
+
 [data-theme="dark"] .diagram-card {
-  background: #122027;
-  border-color: var(--line);
+  background:
+    radial-gradient(circle at top left, rgba(45, 212, 191, 0.10), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.12), transparent 42%),
+    linear-gradient(180deg, #122027, #0d171d);
+  border-color: #28434c;
+  box-shadow: 0 20px 40px rgba(2, 8, 23, 0.35);
+}
+
+[data-theme="dark"] .diagram-card::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.06), transparent 58%);
+}
+
+[data-theme="dark"] .diagram-badge {
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.16), rgba(56, 189, 248, 0.14));
+  color: var(--teal-light);
+  border-color: rgba(94, 234, 212, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+[data-theme="dark"] .diagram-hint {
+  color: #9ac8cf;
+}
+
+[data-theme="dark"] .diagram-viewport {
+  border-color: #28434c;
+  background:
+    radial-gradient(circle at top, rgba(20, 78, 94, 0.28), transparent 42%),
+    radial-gradient(circle at bottom right, rgba(13, 148, 136, 0.18), transparent 44%),
+    linear-gradient(180deg, rgba(12, 24, 29, 0.96), rgba(8, 17, 23, 0.94));
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] .diagram-viewport {
+  background:
+    radial-gradient(circle at top, rgba(23, 54, 74, 0.32), transparent 42%),
+    radial-gradient(circle at bottom right, rgba(13, 108, 121, 0.22), transparent 46%),
+    linear-gradient(180deg, rgba(10, 20, 28, 0.98), rgba(7, 14, 20, 0.96));
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="mindmap"] .diagram-viewport {
+  background:
+    radial-gradient(circle at top left, rgba(16, 85, 78, 0.30), transparent 42%),
+    radial-gradient(circle at bottom right, rgba(22, 87, 146, 0.24), transparent 46%),
+    linear-gradient(180deg, rgba(10, 22, 27, 0.98), rgba(7, 14, 20, 0.96));
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="timeline"] .diagram-viewport {
+  background:
+    radial-gradient(circle at right top, rgba(153, 94, 23, 0.24), transparent 42%),
+    radial-gradient(circle at left bottom, rgba(21, 84, 131, 0.24), transparent 46%),
+    linear-gradient(180deg, rgba(14, 23, 29, 0.98), rgba(8, 14, 19, 0.96));
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="pie"] .diagram-viewport {
+  background:
+    radial-gradient(circle at center, rgba(138, 103, 26, 0.26), transparent 40%),
+    radial-gradient(circle at bottom, rgba(15, 108, 91, 0.24), transparent 46%),
+    linear-gradient(180deg, rgba(13, 22, 26, 0.98), rgba(8, 14, 19, 0.96));
+}
+
+[data-theme="dark"] .diagram-viewport::before {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.10) 1px, transparent 1px);
+}
+
+[data-theme="dark"] .diagram-card svg {
+  filter: drop-shadow(0 16px 26px rgba(2, 8, 23, 0.42));
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg .edgePath path,
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg .flowchart-link {
+  stroke: #5eead4 !important;
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg .arrowheadPath {
+  fill: #5eead4 !important;
+  stroke: #5eead4 !important;
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) rect,
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) circle,
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) ellipse,
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) polygon,
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg g.node:nth-of-type(1) path {
+  fill: #0f766e !important;
+  stroke: #99f6e4 !important;
+}
+
+[data-theme="dark"] .diagram-card[data-diagram-type="flowchart"] svg .edgeLabel rect {
+  fill: rgba(15, 42, 52, 0.92) !important;
 }
 
 /* Dark panels & cards */

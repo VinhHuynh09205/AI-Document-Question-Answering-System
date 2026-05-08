@@ -19,7 +19,11 @@ class JsonDocumentLoader(IDocumentLoader):
         return [
             Document(
                 page_content=content,
-                metadata={"source": str(file_path), "extension": ".json"},
+                metadata={
+                    "source": str(file_path),
+                    "extension": ".json",
+                    "content_type": "json_hierarchy",
+                },
             )
         ]
 

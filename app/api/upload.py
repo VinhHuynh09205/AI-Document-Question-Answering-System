@@ -11,13 +11,13 @@ from app.core.dependencies import (
     get_ingestion_service,
     get_rate_limiter,
     get_runtime_metrics,
-    get_vector_store_admin_service,
+    get_vector_store_repository,
 )
 from app.models.schemas import UploadResponse
 from app.services.interfaces.document_ingestion_service import IDocumentIngestionService
 from app.services.interfaces.rate_limiter import IRateLimiter
 from app.services.interfaces.runtime_metrics import IRuntimeMetrics
-from app.services.interfaces.vector_store_admin_service import IVectorStoreAdminService
+from app.repositories.interfaces.vector_store_repository import IVectorStoreRepository
 
 router = APIRouter(tags=["documents"])
 logger = logging.getLogger(__name__)
@@ -44,12 +44,22 @@ def _cleanup_saved_files(paths: list[Path]) -> None:
             logger.warning("upload_cleanup_failed path=%s", path)
 
 
+def _clear_legacy_documents_only(vector_store_repository: IVectorStoreRepository) -> int:
+    """Clear only legacy /upload chunks that have no workspace owner/chat metadata."""
+    return vector_store_repository.delete_documents_by_metadata(
+        {
+            "owner": "None",
+            "chat_id": "None",
+        }
+    )
+
+
 @router.post("/upload", response_model=UploadResponse)
 async def upload_documents(
     request: Request,
     files: list[UploadFile] = File(...),
     ingestion_service: IDocumentIngestionService = Depends(get_ingestion_service),
-    vector_store_admin_service: IVectorStoreAdminService = Depends(get_vector_store_admin_service),
+    vector_store_repository: IVectorStoreRepository = Depends(get_vector_store_repository),
     rate_limiter: IRateLimiter = Depends(get_rate_limiter),
     runtime_metrics: IRuntimeMetrics = Depends(get_runtime_metrics),
     settings: Settings = Depends(get_app_settings),
@@ -68,11 +78,12 @@ async def upload_documents(
         raise HTTPException(status_code=400, detail="No files uploaded")
 
     if settings.replace_existing_documents_on_upload:
-        clear_result = vector_store_admin_service.clear()
+        removed_chunks = _clear_legacy_documents_only(vector_store_repository)
+        if removed_chunks > 0:
+            vector_store_repository.save()
         logger.info(
-            "upload_replace_mode_cleared_previous_index cleared=%s document_count=%s",
-            clear_result.get("cleared"),
-            clear_result.get("document_count"),
+            "upload_replace_mode_cleared_legacy_docs removed_chunks=%s",
+            removed_chunks,
         )
 
     allowed_extensions = settings.get_supported_upload_extensions()

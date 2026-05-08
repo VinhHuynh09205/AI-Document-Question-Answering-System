@@ -21,17 +21,34 @@ class XmlDocumentLoader(IDocumentLoader):
         return [
             Document(
                 page_content=content,
-                metadata={"source": str(file_path), "extension": ".xml"},
+                metadata={
+                    "source": str(file_path),
+                    "extension": ".xml",
+                    "content_type": "xml_hierarchy",
+                },
             )
         ]
 
-    def _extract_text(self, element: ET.Element, lines: list[str], depth: int = 0) -> None:
+    def _extract_text(
+        self,
+        element: ET.Element,
+        lines: list[str],
+        depth: int = 0,
+        path: str = "",
+    ) -> None:
         tag = element.tag.split("}")[-1] if "}" in element.tag else element.tag
+        current_path = f"{path}.{tag}" if path else tag
+
+        for attr_name, attr_value in element.attrib.items():
+            lines.append(f"{current_path}@{attr_name}: {attr_value}")
+
         text = (element.text or "").strip()
         if text:
-            lines.append(f"{tag}: {text}")
+            lines.append(f"{current_path}: {text}")
+
         for child in element:
-            self._extract_text(child, lines, depth + 1)
+            self._extract_text(child, lines, depth + 1, current_path)
+
         tail = (element.tail or "").strip()
         if tail:
-            lines.append(tail)
+            lines.append(f"{current_path}#tail: {tail}")

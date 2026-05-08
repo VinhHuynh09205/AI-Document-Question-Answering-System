@@ -5,6 +5,7 @@ from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 
 from app.repositories.faiss_vector_store_repository import FaissVectorStoreRepository
+from app.services.runtime_metrics import RuntimeMetrics
 
 
 class CountingEmbeddings(Embeddings):
@@ -71,3 +72,49 @@ def test_delete_documents_by_metadata_reuses_existing_vectors() -> None:
         )
         assert len(remaining_documents) == 1
         assert remaining_documents[0].metadata["source"] == "doc-b.txt"
+
+
+def test_keyword_search_and_embedding_cache_metrics_are_recorded() -> None:
+    embeddings = CountingEmbeddings()
+    metrics = RuntimeMetrics()
+
+    with TemporaryDirectory() as tmp_dir:
+        repository = FaissVectorStoreRepository(
+            index_dir=Path(tmp_dir),
+            embeddings=embeddings,
+            runtime_metrics=metrics,
+            embedding_cache_enabled=True,
+        )
+
+        repository.add_documents(
+            [
+                Document(
+                    page_content="alpha contract payment schedule",
+                    metadata={"source": "doc-a.txt", "owner": "user-a"},
+                ),
+                Document(
+                    page_content="beta delivery delay penalty clause",
+                    metadata={"source": "doc-b.txt", "owner": "user-a"},
+                ),
+            ]
+        )
+        first_call_count = embeddings.embed_documents_calls
+
+        repository.add_documents(
+            [
+                Document(
+                    page_content="alpha contract payment schedule",
+                    metadata={"source": "doc-a-duplicate.txt", "owner": "user-a"},
+                )
+            ]
+        )
+
+        assert embeddings.embed_documents_calls == first_call_count
+
+        keyword_results = repository.keyword_search("payment contract", k=3)
+        assert keyword_results
+        assert float(keyword_results[0].metadata.get("keyword_score", 0.0)) > 0
+
+        snapshot = metrics.snapshot()
+        assert snapshot["counters"].get("cache_hits", 0) >= 1
+        assert snapshot["counters"].get("cache_misses", 0) >= 2

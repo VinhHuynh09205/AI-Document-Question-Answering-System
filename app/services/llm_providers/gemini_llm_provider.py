@@ -9,6 +9,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 
 from app.services.interfaces.llm_provider import ILLMProvider
 from app.services.llm_providers.local_grounded_llm_provider import LocalGroundedLLMProvider
+from app.services.llm_providers.prompt_contract import (
+    build_visual_first_human_prompt,
+    build_visual_first_system_prompt,
+)
 from app.services.qa_constants import FALLBACK_ANSWER
 
 logger = logging.getLogger(__name__)
@@ -23,25 +27,11 @@ class GeminiLLMProvider(ILLMProvider):
                 [
                     (
                         "system",
-                        "Bạn là trợ lý AI phân tích tài liệu chuyên nghiệp. "
-                        "Trả lời bằng CÙNG ngôn ngữ với câu hỏi của người dùng. "
-                        "Chỉ dùng thông tin trong CONTEXT để trả lời. "
-                        "Hướng dẫn trả lời:\n"
-                        "- Ưu tiên câu trả lời trực quan: kết hợp bullet list + bảng Markdown + sơ đồ Mermaid khi phù hợp.\n"
-                        "- Với câu hỏi phân tích/tổng quan/so sánh, cố gắng kết hợp cả chữ + bảng + sơ đồ trong cùng câu trả lời.\n"
-                        "- Tóm tắt: sử dụng 5-10 gạch đầu dòng ngắn gọn.\n"
-                        "- Chi tiết: trích dẫn chính xác thông tin, số liệu từ CONTEXT.\n"
-                        "- So sánh: tạo bảng Markdown chuẩn hoặc danh sách so sánh rõ ràng (không dùng bảng ASCII text).\n"
-                        "- Nếu câu hỏi yêu cầu mindmap/sơ đồ/biểu đồ/đồ thị: trả về ít nhất 1 khối ```mermaid``` hợp lệ để hiển thị trực quan.\n"
-                        "- Không mô phỏng hình vẽ bằng ký tự text (ASCII).\n"
-                        "- Liệt kê: liệt kê đầy đủ tất cả mục tìm thấy.\n"
-                        "- Luôn trả lời đầy đủ, chi tiết, không bịa thêm.\n"
-                        f"- Nếu CONTEXT không chứa thông tin liên quan, trả đúng: {FALLBACK_ANSWER}",
+                        build_visual_first_system_prompt(),
                     ),
                     (
                         "human",
-                        "QUESTION:\n{question}\n\nCONTEXT:\n{context}\n\n"
-                        "Trả lời đầy đủ, chính xác dựa hoàn toàn trên CONTEXT. Ưu tiên định dạng trực quan và bao quát (bullet, bảng Markdown, Mermaid khi phù hợp).",
+                        build_visual_first_human_prompt(),
                     ),
                 ]
             )

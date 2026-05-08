@@ -11,7 +11,14 @@ WORKDIR /app
 
 RUN apt-get update \
     && apt-get upgrade -y \
-    && apt-get install -y --no-install-recommends antiword ca-certificates \
+    && apt-get install -y --no-install-recommends \
+        antiword \
+        ca-certificates \
+        libgl1 \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt ./

@@ -10,6 +10,12 @@ _SUMMARY_PATTERNS = re.compile(
     r"tóm tắt|tổng hợp|summarize|summary|overview|tổng quan|nội dung chính|main content|toàn bộ",
     re.IGNORECASE,
 )
+_UNSUPPORTED_TRANSFORM_PATTERNS = re.compile(
+    r"dịch|dich|translate|quiz|trắc\s*nghiệm|trac\s*nghiem|multiple\s*choice|"
+    r"slide|presentation|thuyết\s*trình|thuyet\s*trinh|rút\s*gọn|rut\s*gon|shorten|"
+    r"viết\s*lại|viet\s*lai|học\s*thuật|hoc\s*thuat|academic\s*style",
+    re.IGNORECASE,
+)
 
 
 class LocalGroundedLLMProvider(ILLMProvider):
@@ -18,6 +24,9 @@ class LocalGroundedLLMProvider(ILLMProvider):
 
     def generate_grounded_answer(self, question: str, context_docs: Sequence[Document]) -> str:
         if not context_docs:
+            return FALLBACK_ANSWER
+
+        if _UNSUPPORTED_TRANSFORM_PATTERNS.search(question or ""):
             return FALLBACK_ANSWER
 
         if _SUMMARY_PATTERNS.search(question):
@@ -42,9 +51,14 @@ class LocalGroundedLLMProvider(ILLMProvider):
         return answer[: self._max_answer_chars]
 
     def _build_full_summary(self, context_docs: Sequence[Document]) -> str:
+        segments = self._collect_readable_segments(context_docs, limit=8)
+        if segments:
+            summary = "\n".join(f"- {segment}" for segment in segments)
+            return summary[: self._max_answer_chars]
+
         parts: list[str] = []
         for doc in context_docs:
-            text = doc.page_content.strip()
+            text = self._normalize_segment(doc.page_content)
             if text:
                 parts.append(text)
 
@@ -76,10 +90,59 @@ class LocalGroundedLLMProvider(ILLMProvider):
         ranked.sort(key=lambda item: item[0], reverse=True)
         return ranked
 
-    @staticmethod
-    def _split_sentences(text: str) -> list[str]:
+    @classmethod
+    def _collect_readable_segments(cls, context_docs: Sequence[Document], limit: int = 8) -> list[str]:
+        segments: list[str] = []
+        seen: set[str] = set()
+
+        for doc in context_docs:
+            for segment in cls._split_sentences(doc.page_content):
+                normalized = cls._normalize_segment(segment)
+                if not normalized:
+                    continue
+
+                key = normalized.lower()
+                if key in seen:
+                    continue
+
+                seen.add(key)
+                segments.append(normalized)
+                if len(segments) >= limit:
+                    return segments
+
+        return segments
+
+    @classmethod
+    def _split_sentences(cls, text: str) -> list[str]:
         raw_parts = re.split(r"(?<=[.!?])\s+|\n+", text)
-        return [part.strip() for part in raw_parts if part.strip()]
+        sentences: list[str] = []
+
+        for part in raw_parts:
+            normalized = cls._normalize_segment(part)
+            if normalized:
+                sentences.append(normalized)
+
+        return sentences
+
+    @staticmethod
+    def _normalize_segment(text: str) -> str:
+        normalized = re.sub(r"\s+", " ", str(text or "").replace("\u00A0", " ")).strip(" -•\t")
+        if not normalized:
+            return ""
+        if LocalGroundedLLMProvider._looks_like_compacted_text(normalized):
+            return ""
+        return normalized
+
+    @staticmethod
+    def _looks_like_compacted_text(text: str) -> bool:
+        alphabetic_chars = re.findall(r"[A-Za-zÀ-ỹ]", text)
+        if len(alphabetic_chars) < 18:
+            return False
+        if len(text.split()) >= 3:
+            return False
+
+        punctuation_count = len(re.findall(r"[:;,.()\-/]", text))
+        return punctuation_count == 0
 
     @staticmethod
     def _tokenize(text: str) -> set[str]:

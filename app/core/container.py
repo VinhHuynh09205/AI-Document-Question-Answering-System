@@ -13,12 +13,14 @@ from app.services.document_loaders.doc_document_loader import DocDocumentLoader
 from app.services.document_loaders.docx_document_loader import DocxDocumentLoader
 from app.services.document_loaders.excel_document_loader import ExcelDocumentLoader
 from app.services.document_loaders.html_document_loader import HtmlDocumentLoader
+from app.services.document_loaders.image_document_loader import ImageDocumentLoader
 from app.services.document_loaders.json_document_loader import JsonDocumentLoader
 from app.services.document_loaders.markdown_document_loader import MarkdownDocumentLoader
 from app.services.document_loaders.pdf_document_loader import PdfDocumentLoader
 from app.services.document_loaders.pptx_document_loader import PptxDocumentLoader
 from app.services.document_loaders.text_document_loader import TextDocumentLoader
 from app.services.document_loaders.xml_document_loader import XmlDocumentLoader
+from app.services.image_understanding_service import ImageUnderstandingService
 from app.services.in_memory_rate_limiter import InMemoryRateLimiter
 from app.services.interfaces.document_ingestion_service import IDocumentIngestionService
 from app.services.interfaces.auth_service import IAuthService
@@ -61,25 +63,49 @@ def build_container(settings: Settings) -> AppContainer:
     ensure_directory(Path(settings.vector_backup_dir))
     ensure_directory(Path(settings.users_file_path).parent)
 
+    runtime_metrics = RuntimeMetrics()
     embeddings = build_embeddings(settings)
     vector_store_repository = FaissVectorStoreRepository(
         index_dir=Path(settings.vector_store_path),
         embeddings=embeddings,
         embedding_batch_size=settings.embedding_batch_size,
+        embedding_cache_enabled=settings.embedding_cache_enabled,
+        runtime_metrics=runtime_metrics,
     )
+    image_understanding_service = ImageUnderstandingService(settings=settings)
     loader_registry = DocumentLoaderRegistry(
         loaders=[
-            PdfDocumentLoader(),
+            PdfDocumentLoader(
+                image_understanding_service=image_understanding_service,
+                max_images_per_page=settings.pdf_max_images_per_page,
+                max_pages_with_image_analysis=settings.pdf_max_pages_with_image_analysis,
+                text_char_threshold_for_image_analysis=settings.pdf_image_analysis_text_char_threshold,
+                max_image_analysis_seconds=settings.pdf_image_analysis_max_seconds_per_document,
+            ),
             DocDocumentLoader(),
-            DocxDocumentLoader(),
+            DocxDocumentLoader(
+                image_understanding_service=image_understanding_service,
+                max_images_per_document=settings.docx_max_images_per_document,
+                text_char_threshold_for_image_analysis=settings.docx_image_analysis_text_char_threshold,
+                max_image_analysis_seconds=settings.docx_image_analysis_max_seconds_per_document,
+            ),
             ExcelDocumentLoader(),
-            PptxDocumentLoader(),
+            PptxDocumentLoader(
+                image_understanding_service=image_understanding_service,
+                max_images_per_slide=settings.pptx_max_images_per_slide,
+                max_images_per_document=settings.pptx_max_images_per_document,
+                text_char_threshold_for_image_analysis=settings.pptx_image_analysis_text_char_threshold,
+                max_image_analysis_seconds=settings.pptx_image_analysis_max_seconds_per_document,
+            ),
             HtmlDocumentLoader(),
             JsonDocumentLoader(),
             XmlDocumentLoader(),
             TextDocumentLoader(),
             MarkdownDocumentLoader(),
             CsvDocumentLoader(),
+            ImageDocumentLoader(
+                image_understanding_service=image_understanding_service,
+            ),
         ]
     )
     chunking_service = TextChunkingService(
@@ -91,6 +117,7 @@ def build_container(settings: Settings) -> AppContainer:
         chunking_service=chunking_service,
         vector_store_repository=vector_store_repository,
         max_file_workers=settings.ingestion_max_file_workers,
+        runtime_metrics=runtime_metrics,
     )
     llm_provider = build_llm_provider(settings)
     backup_llm_provider = LocalGroundedLLMProvider(max_answer_chars=settings.max_answer_chars)
@@ -103,12 +130,14 @@ def build_container(settings: Settings) -> AppContainer:
         min_relevant_chunks=settings.min_relevant_chunks,
         cache_ttl_seconds=settings.qa_cache_ttl_seconds,
         cache_max_size=settings.qa_cache_max_size,
+        runtime_metrics=runtime_metrics,
+        hybrid_retrieval_enabled=settings.hybrid_retrieval_enabled,
+        reranking_enabled=settings.reranking_enabled,
     )
     rate_limiter = InMemoryRateLimiter(
         limits=settings.get_rate_limit_config(),
         window_seconds=settings.rate_limit_window_seconds,
     )
-    runtime_metrics = RuntimeMetrics()
     vector_store_admin_service = VectorStoreAdminService(
         vector_store_repository=vector_store_repository,
         backup_root_dir=Path(settings.vector_backup_dir),

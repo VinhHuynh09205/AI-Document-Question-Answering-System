@@ -1,0 +1,250 @@
+{
+  "provider": "LocalSemanticEmbeddings",
+  "model": "all-MiniLM-L6-v2",
+  "device": "cpu",
+  "chunk_size": 1000,
+  "chunk_overlap": 150,
+  "embedding_batch_size": 64,
+  "cases": [
+    {
+      "name": "TXT/MD",
+      "target_seconds": 2.0,
+      "runs": 3,
+      "durations_seconds": [
+        1.992,
+        1.889,
+        1.917
+      ],
+      "avg_seconds": 1.932,
+      "min_seconds": 1.889,
+      "max_seconds": 1.992,
+      "avg_chunks_indexed": 96,
+      "status": "PASS",
+      "latest_metrics": {
+        "uptime_seconds": 1,
+        "total_requests": 0,
+        "status_counts": {},
+        "endpoint_counts": {},
+        "fallback_answers": 0,
+        "rate_limited_requests": 0,
+        "pipeline_timing": {
+          "embedding_generation_time_ms": {
+            "count": 3,
+            "total_ms": 3786.501,
+            "avg_ms": 1262.167,
+            "max_ms": 1898.815,
+            "last_ms": 1898.815
+          },
+          "ingestion_total_time_ms": {
+            "count": 1,
+            "total_ms": 1916.807,
+            "avg_ms": 1916.807,
+            "max_ms": 1916.807,
+            "last_ms": 1916.807
+          },
+          "chunking_time_ms": {
+            "count": 1,
+            "total_ms": 7.783,
+            "avg_ms": 7.783,
+            "max_ms": 7.783,
+            "last_ms": 7.783
+          },
+          "vector_index_time_ms": {
+            "count": 1,
+            "total_ms": 1903.432,
+            "avg_ms": 1903.432,
+            "max_ms": 1903.432,
+            "last_ms": 1903.432
+          }
+        },
+        "counters": {
+          "cache_hits": 0,
+          "cache_misses": 96
+        },
+        "gauges": {
+          "average_embedding_batch_size": 48.0
+        }
+      }
+    },
+    {
+      "name": "DOCX",
+      "target_seconds": 5.0,
+      "runs": 3,
+      "durations_seconds": [
+        1.352,
+        1.26,
+        1.363
+      ],
+      "avg_seconds": 1.325,
+      "min_seconds": 1.26,
+      "max_seconds": 1.363,
+      "avg_chunks_indexed": 40,
+      "status": "PASS",
+      "latest_metrics": {
+        "uptime_seconds": 1,
+        "total_requests": 0,
+        "status_counts": {},
+        "endpoint_counts": {},
+        "fallback_answers": 0,
+        "rate_limited_requests": 0,
+        "pipeline_timing": {
+          "embedding_generation_time_ms": {
+            "count": 2,
+            "total_ms": 2399.107,
+            "avg_ms": 1199.554,
+            "max_ms": 1201.935,
+            "last_ms": 1201.935
+          },
+          "ingestion_total_time_ms": {
+            "count": 1,
+            "total_ms": 1362.816,
+            "avg_ms": 1362.816,
+            "max_ms": 1362.816,
+            "last_ms": 1362.816
+          },
+          "chunking_time_ms": {
+            "count": 1,
+            "total_ms": 8.391,
+            "avg_ms": 8.391,
+            "max_ms": 8.391,
+            "last_ms": 8.391
+          },
+          "vector_index_time_ms": {
+            "count": 1,
+            "total_ms": 1205.502,
+            "avg_ms": 1205.502,
+            "max_ms": 1205.502,
+            "last_ms": 1205.502
+          }
+        },
+        "counters": {
+          "cache_hits": 0,
+          "cache_misses": 40
+        },
+        "gauges": {
+          "average_embedding_batch_size": 40.0
+        }
+      }
+    },
+    {
+      "name": "PPTX 40 slides",
+      "target_seconds": 8.0,
+      "runs": 3,
+      "durations_seconds": [
+        0.762,
+        0.746,
+        0.605
+      ],
+      "avg_seconds": 0.704,
+      "min_seconds": 0.605,
+      "max_seconds": 0.762,
+      "avg_chunks_indexed": 40,
+      "status": "PASS",
+      "latest_metrics": {
+        "uptime_seconds": 0,
+        "total_requests": 0,
+        "status_counts": {},
+        "endpoint_counts": {},
+        "fallback_answers": 0,
+        "rate_limited_requests": 0,
+        "pipeline_timing": {
+          "embedding_generation_time_ms": {
+            "count": 2,
+            "total_ms": 983.356,
+            "avg_ms": 491.678,
+            "max_ms": 492.896,
+            "last_ms": 492.896
+          },
+          "ingestion_total_time_ms": {
+            "count": 1,
+            "total_ms": 605.22,
+            "avg_ms": 605.22,
+            "max_ms": 605.22,
+            "last_ms": 605.22
+          },
+          "chunking_time_ms": {
+            "count": 1,
+            "total_ms": 3.117,
+            "avg_ms": 3.117,
+            "max_ms": 3.117,
+            "last_ms": 3.117
+          },
+          "vector_index_time_ms": {
+            "count": 1,
+            "total_ms": 495.846,
+            "avg_ms": 495.846,
+            "max_ms": 495.846,
+            "last_ms": 495.846
+          }
+        },
+        "counters": {
+          "cache_hits": 0,
+          "cache_misses": 40
+        },
+        "gauges": {
+          "average_embedding_batch_size": 40.0
+        }
+      }
+    },
+    {
+      "name": "PDF 100 pages",
+      "target_seconds": 15.0,
+      "runs": 3,
+      "durations_seconds": [
+        1.208,
+        1.394,
+        1.193
+      ],
+      "avg_seconds": 1.265,
+      "min_seconds": 1.193,
+      "max_seconds": 1.394,
+      "avg_chunks_indexed": 100,
+      "status": "PASS",
+      "latest_metrics": {
+        "uptime_seconds": 1,
+        "total_requests": 0,
+        "status_counts": {},
+        "endpoint_counts": {},
+        "fallback_answers": 0,
+        "rate_limited_requests": 0,
+        "pipeline_timing": {
+          "embedding_generation_time_ms": {
+            "count": 2,
+            "total_ms": 1891.726,
+            "avg_ms": 945.863,
+            "max_ms": 950.825,
+            "last_ms": 950.825
+          },
+          "ingestion_total_time_ms": {
+            "count": 1,
+            "total_ms": 1193.012,
+            "avg_ms": 1193.012,
+            "max_ms": 1193.012,
+            "last_ms": 1193.012
+          },
+          "chunking_time_ms": {
+            "count": 1,
+            "total_ms": 4.271,
+            "avg_ms": 4.271,
+            "max_ms": 4.271,
+            "last_ms": 4.271
+          },
+          "vector_index_time_ms": {
+            "count": 1,
+            "total_ms": 955.462,
+            "avg_ms": 955.462,
+            "max_ms": 955.462,
+            "last_ms": 955.462
+          }
+        },
+        "counters": {
+          "cache_hits": 0,
+          "cache_misses": 100
+        },
+        "gauges": {
+          "average_embedding_batch_size": 100.0
+        }
+      }
+    }
+  ]
+}

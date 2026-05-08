@@ -8,6 +8,10 @@ from langchain_openai import ChatOpenAI
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.services.interfaces.llm_provider import ILLMProvider
+from app.services.llm_providers.prompt_contract import (
+    build_visual_first_human_prompt,
+    build_visual_first_system_prompt,
+)
 from app.services.qa_constants import FALLBACK_ANSWER
 
 
@@ -19,24 +23,11 @@ class OpenAILLMProvider(ILLMProvider):
                 [
                     (
                         "system",
-                        "Bạn là trợ lý phân tích tài liệu chuyên nghiệp. "
-                        "Trả lời bằng CÙNG ngôn ngữ với câu hỏi của người dùng. "
-                        "Chỉ dùng thông tin trong CONTEXT. "
-                        "Hướng dẫn:\n"
-                        "- Trả lời chi tiết, đầy đủ dựa trên CONTEXT.\n"
-                        "- Trích dẫn số liệu, tên, ngày tháng chính xác.\n"
-                        "- Ưu tiên trả lời trực quan: kết hợp bullet list + bảng Markdown + sơ đồ Mermaid khi phù hợp.\n"
-                        "- Với câu hỏi phân tích/tổng quan/so sánh, cố gắng kết hợp cả chữ + bảng + sơ đồ trong cùng câu trả lời.\n"
-                        "- Sử dụng bullet list cho tóm tắt, bảng Markdown chuẩn cho so sánh (không dùng bảng ASCII thuần text).\n"
-                        "- Nếu người dùng yêu cầu mindmap/sơ đồ/biểu đồ/đồ thị: phải trả về ít nhất 1 khối ```mermaid``` hợp lệ để frontend vẽ trực quan.\n"
-                        "- Không mô phỏng hình vẽ bằng ký tự text như gạch ngang hoặc mũi tên ASCII.\n"
-                        "- Không bịa thêm dữ liệu ngoài CONTEXT.\n"
-                        f"- Nếu không tìm thấy câu trả lời trong CONTEXT, trả đúng: {FALLBACK_ANSWER}",
+                        build_visual_first_system_prompt(),
                     ),
                     (
                         "human",
-                        "QUESTION:\n{question}\n\nCONTEXT:\n{context}\n\n"
-                        "Trả lời đầy đủ, chính xác. Ưu tiên định dạng trực quan và dễ hiểu (bullet, bảng Markdown, Mermaid khi phù hợp).",
+                        build_visual_first_human_prompt(),
                     ),
                 ]
             )
