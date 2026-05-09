@@ -1,304 +1,277 @@
-# 🚀 AI Document Question Answering System
+# 🚀 AIChatBox
 
-An end-to-end RAG (Retrieval-Augmented Generation) application that allows users to upload documents and ask questions based on their content.
+AIChatBox là hệ thống RAG (Retrieval-Augmented Generation) end-to-end cho phép:
 
-Built with FastAPI + LangChain + FAISS, designed using clean architecture principles and production-ready practices.
+- Upload tài liệu vào workspace/chat cụ thể
+- Hỏi đáp dựa trên nội dung tài liệu đã index
+- Nhận câu trả lời có nguồn tham chiếu
+- Quản trị người dùng và cấu hình hệ thống qua trang Admin
 
-## 📌 Overview
+Hệ thống được xây dựng với FastAPI + LangChain + FAISS, theo hướng clean architecture, có CI/CD và đóng gói Docker.
 
-This system enables:
+## ✨ Tính năng chính
 
-- 📄 Upload documents (PDF, DOCX, TXT, CSV…)
-- ❓ Ask questions related to uploaded content
-- 🤖 Get grounded answers with sources
-- 🧠 Reduce hallucination with strict fallback logic
+- Workspace đa chat cho từng user (hoặc guest session)
+- Session đăng nhập theo tab (ưu tiên sessionStorage, có fallback localStorage)
+- Upload nền (background job) + theo dõi trạng thái job + retry
+- RAG pipeline: Ingest → Chunk → Embed → Retrieve → Grounded Answer
+- Hỗ trợ hỏi đáp theo chat, theo tài liệu đã chọn, và streaming SSE
+- Admin dashboard: thống kê, quản lý user, audit log, analytics
+- Auth đầy đủ: register/login, forgot/reset password, OAuth (Google/GitHub)
+- Rate limiting, structured logging, request tracing
+- Vector backup/restore/clear cho vận hành
 
-✨ Key Features
-- 🔍 RAG Pipeline: Ingest → Embed → Retrieve → Answer
-- 🧠 Grounded Answers Only (no hallucination fallback)
-- ⚡ FastAPI backend with clean architecture
-- 📦 FAISS vector database for efficient retrieval
-- 🔐 Optional authentication (register/login)
-- 🧪 Unit tests with pytest
-- 🐳 Dockerized for easy deployment
-- 🔁 CI/CD pipeline with GitHub Actions
-- 📊 Rate limiting & structured logging
-- 💾 Vector backup & restore support
+## 🏗️ Kiến trúc tổng quan
 
-🏗️ Architecture
-User → FastAPI → Upload → Document Processing
-                        ↓
-                  Text Chunking
-                        ↓
-                  Embeddings
-                        ↓
-                     FAISS
-                        ↓
-User Question → Retriever → LLM → Answer
+User/UI → FastAPI API → Ingestion/QA Services
+                      → PostgreSQL (users/workspace/admin/upload jobs)
+                      → FAISS (vector index)
 
-🛠 Tech Stack
+## 🛠 Tech Stack
+
 - Backend: FastAPI
 - AI/LLM: LangChain, OpenAI / Groq / Gemini
 - Vector DB: FAISS
+- Metadata store: PostgreSQL
+- Frontend: Vanilla JS (routes: `/`, `/login`, `/admin`)
 - Testing: Pytest
-- DevOps: Docker, GitHub Actions
-- Frontend: Vanilla JS (Web UI)
+- DevOps: Docker Compose, GitHub Actions
 
-📸 Demo
-- home page interface.
-![Demo](docs/demo/home.png)
-- login or registration interface.
-![Demo](docs/demo/signin-signup.png)
-- messaging interface.
-![Demo](docs/demo/messaging-interface.png)
-- document loading interface.
-![Demo](docs/demo/document-loading-interface.png)
+## 📸 Demo
 
-⚙️ Installation & Run (Local)
-1. Clone project
-git clone https://github.com/your-username/AI-Document-Question-Answering-System.git
-cd AI-Document-Question-Answering-System
-2. Setup environment
-python -m venv .venv
-source .venv/Scripts/activate   # Windows
-3. Install dependencies
-pip install -r requirements.txt
-4. Setup environment variables
-copy .env.example .env
-👉 Thêm API key nếu có:
-OPENAI_API_KEY=your_key_here
-5. Run server
-uvicorn main:app --reload
-6. Open UI
-http://127.0.0.1:8000/
+- Home page interface
+  ![Home](docs/demo/home.png)
+- Login / registration interface
+  ![Signin Signup](docs/demo/signin-signup.png)
+- Messaging interface
+  ![Messaging](docs/demo/messaging-interface.png)
+- Document loading interface
+  ![Document Loading](docs/demo/document-loading-interface.png)
 
-🐳 Deploy with Docker (Recommended)
-1. Build & run
-docker compose up --build -d
-2. Check service
-http://127.0.0.1:8000/api/v1/health
-3. Stop service
-docker compose down
+## ⚙️ Chạy local
 
-🌐 Production Deployment (Simple Guide)
-- Option 1: Deploy to VPS
-+ git clone <repo>
-+ cd project
-+ docker compose up -d
-👉 Mở port 8000 là chạy được
+1. Clone repository
 
-- Option 2: Deploy to Cloud (Render / Railway)
-- Connect GitHub repo
-- Add environment variables
-- Set start command:
-- uvicorn main:app --host 0.0.0.0 --port 8000
+   ```bash
+   git clone <your-repo-url>
+   cd AIChatBox
+   ```
 
-📡 API Endpoints
-- Method	Endpoint
-- GET	/api/v1/health
-- POST	/api/v1/upload
-- POST	/api/v1/ask
-- POST	/api/v1/auth/login
+2. Tạo virtual environment
 
-🧠 How It Works
-- 📥 Upload Flow
-- Upload file
-- Extract text
-- Split into chunks
-- Generate embeddings
-- Store in FAISS
-❓ Ask Flow
-- Retrieve top-k relevant chunks
-- Filter by relevance
-- Generate grounded answer
-- If no result → return:
-Không tìm thấy trong tài liệu
+   ```bash
+   python -m venv .venv
+   ```
 
-💡 Use Cases
-- 📚 Internal knowledge assistant
-- ⚖️ Legal document search
-- 🏢 Company document Q&A
-- 🤖 Customer support automation
+3. Kích hoạt virtual environment
 
-🧪 Testing
-- pytest -q
+   Git Bash:
 
-🔁 CI/CD
-- Automated tests
-- Docker build validation
-- GitHub Actions pipeline
+   ```bash
+   source .venv/Scripts/activate
+   ```
 
-📦 Release Management
-- Version: VERSION
-- Changelog: CHANGELOG.md
-- Deployment guide: docs/DEPLOY_RUNBOOK.md
+   PowerShell:
 
-🔐 Security
-- CORS configurable
-- Rate limiting
-- Security headers (HSTS optional)
-- No API key → fallback local model
+   ```powershell
+   .\.venv\Scripts\Activate.ps1
+   ```
 
-📈 Future Improvements
-- UI upgrade (React)
-- Streaming responses
-- Multi-user workspace
-- Vector DB scaling (Pinecone / Weaviate)
+4. Cài dependencies
 
-👨‍💻 Author
-Huỳnh Ngọc Quang Vinh
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+5. Tạo file môi trường
 
-## 🔍 Details
-### AIChatBox
+   ```bash
+   copy .env.example .env
+   ```
 
-This repository contains a production-quality RAG backend foundation with release-ready packaging and CI/CD using FastAPI + LangChain + FAISS.
+6. Chạy server
 
-## What is included
+   ```bash
+   uvicorn main:app --reload
+   ```
 
-- Clean architecture project structure
-- SOLID-first abstractions (interfaces)
-- Dependency injection container
-- API endpoints for health, auth, upload, ask
-- Real document ingestion pipeline (upload -> load -> split -> embed -> FAISS)
-- Real ask pipeline (retrieve top-k -> grounded answer)
-- File-based optional authentication (register/login)
-- Strict fallback rule for unanswered questions
-- Tests for health, ask fallback, upload ingestion, and auth
-- Docker packaging with runtime health checks
-- CI workflow for automated tests and image build checks
+7. Mở giao diện
 
-## Run locally
+- Workspace UI: `http://127.0.0.1:8000/`
+- Login UI: `http://127.0.0.1:8000/login`
+- Admin UI: `http://127.0.0.1:8000/admin`
 
-1. Create and activate a Python 3.10+ environment.
-2. Install dependencies:
-   - `pip install -r requirements.txt`
-3. Copy env file:
-   - `copy .env.example .env`
-4. Start server:
-   - `uvicorn main:app --reload`
-5. Open UI:
-   - `http://127.0.0.1:8000/`
+## 🐳 Chạy với Docker (khuyến nghị)
 
-## Web UI
+`docker-compose.yml` khởi chạy **2 service**:
 
-- A workspace-style chat interface is served at `/`
-- File upload panel supports PDF, DOCX, TXT, MD, CSV and calls `/api/v1/upload`
-- Chat composer calls `/api/v1/ask` and renders grounded answer with source chips
-- Static assets live under `web/` and are mounted at `/static`
+- `aichatbox-api` (FastAPI)
+- `postgres` (PostgreSQL)
 
-## Run with Docker
+1. Build và chạy
 
-1. Create `.env` from `.env.example`.
-2. Build and run:
-   - `docker compose up --build -d`
-   - Build profile follows `LOCAL_SEMANTIC_EMBEDDINGS` in `.env`:
-     - `true`: installs local semantic dependencies (heavier image)
-     - `false`: skips those optional dependencies (faster build)
-3. Check service:
-   - `http://127.0.0.1:8000/api/v1/health`
-4. Stop service:
-   - `docker compose down`
+   ```bash
+   docker compose up --build -d
+   ```
 
-Note:
-- Current Docker base image is kept as-is to maintain build/runtime compatibility.
-- Local vulnerability scanners may still report OS-level CVEs depending on scanner database freshness.
-- For stricter compliance, replace base image with your organization hardened image in production.
+2. Kiểm tra health
 
-## CI/CD
+   ```bash
+   curl http://127.0.0.1:8000/api/v1/health
+   ```
 
-- GitHub Actions workflow is at `.github/workflows/ci.yml`
-- Pipeline stages:
-  - install dependencies
-  - run test suite (`pytest -q`)
-   - run API smoke test
-  - validate Docker image build
+3. Dừng service
 
-## Release management
+   ```bash
+   docker compose down
+   ```
 
-- Current app version is tracked in `VERSION`
-- Change history is tracked in `CHANGELOG.md`
-- Deployment/rollback operations are documented in `docs/DEPLOY_RUNBOOK.md`
+Ghi chú:
 
-Release checklist:
-1. Update `VERSION`
-2. Append release notes in `CHANGELOG.md`
-3. Run full tests (`pytest -q`)
-4. Run smoke test (`python scripts/smoke_test.py --base-url http://127.0.0.1:8000`)
-5. Build Docker image (`docker build -t aichatbox:<tag> .`)
-6. Deploy with `docker compose up -d`
+- API expose qua port `8000` (config bằng `API_HOST_PORT`).
+- PostgreSQL expose host port `5433` mặc định.
+- Build profile local semantic embedding dùng biến `LOCAL_SEMANTIC_EMBEDDINGS`.
 
-## Environment profiles
+## 📡 API endpoints (rút gọn theo nhóm)
 
-- Use `.env.example` profile snippets for development, staging, and production defaults
-- For production, set strong values at minimum:
-  - `OPENAI_API_KEY`
-  - `AUTH_SECRET_KEY`
-  - `ENABLE_HSTS=true` (when served over HTTPS)
-  - stricter rate limits
-
-## Available endpoints
+### Health & Metrics
 
 - `GET /api/v1/health`
 - `GET /api/v1/health/ready`
 - `GET /api/v1/metrics`
+
+### Ops (Vector Store)
+
 - `GET /api/v1/ops/vector/status`
 - `POST /api/v1/ops/vector/backup`
 - `POST /api/v1/ops/vector/restore-latest`
-- `POST /api/v1/auth/register` (optional, controlled by `ENABLE_REGISTRATION`)
+- `POST /api/v1/ops/vector/clear`
+
+### Auth
+
+- `POST /api/v1/auth/register` (có thể tắt bằng `ENABLE_REGISTRATION`)
 - `POST /api/v1/auth/login`
+- `POST /api/v1/auth/forgot-password`
+- `POST /api/v1/auth/reset-password`
+- `GET /api/v1/auth/oauth/{provider}/start`
+- `POST /api/v1/auth/oauth/{provider}/complete`
+
+### Workspace
+
+- `POST /api/v1/workspace/chats`
+- `GET /api/v1/workspace/chats`
+- `GET /api/v1/workspace/chats/{chat_id}/documents`
+- `GET /api/v1/workspace/chats/{chat_id}/messages`
+- `POST /api/v1/workspace/chats/{chat_id}/upload`
+- `GET /api/v1/workspace/chats/{chat_id}/upload-jobs`
+- `GET /api/v1/workspace/chats/{chat_id}/upload-jobs/{job_id}`
+- `POST /api/v1/workspace/chats/{chat_id}/upload-jobs/{job_id}/retry`
+- `POST /api/v1/workspace/chats/{chat_id}/ask`
+- `POST /api/v1/workspace/chats/{chat_id}/ask/stream`
+- `PUT /api/v1/workspace/chats/{chat_id}`
+- `DELETE /api/v1/workspace/chats/{chat_id}`
+- `DELETE /api/v1/workspace/chats/{chat_id}/messages`
+- `DELETE /api/v1/workspace/chats/{chat_id}/documents`
+- `PUT /api/v1/workspace/chats/{chat_id}/documents/{document_id}`
+- `DELETE /api/v1/workspace/chats/{chat_id}/documents/{document_id}`
+
+### Admin
+
+- `POST /api/v1/admin/setup`
+- `GET /api/v1/admin/dashboard`
+- `GET /api/v1/admin/users`
+- `GET /api/v1/admin/users/{username}`
+- `PUT /api/v1/admin/users/{username}/role`
+- `PUT /api/v1/admin/users/{username}/status`
+- `DELETE /api/v1/admin/users/{username}`
+- `POST /api/v1/admin/users/{username}/reset-password`
+- `GET /api/v1/admin/system/metrics`
+- `GET /api/v1/admin/system/config`
+- `GET /api/v1/admin/audit-logs`
+- `GET /api/v1/admin/analytics/usage`
+
+### Legacy endpoints (vẫn còn hỗ trợ)
+
 - `POST /api/v1/upload`
 - `POST /api/v1/ask`
 
-## Supported document types
+## 📄 Loại tài liệu hỗ trợ
 
-- `.pdf`
-- `.docx`
-- `.txt`
-- `.md`
-- `.csv`
+Có thể cấu hình qua `SUPPORTED_UPLOAD_EXTENSIONS`.
 
-## Ingestion behavior
+Mặc định hệ thống hỗ trợ:
 
-- `/upload` now performs real ingestion and persists vectors into FAISS at `VECTOR_STORE_PATH`
-- If `OPENAI_API_KEY` is provided, OpenAI embeddings are used
-- If no API key is provided, deterministic local embeddings are used so local development and tests still work
+- `.pdf`, `.doc`, `.docx`
+- `.xlsx`, `.pptx`
+- `.html`, `.htm`, `.json`, `.xml`
+- `.txt`, `.md`, `.csv`
+- `.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp`, `.tif`, `.tiff`, `.gif`
 
-## Ask behavior
+## 🧠 Hành vi RAG
 
-- `/ask` retrieves top-k chunks from FAISS using the configured `TOP_K`
-- Answer generation is grounded strictly on retrieved context
-- Retrieved chunks are filtered by token-overlap relevance (`MIN_CONTEXT_TOKEN_OVERLAP`)
-- If filtered relevant chunks are fewer than `MIN_RELEVANT_CHUNKS`, fallback is returned
-- If no grounded answer is available, API returns exactly: `Không tìm thấy trong tài liệu`
-- If `OPENAI_API_KEY` is not set, a local grounded provider is used for deterministic development and test behavior
+- Ingestion lưu vector vào `VECTOR_STORE_PATH`.
+- Nếu có API key embeddings phù hợp, hệ thống dùng provider tương ứng.
+- Nếu không có API key, hệ thống dùng local semantic embeddings/local grounded fallback để chạy ổn định ở môi trường dev/test.
+- Khi không đủ ngữ cảnh liên quan, API trả fallback:
 
-## Reliability and logs
+  ```
+  Không tìm thấy trong tài liệu
+  ```
 
-- Upload and ask flows emit structured logs for request outcomes
-- Ingestion writes chunk-level metadata (for example, chunk index) for better source traceability
-- Every response includes `X-Request-ID` for request tracing
-- Ask and upload endpoints enforce configurable in-memory rate limiting
+## 🔐 Security & Reliability
 
-## Operational controls
+- CORS cấu hình qua biến môi trường
+- Security headers bật qua `ENABLE_SECURITY_HEADERS`
+- HSTS bật qua `ENABLE_HSTS` khi triển khai HTTPS
+- Rate limit cho login/register/ask/upload
+- Structured log và request ID để trace
 
-- `RATE_LIMIT_WINDOW_SECONDS`: rolling window for request throttling
-- `ASK_RATE_LIMIT_PER_WINDOW`: maximum ask requests per window per client
-- `UPLOAD_RATE_LIMIT_PER_WINDOW`: maximum upload requests per window per client
+## 🧪 Testing
 
-## Security controls
+```bash
+pytest -q
+```
 
-- CORS is configurable via `CORS_ALLOW_ORIGINS`, `CORS_ALLOW_METHODS`, `CORS_ALLOW_HEADERS`, and `CORS_ALLOW_CREDENTIALS`
-- Basic security headers are enabled via `ENABLE_SECURITY_HEADERS`
-- HSTS can be enabled in HTTPS deployments via `ENABLE_HSTS`
+## 🔁 CI/CD
 
-## Backup and recovery
+Workflow: `.github/workflows/ci.yml`
 
-- Vector store backups are written under `VECTOR_BACKUP_DIR`
-- Use `POST /api/v1/ops/vector/backup` to create a snapshot
-- Use `POST /api/v1/ops/vector/restore-latest` to recover from latest snapshot
+Pipeline hiện tại:
 
-## Benchmark utility
+- Cài dependencies
+- Chạy test suite (`pytest -q`)
+- Chạy smoke test API (`scripts/smoke_test.py`)
+- Validate Docker image build
 
-- Run ask benchmark locally:
-   - `python scripts/benchmark_ask.py --base-url http://127.0.0.1:8000 --runs 50 --question "FastAPI la gi?"`
+## 📊 Benchmark utilities
+
+- Ask latency benchmark:
+
+  ```bash
+  python scripts/benchmark_ask.py --base-url http://127.0.0.1:8000 --runs 50 --question "FastAPI la gi?"
+  ```
+
+- Ingestion benchmark:
+
+  ```bash
+  python scripts/benchmark_ingestion.py --runs 1 --output tmp/benchmark_ingestion_results.json
+  ```
+
+## 📦 Release management
+
+- Version hiện tại: `VERSION`
+- Changelog: `CHANGELOG.md`
+- Runbook triển khai/rollback: `docs/DEPLOY_RUNBOOK.md`
+
+Checklist đề xuất:
+
+1. Update `VERSION`
+2. Cập nhật `CHANGELOG.md`
+3. Chạy `pytest -q`
+4. Chạy smoke test API
+5. Build image: `docker build -t aichatbox:<tag> .`
+6. Deploy: `docker compose up -d`
+
+## 👨‍💻 Author
+
+Huỳnh Ngọc Quang Vinh
