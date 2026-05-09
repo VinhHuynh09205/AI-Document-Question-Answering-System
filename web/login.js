@@ -19,6 +19,37 @@ const btnGithubLogin = document.getElementById("btnGithubLogin");
 
 let currentMode = "login";
 const AUTH_ROLE_KEY = "user_role";
+const AUTH_TOKEN_KEY = "auth_token";
+const ADMIN_TOKEN_KEY = "admin_token";
+const USERNAME_KEY = "username";
+const LEGACY_ACCESS_TOKEN_KEY = "access_token";
+
+function setAuthStorageItem(key, value) {
+  if (!key) return;
+  const normalized = String(value ?? "");
+  try { sessionStorage.setItem(key, normalized); } catch (_) { /* ignore */ }
+  try { localStorage.setItem(key, normalized); } catch (_) { /* ignore */ }
+}
+
+function removeAuthStorageItem(key) {
+  if (!key) return;
+  try { sessionStorage.removeItem(key); } catch (_) { /* ignore */ }
+  try { localStorage.removeItem(key); } catch (_) { /* ignore */ }
+}
+
+function setRoleStorage(role) {
+  setAuthStorageItem(AUTH_ROLE_KEY, normalizeRole(role));
+}
+
+function getTabAuthToken() {
+  try {
+    return sessionStorage.getItem(AUTH_TOKEN_KEY)
+      || sessionStorage.getItem(LEGACY_ACCESS_TOKEN_KEY)
+      || "";
+  } catch {
+    return "";
+  }
+}
 
 function normalizeRole(role) {
   return String(role || "").trim().toLowerCase() === "admin" ? "admin" : "user";
@@ -34,18 +65,18 @@ function persistAuthSession(authPayload, fallbackUsername = "", resolvedRole = n
   const role = normalizeRole(resolvedRole || authPayload?.role);
 
   if (token) {
-    localStorage.setItem("auth_token", token);
+    setAuthStorageItem(AUTH_TOKEN_KEY, token);
     if (role === "admin") {
-      localStorage.setItem("admin_token", token);
+      setAuthStorageItem(ADMIN_TOKEN_KEY, token);
     } else {
-      localStorage.removeItem("admin_token");
+      removeAuthStorageItem(ADMIN_TOKEN_KEY);
     }
   }
 
   if (username) {
-    localStorage.setItem("username", username);
+    setAuthStorageItem(USERNAME_KEY, username);
   }
-  localStorage.setItem(AUTH_ROLE_KEY, role);
+  setRoleStorage(role);
 
   return role;
 }
@@ -568,11 +599,11 @@ async function handleOAuthAndResetCallbacks() {
 
 /* ---- Check if already logged in ---- */
 async function checkAuth() {
-  const token = localStorage.getItem("auth_token") || localStorage.getItem("access_token");
+  const token = getTabAuthToken();
   if (token) {
     const roleFromToken = getRoleFromToken(token);
     if (roleFromToken) {
-      localStorage.setItem(AUTH_ROLE_KEY, roleFromToken);
+      setRoleStorage(roleFromToken);
       window.location.href = getRedirectPathByRole(roleFromToken);
       return;
     }
@@ -583,7 +614,7 @@ async function checkAuth() {
         headers: { Authorization: "Bearer " + token },
       });
       if (res.ok) {
-        localStorage.setItem(AUTH_ROLE_KEY, "admin");
+        setRoleStorage("admin");
         window.location.href = "/admin";
         return;
       }
@@ -591,7 +622,7 @@ async function checkAuth() {
       /* fallback to user route */
     }
 
-    localStorage.setItem(AUTH_ROLE_KEY, "user");
+    setRoleStorage("user");
     window.location.href = "/";
   }
 }

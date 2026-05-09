@@ -69,7 +69,7 @@ class PgAdminRepository(IAdminRepository):
         try:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL '%s days'",
+                    "SELECT COUNT(*) FROM users WHERE created_at >= NOW() - make_interval(days => %s)",
                     (days,),
                 )
                 return cur.fetchone()[0]
@@ -95,10 +95,21 @@ class PgAdminRepository(IAdminRepository):
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT DATE(created_at) as day, COUNT(*) as count
-                    FROM messages
-                    WHERE created_at >= NOW() - INTERVAL '%s days'
-                    GROUP BY DATE(created_at) ORDER BY day ASC
+                    WITH normalized_messages AS (
+                        SELECT
+                            CASE
+                                WHEN created_at ~ '^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}'
+                                    THEN created_at::timestamptz
+                                ELSE NULL
+                            END AS created_ts
+                        FROM messages
+                    )
+                    SELECT DATE(created_ts) as day, COUNT(*) as count
+                    FROM normalized_messages
+                    WHERE created_ts IS NOT NULL
+                      AND created_ts >= NOW() - make_interval(days => %s)
+                    GROUP BY DATE(created_ts)
+                    ORDER BY day ASC
                 """, (days,))
                 rows = cur.fetchall()
         finally:

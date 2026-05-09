@@ -29,6 +29,11 @@ const UPLOAD_JOB_STORAGE_KEY = "nectar_upload_jobs_v1";
 const LAST_CHAT_STORAGE_KEY = "nectar_last_chat_v1";
 const UPLOAD_JOB_TRACK_LIMIT_PER_CHAT = 30;
 const GUEST_SESSION_HEADER = "X-Guest-Session";
+const AUTH_TOKEN_KEY = "auth_token";
+const ADMIN_TOKEN_KEY = "admin_token";
+const USERNAME_KEY = "username";
+const AUTH_ROLE_KEY = "user_role";
+const LEGACY_ACCESS_TOKEN_KEY = "access_token";
 
 const UNSAVED_ANONYMOUS_WARNING =
   "Bạn chưa đăng nhập. Nếu thoát trang, cuộc hội thoại và tài liệu tạm sẽ bị mất.";
@@ -105,7 +110,7 @@ function restoreSession() {
   const token = getStoredAuthToken();
   if (token) {
     state.token = token;
-    state.username = localStorage.getItem("username") || "user";
+    state.username = getStoredUsername();
     showLoggedIn();
   } else {
     showLoggedOut();
@@ -321,10 +326,11 @@ function handleLogout() {
   state.uploadProgressStateByJob = {};
   state.uploadProgressTimersByJob = {};
   state.pendingDocsRenderByChat = {};
-  localStorage.removeItem("auth_token");
-  localStorage.removeItem("admin_token");
-  localStorage.removeItem("username");
-  localStorage.removeItem("user_role");
+  removeAuthStorageItem(AUTH_TOKEN_KEY);
+  removeAuthStorageItem(ADMIN_TOKEN_KEY);
+  removeAuthStorageItem(USERNAME_KEY);
+  removeAuthStorageItem(AUTH_ROLE_KEY);
+  removeAuthStorageItem(LEGACY_ACCESS_TOKEN_KEY);
   localStorage.removeItem(UPLOAD_JOB_STORAGE_KEY);
   localStorage.removeItem(LAST_CHAT_STORAGE_KEY);
   showLoggedOut();
@@ -2007,10 +2013,32 @@ function shouldWarnAnonymousDataLoss() {
 
 function isAuthenticated() { return Boolean(state.token); }
 
-function getStoredAuthToken() {
+function getStorageValue(key) {
   try {
-    return localStorage.getItem("auth_token") || localStorage.getItem("access_token") || "";
-  } catch { return ""; }
+    const sessionValue = sessionStorage.getItem(key);
+    if (sessionValue) return sessionValue;
+  } catch {
+    // Ignore storage access issues.
+  }
+
+  try {
+    return localStorage.getItem(key) || "";
+  } catch {
+    return "";
+  }
+}
+
+function removeAuthStorageItem(key) {
+  try { sessionStorage.removeItem(key); } catch { /* ignore */ }
+  try { localStorage.removeItem(key); } catch { /* ignore */ }
+}
+
+function getStoredAuthToken() {
+  return getStorageValue(AUTH_TOKEN_KEY) || getStorageValue(LEGACY_ACCESS_TOKEN_KEY) || "";
+}
+
+function getStoredUsername() {
+  return getStorageValue(USERNAME_KEY) || "user";
 }
 
 function autoGrowTextarea() {

@@ -5,11 +5,54 @@
   "use strict";
 
   const API = "/api/v1";
-  let token = localStorage.getItem("auth_token") || localStorage.getItem("admin_token") || "";
+  const AUTH_TOKEN_KEY = "auth_token";
+  const ADMIN_TOKEN_KEY = "admin_token";
+  const USERNAME_KEY = "username";
+  const USER_ROLE_KEY = "user_role";
+  const LEGACY_ACCESS_TOKEN_KEY = "access_token";
+
+  function getStorageValue(key) {
+    try {
+      const sessionValue = sessionStorage.getItem(key);
+      if (sessionValue) return sessionValue;
+    } catch {
+      // Ignore storage access issues.
+    }
+
+    try {
+      return localStorage.getItem(key) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function removeStorageItem(key) {
+    try { sessionStorage.removeItem(key); } catch (_) { /* ignore */ }
+    try { localStorage.removeItem(key); } catch (_) { /* ignore */ }
+  }
+
+  function clearAuthStorage() {
+    removeStorageItem(AUTH_TOKEN_KEY);
+    removeStorageItem(ADMIN_TOKEN_KEY);
+    removeStorageItem(USERNAME_KEY);
+    removeStorageItem(USER_ROLE_KEY);
+    removeStorageItem(LEGACY_ACCESS_TOKEN_KEY);
+  }
+
+  let token = getStorageValue(AUTH_TOKEN_KEY)
+    || getStorageValue(ADMIN_TOKEN_KEY)
+    || getStorageValue(LEGACY_ACCESS_TOKEN_KEY)
+    || "";
   let currentPage = "dashboard";
   let usersOffset = 0;
   let auditOffset = 0;
   const PAGE_SIZE = 20;
+  const USERS_API_MAX_LIMIT = 200;
+  let globalSearchRaw = "";
+  let globalSearchQuery = "";
+  let configSectionsCache = [];
+  let analyticsCache = { top_users: [], messages_per_day: [] };
+  let searchDebounceTimer = null;
 
   /* ---------- helpers ---------- */
   function authHeaders() {
@@ -22,6 +65,7 @@
       ...opts,
     });
     if (res.status === 401 || res.status === 403) {
+      clearAuthStorage();
       toast("Phiên đăng nhập hết hạn hoặc không có quyền admin.", "error");
       setTimeout(() => (window.location.href = "/login"), 1500);
       throw new Error("unauthorized");
@@ -31,6 +75,31 @@
 
   function qs(sel) { return document.querySelector(sel); }
   function qsa(sel) { return document.querySelectorAll(sel); }
+
+  function normalizeForSearch(value) {
+    return String(value || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  }
+
+  function includesSearch(value, query) {
+    if (!query) return true;
+    return normalizeForSearch(value).includes(query);
+  }
+
+  async function readErrorDetail(res, fallbackMessage) {
+    try {
+      const payload = await res.json();
+      if (payload && typeof payload.detail === "string" && payload.detail.trim()) {
+        return payload.detail.trim();
+      }
+    } catch (_) {
+      // Ignore invalid/non-JSON error payloads.
+    }
+    return fallbackMessage;
+  }
 
   function formatNumber(n) {
     if (n === null || n === undefined) return "—";
@@ -138,12 +207,98 @@
     el.onclick = (e) => { e.preventDefault(); navigateTo(el.dataset.goto); };
   });
 
+  function inferSearchPage(query) {
+    const pageKeywords = {
+      dashboard: ["dashboard", "tong quan", "overview", "he thong"],
+      users: ["user", "nguoi dung", "tai khoan", "username", "email"],
+      metrics: ["metrics", "chi so", "uptime", "request", "status"],
+      config: ["config", "cau hinh", "setting", "model", "chunk", "api key"],
+      analytics: ["analytics", "phan tich", "su dung", "top user", "tin nhan", "message"],
+      audit: ["audit", "nhat ky", "kiem toan", "log", "bao mat"],
+    };
+
+    for (const [page, keywords] of Object.entries(pageKeywords)) {
+      if (keywords.some((keyword) => query.includes(keyword) || (query.length >= 3 && keyword.includes(query)))) {
+        return page;
+      }
+    }
+
+    if (query.includes("@")) return "users";
+    if (currentPage === "dashboard" || currentPage === "metrics") return "users";
+    return currentPage;
+  }
+
+  function executeGlobalSearch(options = {}) {
+    const allowRoute = options.allowRoute !== false;
+    const input = qs("#globalSearch");
+    globalSearchRaw = (input.value || "").trim();
+    globalSearchQuery = normalizeForSearch(globalSearchRaw);
+
+    if (!globalSearchQuery) {
+      loadPageData(currentPage);
+      return;
+    }
+
+    const targetPage = inferSearchPage(globalSearchQuery);
+    if (allowRoute && targetPage !== currentPage) {
+      navigateTo(targetPage);
+      return;
+    }
+
+    loadPageData(currentPage);
+  }
+
+  function initGlobalSearch() {
+    const input = qs("#globalSearch");
+    if (!input) return;
+
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if (searchDebounceTimer) {
+          window.clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = null;
+        }
+        executeGlobalSearch({ allowRoute: true });
+        return;
+      }
+
+      if (event.key === "Escape") {
+        if (searchDebounceTimer) {
+          window.clearTimeout(searchDebounceTimer);
+          searchDebounceTimer = null;
+        }
+        input.value = "";
+        globalSearchRaw = "";
+        globalSearchQuery = "";
+        loadPageData(currentPage);
+      }
+    });
+
+    input.addEventListener("input", () => {
+      if (searchDebounceTimer) {
+        window.clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = null;
+      }
+
+      if (!input.value.trim() && globalSearchQuery) {
+        globalSearchRaw = "";
+        globalSearchQuery = "";
+        loadPageData(currentPage);
+        return;
+      }
+
+      if (!input.value.trim()) return;
+
+      searchDebounceTimer = window.setTimeout(() => {
+        executeGlobalSearch({ allowRoute: false });
+      }, 220);
+    });
+  }
+
   /* ---------- logout ---------- */
   qs("#btnLogout").onclick = () => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("username");
-    localStorage.removeItem("user_role");
+    clearAuthStorage();
     window.location.href = "/login";
   };
 
@@ -187,6 +342,8 @@
       if (analyticsRes.ok) {
         const an = await analyticsRes.json();
         renderChart(an.messages_per_day || [], "chartBars", "chartLabels", 7);
+      } else {
+        renderChart([], "chartBars", "chartLabels", 7);
       }
 
       if (configRes.ok) {
@@ -268,28 +425,77 @@
     el.innerHTML = items.map(([k, v]) => `<div class="config-row"><span class="config-key">${escapeHtml(k)}</span><span class="config-val">${escapeHtml(String(v))}</span></div>`).join("");
   }
 
+  function applyUserFilters(users, options = {}) {
+    const includeGlobalSearch = Boolean(options.includeGlobalSearch);
+    const role = qs("#filterRole").value;
+    const status = qs("#filterStatus").value;
+    let filtered = Array.isArray(users) ? users.slice() : [];
+
+    if (role) filtered = filtered.filter((u) => u.role === role);
+    if (status === "active") filtered = filtered.filter((u) => u.is_active);
+    if (status === "inactive") filtered = filtered.filter((u) => !u.is_active);
+
+    if (includeGlobalSearch && globalSearchQuery) {
+      filtered = filtered.filter((u) => includesSearch(
+        `${u.username} ${u.role} ${u.created_at || ""} ${u.is_active ? "active hoat dong" : "inactive khoa"}`,
+        globalSearchQuery,
+      ));
+    }
+
+    return filtered;
+  }
+
+  async function fetchUsersPage(offset, limit) {
+    const safeOffset = Math.max(0, Number(offset) || 0);
+    const safeLimit = Math.min(USERS_API_MAX_LIMIT, Math.max(1, Number(limit) || PAGE_SIZE));
+    const res = await api(`/admin/users?offset=${safeOffset}&limit=${safeLimit}`);
+    if (!res.ok) {
+      const message = await readErrorDetail(res, "Không thể tải danh sách người dùng.");
+      throw new Error(message);
+    }
+    return res.json();
+  }
+
+  async function fetchAllUsers() {
+    let offset = 0;
+    let total = Number.POSITIVE_INFINITY;
+    const users = [];
+
+    while (offset < total) {
+      const data = await fetchUsersPage(offset, USERS_API_MAX_LIMIT);
+      const pageUsers = Array.isArray(data.users) ? data.users : [];
+      users.push(...pageUsers);
+
+      const parsedTotal = Number(data.total);
+      total = Number.isFinite(parsedTotal) ? parsedTotal : users.length;
+      if (!pageUsers.length) break;
+
+      offset += pageUsers.length;
+    }
+
+    return { users, total: users.length };
+  }
+
   /* ===================== USERS ===================== */
   async function loadUsers() {
     try {
-      const role = qs("#filterRole").value;
-      const status = qs("#filterStatus").value;
-      let url = `/admin/users?offset=${usersOffset}&limit=${PAGE_SIZE}`;
-      const res = await api(url);
-      if (!res.ok) return;
-      const data = await res.json();
-      let users = data.users || [];
-
-      // client-side filter
-      if (role) users = users.filter((u) => u.role === role);
-      if (status === "active") users = users.filter((u) => u.is_active);
-      if (status === "inactive") users = users.filter((u) => !u.is_active);
+      const searchingUsers = currentPage === "users" && Boolean(globalSearchQuery);
+      const data = searchingUsers
+        ? await fetchAllUsers()
+        : await fetchUsersPage(usersOffset, PAGE_SIZE);
+      const users = applyUserFilters(data.users || [], { includeGlobalSearch: searchingUsers });
 
       renderUsersTable(users);
-      qs("#usersCount").textContent = `Hiển thị ${users.length} / ${data.total} người dùng`;
-      renderPagination(data.total, usersOffset, PAGE_SIZE, "usersPagination", (off) => {
-        usersOffset = off;
-        loadUsers();
-      });
+      if (searchingUsers) {
+        qs("#usersCount").textContent = `Tìm thấy ${users.length} kết quả cho "${globalSearchRaw}"`;
+        qs("#usersPagination").innerHTML = "";
+      } else {
+        qs("#usersCount").textContent = `Hiển thị ${users.length} / ${data.total} người dùng`;
+        renderPagination(data.total, usersOffset, PAGE_SIZE, "usersPagination", (off) => {
+          usersOffset = off;
+          loadUsers();
+        });
+      }
     } catch (e) {
       console.error("Users load error:", e);
     }
@@ -432,26 +638,119 @@
   qs("#filterStatus").onchange = () => { usersOffset = 0; loadUsers(); };
 
   /* Export */
-  qs("#btnExportUsers").onclick = async () => {
+  function getStatusFilterLabel(value) {
+    if (value === "active") return "Hoạt động";
+    if (value === "inactive") return "Tạm khóa";
+    return "Tất cả";
+  }
+
+  function buildUsersExportDocument(users) {
+    const roleFilter = qs("#filterRole").value;
+    const statusFilter = qs("#filterStatus").value;
+    const generatedAt = new Date().toLocaleString("vi-VN");
+    const searchLabel = globalSearchRaw
+      ? ` | Từ khóa: ${escapeHtml(globalSearchRaw)}`
+      : "";
+
+    const rows = users.length
+      ? users.map((u, idx) => `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${escapeHtml(u.username)}</td>
+            <td>${escapeHtml(u.role)}</td>
+            <td>${u.is_active ? "Hoạt động" : "Tạm khóa"}</td>
+            <td>${escapeHtml(u.created_at || "—")}</td>
+          </tr>
+        `).join("")
+      : '<tr><td colspan="5">Không có dữ liệu người dùng phù hợp.</td></tr>';
+
+    const wrapper = document.createElement("div");
+    wrapper.innerHTML = `
+      <div style="font-family: Arial, Helvetica, sans-serif; color:#0f172a; background:#ffffff; padding:20px; width:980px; box-sizing:border-box;">
+        <h1 style="margin:0 0 8px; font-size:24px;">Danh sách người dùng</h1>
+        <p style="margin:0 0 6px; color:#334155; font-size:13px;">Thời gian xuất: ${escapeHtml(generatedAt)}</p>
+        <p style="margin:0 0 6px; color:#334155; font-size:13px;">Bộ lọc: Vai trò ${escapeHtml(roleFilter || "Tất cả")} | Trạng thái ${escapeHtml(getStatusFilterLabel(statusFilter))}${searchLabel}</p>
+        <p style="margin:0 0 16px; color:#0d9488; font-size:13px; font-weight:700;">Tổng số người dùng: ${users.length}</p>
+        <table style="width:100%; border-collapse:collapse; font-size:12px;">
+          <thead>
+            <tr style="background:#e2e8f0; color:#0f172a;">
+              <th style="border:1px solid #cbd5e1; text-align:left; padding:8px; width:48px;">#</th>
+              <th style="border:1px solid #cbd5e1; text-align:left; padding:8px;">Người dùng</th>
+              <th style="border:1px solid #cbd5e1; text-align:left; padding:8px; width:110px;">Vai trò</th>
+              <th style="border:1px solid #cbd5e1; text-align:left; padding:8px; width:120px;">Trạng thái</th>
+              <th style="border:1px solid #cbd5e1; text-align:left; padding:8px; width:210px;">Ngày tạo</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    `;
+    return wrapper.firstElementChild;
+  }
+
+  async function exportUsersToPdf() {
+    if (!window.html2pdf) {
+      throw new Error("Thư viện xuất PDF chưa sẵn sàng.");
+    }
+
+    const allUsersData = await fetchAllUsers();
+    const filteredUsers = applyUserFilters(allUsersData.users, {
+      includeGlobalSearch: Boolean(globalSearchQuery),
+    });
+    const exportDoc = buildUsersExportDocument(filteredUsers);
+
+    const host = document.createElement("div");
+    host.style.position = "fixed";
+    host.style.left = "-10000px";
+    host.style.top = "0";
+    host.style.width = "1024px";
+    host.style.background = "#ffffff";
+    host.appendChild(exportDoc);
+    document.body.appendChild(host);
+
+    const dateStamp = new Date().toISOString().split("T")[0];
+    const querySuffix = globalSearchQuery ? `_${globalSearchQuery.replace(/\s+/g, "-").slice(0, 20)}` : "";
+
     try {
-      const res = await api("/admin/users?limit=10000");
-      if (!res.ok) return;
-      const data = await res.json();
-      const rows = [["Username", "Role", "Status", "Created At"]];
-      (data.users || []).forEach((u) => {
-        rows.push([u.username, u.role, u.is_active ? "active" : "inactive", u.created_at || ""]);
-      });
-      const csv = rows.map((r) => r.map((c) => '"' + String(c).replace(/"/g, '""') + '"').join(",")).join("\n");
-      const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "users_export_" + new Date().toISOString().split("T")[0] + ".csv";
-      a.click();
-      URL.revokeObjectURL(url);
-      toast("Đã xuất danh sách người dùng", "success");
+      await window.html2pdf()
+        .set({
+          margin: [8, 8, 8, 8],
+          filename: `users_export_${dateStamp}${querySuffix}.pdf`,
+          pagebreak: { mode: ["css", "legacy"] },
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+          },
+          jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+        })
+        .from(exportDoc)
+        .save();
+    } finally {
+      host.remove();
+    }
+
+    return filteredUsers.length;
+  }
+
+  qs("#btnExportUsers").onclick = async () => {
+    const btn = qs("#btnExportUsers");
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = "Đang xuất PDF...";
+
+    try {
+      const exportedCount = await exportUsersToPdf();
+      toast(`Đã xuất ${exportedCount} người dùng ra PDF`, "success");
     } catch (e) {
-      toast("Lỗi xuất danh sách", "error");
+      toast("Lỗi xuất PDF: " + (e && e.message ? e.message : "Không xác định"), "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
     }
   };
 
@@ -509,13 +808,46 @@
   qs("#btnRefreshMetrics").onclick = loadMetrics;
 
   /* ===================== CONFIG ===================== */
+  function renderConfigSections(sections) {
+    qs("#configGrid").innerHTML = sections.map((s) =>
+      `<div class="config-section-title">${escapeHtml(s.title)}</div>` +
+      s.items.map(([k, v]) =>
+        `<div class="config-row"><span class="config-key">${escapeHtml(k)}</span><span class="config-val">${escapeHtml(String(v ?? "—"))}</span></div>`
+      ).join("")
+    ).join("");
+  }
+
+  function applyConfigSearchFilter() {
+    if (!globalSearchQuery) {
+      renderConfigSections(configSectionsCache);
+      return;
+    }
+
+    const filteredSections = configSectionsCache
+      .map((section) => {
+        const titleMatches = includesSearch(section.title, globalSearchQuery);
+        const items = titleMatches
+          ? section.items
+          : section.items.filter(([k, v]) => includesSearch(`${k} ${String(v ?? "")}`, globalSearchQuery));
+        return { title: section.title, items };
+      })
+      .filter((section) => section.items.length > 0);
+
+    if (!filteredSections.length) {
+      qs("#configGrid").innerHTML = `<div class="empty-state">Không tìm thấy cấu hình phù hợp với "${escapeHtml(globalSearchRaw)}".</div>`;
+      return;
+    }
+
+    renderConfigSections(filteredSections);
+  }
+
   async function loadConfig() {
     try {
       const res = await api("/admin/system/config");
       if (!res.ok) return;
       const cfg = await res.json();
 
-      const sections = [
+      configSectionsCache = [
         {
           title: "Ứng dụng",
           items: [
@@ -571,12 +903,7 @@
         },
       ];
 
-      qs("#configGrid").innerHTML = sections.map((s) =>
-        `<div class="config-section-title">${escapeHtml(s.title)}</div>` +
-        s.items.map(([k, v]) =>
-          `<div class="config-row"><span class="config-key">${escapeHtml(k)}</span><span class="config-val">${escapeHtml(String(v ?? "—"))}</span></div>`
-        ).join("")
-      ).join("");
+      applyConfigSearchFilter();
     } catch (e) {
       console.error("Config load error:", e);
     }
@@ -586,30 +913,60 @@
   async function loadAnalytics() {
     try {
       const res = await api("/admin/analytics/usage?days=30");
-      if (!res.ok) return;
+      if (!res.ok) {
+        const message = await readErrorDetail(res, "Không thể tải dữ liệu phân tích sử dụng.");
+        renderAnalyticsError(message);
+        return;
+      }
       const data = await res.json();
+      analyticsCache = {
+        top_users: Array.isArray(data.top_users) ? data.top_users : [],
+        messages_per_day: Array.isArray(data.messages_per_day) ? data.messages_per_day : [],
+      };
 
       // Chart
-      renderAnalyticsChart(data.messages_per_day || []);
-
-      // Top users
-      const el = qs("#topUsersList");
-      const users = data.top_users || [];
-      if (!users.length) {
-        el.innerHTML = '<div class="empty-state">Chưa có dữ liệu người dùng.</div>';
-      } else {
-        el.innerHTML = users.map((u, i) => {
-          const rankCls = i < 3 ? ` rank-${i + 1}` : "";
-          return `<div class="top-user-row">
-            <div class="top-user-rank${rankCls}">${i + 1}</div>
-            <span class="top-user-name">${escapeHtml(u.username)}</span>
-            <span class="top-user-count">${formatNumber(u.message_count)}<span class="top-user-label">tin nhắn</span></span>
-          </div>`;
-        }).join("");
-      }
+      renderAnalyticsChart(analyticsCache.messages_per_day);
+      applyAnalyticsSearchFilter();
     } catch (e) {
       console.error("Analytics load error:", e);
+      renderAnalyticsError("Không thể tải dữ liệu phân tích sử dụng.");
     }
+  }
+
+  function renderTopUsers(users, emptyMessage = "Chưa có dữ liệu người dùng.") {
+    const el = qs("#topUsersList");
+    if (!users.length) {
+      el.innerHTML = `<div class="empty-state">${escapeHtml(emptyMessage)}</div>`;
+      return;
+    }
+
+    el.innerHTML = users.map((u, i) => {
+      const rankCls = i < 3 ? ` rank-${i + 1}` : "";
+      return `<div class="top-user-row">
+        <div class="top-user-rank${rankCls}">${i + 1}</div>
+        <span class="top-user-name">${escapeHtml(u.username)}</span>
+        <span class="top-user-count">${formatNumber(u.message_count)}<span class="top-user-label">tin nhắn</span></span>
+      </div>`;
+    }).join("");
+  }
+
+  function applyAnalyticsSearchFilter() {
+    if (!globalSearchQuery) {
+      renderTopUsers(analyticsCache.top_users);
+      return;
+    }
+
+    const users = analyticsCache.top_users.filter((u) =>
+      includesSearch(`${u.username} ${u.message_count}`, globalSearchQuery)
+    );
+    renderTopUsers(users, `Không tìm thấy người dùng phù hợp với "${globalSearchRaw}".`);
+  }
+
+  function renderAnalyticsError(message) {
+    const safeMessage = escapeHtml(message);
+    qs("#analyticsChartBars").innerHTML = `<div class="empty-state">${safeMessage}</div>`;
+    qs("#analyticsChartLabels").innerHTML = "";
+    renderTopUsers([], message);
   }
 
   function renderAnalyticsChart(data) {
@@ -643,16 +1000,25 @@
   /* ===================== AUDIT ===================== */
   async function loadAudit() {
     try {
-      const res = await api(`/admin/audit-logs?offset=${auditOffset}&limit=${PAGE_SIZE}`);
+      const searchingAudit = currentPage === "audit" && Boolean(globalSearchQuery);
+      const reqOffset = searchingAudit ? 0 : auditOffset;
+      const reqLimit = searchingAudit ? 10000 : PAGE_SIZE;
+      const res = await api(`/admin/audit-logs?offset=${reqOffset}&limit=${reqLimit}`);
       if (!res.ok) return;
       const data = await res.json();
       const logs = data.logs || [];
+      const filteredLogs = searchingAudit
+        ? logs.filter((l) => includesSearch(
+          `${l.admin_username} ${l.action} ${l.target} ${l.detail} ${l.created_at}`,
+          globalSearchQuery,
+        ))
+        : logs;
 
       const body = qs("#auditTableBody");
-      if (!logs.length) {
+      if (!filteredLogs.length) {
         body.innerHTML = '<tr><td colspan="5" class="empty-state">Chưa có nhật ký nào.</td></tr>';
       } else {
-        body.innerHTML = logs.map((l) => `<tr>
+        body.innerHTML = filteredLogs.map((l) => `<tr>
           <td style="white-space:nowrap">${escapeHtml(timeAgo(l.created_at))}</td>
           <td><strong>${escapeHtml(l.admin_username)}</strong></td>
           <td><span class="action-badge badge-${l.action.includes('delete') ? 'admin' : l.action.includes('setup') || l.action.includes('role') ? 'read' : 'write'}">${escapeHtml(l.action)}</span></td>
@@ -661,11 +1027,16 @@
         </tr>`).join("");
       }
 
-      qs("#auditCount").textContent = `${data.total} bản ghi`;
-      renderPagination(data.total, auditOffset, PAGE_SIZE, "auditPagination", (off) => {
-        auditOffset = off;
-        loadAudit();
-      });
+      if (searchingAudit) {
+        qs("#auditCount").textContent = `Tìm thấy ${filteredLogs.length} kết quả cho "${globalSearchRaw}"`;
+        qs("#auditPagination").innerHTML = "";
+      } else {
+        qs("#auditCount").textContent = `${data.total} bản ghi`;
+        renderPagination(data.total, auditOffset, PAGE_SIZE, "auditPagination", (off) => {
+          auditOffset = off;
+          loadAudit();
+        });
+      }
     } catch (e) {
       console.error("Audit load error:", e);
     }
@@ -674,6 +1045,7 @@
   /* ===================== INIT ===================== */
   async function init() {
     initTheme();
+    initGlobalSearch();
 
     // Check auth - try to use existing token
     if (!token) {
@@ -685,7 +1057,7 @@
     try {
       const res = await api("/admin/dashboard");
       if (!res.ok) {
-        localStorage.removeItem("admin_token");
+        clearAuthStorage();
         window.location.href = "/login";
         return;
       }
