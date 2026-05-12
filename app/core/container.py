@@ -94,6 +94,7 @@ def build_container(settings: Settings) -> AppContainer:
                 image_understanding_service=image_understanding_service,
                 max_images_per_slide=settings.pptx_max_images_per_slide,
                 max_images_per_document=settings.pptx_max_images_per_document,
+                max_slides_with_image_analysis=settings.pptx_max_slides_with_image_analysis,
                 text_char_threshold_for_image_analysis=settings.pptx_image_analysis_text_char_threshold,
                 max_image_analysis_seconds=settings.pptx_image_analysis_max_seconds_per_document,
             ),

@@ -449,8 +449,24 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
 
     @staticmethod
     def _match_metadata_filter(metadata: dict, metadata_filter: dict[str, str | list[str]]) -> bool:
+        def _normalize_extension(value: object) -> str:
+            return str(value or "").strip().lower().lstrip(".")
+
         for key, value in metadata_filter.items():
             metadata_value = str(metadata.get(key))
+
+            if key == "extension":
+                metadata_extension = _normalize_extension(metadata_value)
+                if isinstance(value, list):
+                    allowed_extensions = {_normalize_extension(item) for item in value}
+                    if metadata_extension not in allowed_extensions:
+                        return False
+                    continue
+
+                if metadata_extension != _normalize_extension(value):
+                    return False
+                continue
+
             if isinstance(value, list):
                 if metadata_value not in {str(item) for item in value}:
                     return False

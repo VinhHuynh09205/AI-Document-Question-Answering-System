@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 import re
 import time
 
@@ -16,6 +17,7 @@ class PdfDocumentLoader(IDocumentLoader):
     )
     _LATIN_WORD_RE = re.compile(r"[A-Za-z\u00C0-\u024F]{2,}")
     _CJK_RE = re.compile(r"[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]")
+    _NUMERIC_TOKEN_RE = re.compile(r"\d+(?:[.,]\d+)?")
 
     def __init__(
         self,
@@ -40,23 +42,27 @@ class PdfDocumentLoader(IDocumentLoader):
         documents: list[Document] = []
         image_analysis_started_at = time.perf_counter()
         analyzed_pages = 0
+        seen_image_hashes: set[str] = set()
 
         for index, page in enumerate(reader.pages, start=1):
             text = self._extract_page_text(page)
             image_notes: list[str] = []
             providers_used: set[str] = set()
+            page_images = list(getattr(page, "images", []) or [])
 
             should_analyze_images = self._should_analyze_page_images(
                 text=text,
                 analyzed_pages=analyzed_pages,
                 started_at=image_analysis_started_at,
+                page_image_count=len(page_images),
             )
             if should_analyze_images:
                 image_notes, providers_used = self._analyze_page_images(
-                    page=page,
+                    page_images=page_images,
                     file_path=file_path,
                     page_number=index,
                     page_text_snapshot=text,
+                    seen_image_hashes=seen_image_hashes,
                 )
                 if image_notes:
                     analyzed_pages += 1
@@ -86,8 +92,12 @@ class PdfDocumentLoader(IDocumentLoader):
         text: str,
         analyzed_pages: int,
         started_at: float,
+        page_image_count: int,
     ) -> bool:
         if self._image_understanding_service is None:
+            return False
+
+        if page_image_count <= 0:
             return False
 
         if analyzed_pages >= self._max_pages_with_image_analysis:
@@ -105,6 +115,15 @@ class PdfDocumentLoader(IDocumentLoader):
             return True
 
         if len(compact_text) >= self._text_char_threshold_for_image_analysis:
+            if page_image_count < 2:
+                return False
+            if len(compact_text) >= int(self._text_char_threshold_for_image_analysis * 1.4):
+                return False
+
+        if page_image_count >= 2 and len(compact_text) < int(self._text_char_threshold_for_image_analysis * 1.25):
+            return True
+
+        if len(compact_text) >= self._text_char_threshold_for_image_analysis:
             return False
 
         alpha_words = len(self._LATIN_WORD_RE.findall(compact_text)) + len(self._CJK_RE.findall(compact_text))
@@ -117,15 +136,15 @@ class PdfDocumentLoader(IDocumentLoader):
     def _analyze_page_images(
         self,
         *,
-        page,
+        page_images,
         file_path: Path,
         page_number: int,
         page_text_snapshot: str,
+        seen_image_hashes: set[str],
     ) -> tuple[list[str], set[str]]:
         if self._image_understanding_service is None:
             return [], set()
 
-        page_images = getattr(page, "images", None)
         if not page_images:
             return [], set()
 
@@ -140,6 +159,11 @@ class PdfDocumentLoader(IDocumentLoader):
             image_bytes = getattr(image, "data", b"")
             if not image_bytes:
                 continue
+
+            image_hash = self._fingerprint_image_bytes(image_bytes)
+            if image_hash in seen_image_hashes:
+                continue
+            seen_image_hashes.add(image_hash)
 
             result = self._image_understanding_service.analyze_image(
                 image_bytes,
@@ -167,6 +191,10 @@ class PdfDocumentLoader(IDocumentLoader):
             notes.append(f"Image {image_index}: {note_text}")
 
         return notes, providers_used
+
+    @staticmethod
+    def _fingerprint_image_bytes(image_bytes: bytes) -> str:
+        return hashlib.sha1(image_bytes).hexdigest()[:24]
 
     @staticmethod
     def _merge_text_and_image_notes(*, text: str, image_notes: list[str]) -> str:
@@ -199,7 +227,7 @@ class PdfDocumentLoader(IDocumentLoader):
 
             seen.add(lowered)
             cleaned_lines.append(line)
-            if len(cleaned_lines) >= 3:
+            if len(cleaned_lines) >= 5:
                 break
 
         return "\n".join(cleaned_lines).strip()
@@ -234,8 +262,16 @@ class PdfDocumentLoader(IDocumentLoader):
         if len(stripped_symbols) > len(compact) * 0.35:
             return False
 
-        if not has_cjk and len(cls._LATIN_WORD_RE.findall(compact)) < 2:
-            return False
+        if not has_cjk:
+            latin_word_count = len(cls._LATIN_WORD_RE.findall(compact))
+            if latin_word_count < 2:
+                numeric_count = len(cls._NUMERIC_TOKEN_RE.findall(compact))
+                if not (
+                    (latin_word_count >= 1 and numeric_count >= 3)
+                    or numeric_count >= 5
+                    or "%" in compact
+                ):
+                    return False
 
         return True
 

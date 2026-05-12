@@ -44,13 +44,26 @@ class Settings(BaseSettings):
     enable_local_vision_fallback: bool = True
     local_vision_endpoint: str = "http://localhost:11434"
     local_vision_model: str = "llava:7b"
+    local_vision_model_candidates: str = "qwen2.5vl:7b,llava:13b,llava:7b"
+    local_vision_model_discovery_ttl_seconds: int = 300
+    local_vision_max_model_attempts: int = 1
+    local_vision_request_timeout_seconds: float = 8.0
+    local_vision_max_concurrency: int = 1
     enable_local_ocr_fallback: bool = True
+    local_ocr_max_concurrency: int = 1
     image_understanding_min_bytes: int = 2048
     image_understanding_min_edge_pixels: int = 96
     image_ocr_min_confidence: float = 0.35
+    ocr_max_variants_per_image: int = 2
+    ocr_max_seconds_per_image: float = 6.0
+    image_analysis_max_concurrency: int = 2
     image_analysis_timeout_seconds: float = 25.0
     image_analysis_max_lines: int = 12
     image_analysis_min_meaningful_chars: int = 10
+    image_analysis_min_area_pixels: int = 14400
+    image_analysis_min_entropy: float = 2.2
+    image_analysis_min_text_density: float = 0.015
+    image_analysis_max_pixels: int = 2200000
     image_analysis_min_edge_mean: float = 3.0
     image_analysis_min_grayscale_stddev: float = 6.0
 
@@ -65,6 +78,7 @@ class Settings(BaseSettings):
 
     pptx_max_images_per_slide: int = 2
     pptx_max_images_per_document: int = 24
+    pptx_max_slides_with_image_analysis: int = 12
     pptx_image_analysis_text_char_threshold: int = 950
     pptx_image_analysis_max_seconds_per_document: float = 25.0
 

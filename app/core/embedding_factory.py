@@ -7,6 +7,7 @@ from langchain_openai import OpenAIEmbeddings
 from app.core.config import Settings
 from app.services.embeddings.deterministic_embeddings import DeterministicEmbeddings
 from app.services.embeddings.local_semantic_embeddings import LocalSemanticEmbeddings
+from app.services.embeddings.resilient_embeddings import ResilientEmbeddings
 
 
 logger = logging.getLogger(__name__)
@@ -42,11 +43,26 @@ def build_embeddings(settings: Settings) -> Embeddings:
         )
 
     if settings.google_api_key.strip():
-        logger.info("embedding_provider_selected provider=google model=models/gemini-embedding-001")
-        return GoogleGenerativeAIEmbeddings(
+        primary = GoogleGenerativeAIEmbeddings(
             google_api_key=settings.google_api_key,
             model="models/gemini-embedding-001",
         )
+
+        if settings.openai_api_key.strip():
+            fallback: Embeddings = OpenAIEmbeddings(
+                model=settings.embeddings_model,
+                api_key=settings.openai_api_key,
+            )
+            fallback_provider = "openai"
+        else:
+            fallback = DeterministicEmbeddings()
+            fallback_provider = "deterministic"
+
+        logger.info(
+            "embedding_provider_selected provider=google model=models/gemini-embedding-001 fallback=%s",
+            fallback_provider,
+        )
+        return ResilientEmbeddings(primary=primary, fallback=fallback)
 
     if settings.openai_api_key.strip():
         logger.info("embedding_provider_selected provider=openai model=%s", settings.embeddings_model)

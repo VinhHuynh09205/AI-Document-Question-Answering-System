@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 import re
 import time
 
@@ -17,6 +18,7 @@ class PptxDocumentLoader(IDocumentLoader):
     )
     _LATIN_WORD_RE = re.compile(r"[A-Za-z\u00C0-\u024F]{2,}")
     _CJK_RE = re.compile(r"[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]")
+    _NUMERIC_TOKEN_RE = re.compile(r"\d+(?:[.,]\d+)?")
     _DECORATIVE_LINE_RE = re.compile(
         r"^(?:\d{1,3}|page\s*\d{1,3}|slide\s*\d{1,3}|\d{1,3}/\d{1,3})$",
         re.IGNORECASE,
@@ -28,12 +30,14 @@ class PptxDocumentLoader(IDocumentLoader):
         *,
         max_images_per_slide: int = 2,
         max_images_per_document: int = 24,
+        max_slides_with_image_analysis: int = 12,
         text_char_threshold_for_image_analysis: int = 950,
         max_image_analysis_seconds: float = 25.0,
     ) -> None:
         self._image_understanding_service = image_understanding_service
         self._max_images_per_slide = max(1, max_images_per_slide)
         self._max_images_per_document = max(1, max_images_per_document)
+        self._max_slides_with_image_analysis = max(1, max_slides_with_image_analysis)
         self._text_char_threshold_for_image_analysis = max(250, text_char_threshold_for_image_analysis)
         self._max_image_analysis_seconds = max(1.0, float(max_image_analysis_seconds))
 
@@ -46,6 +50,8 @@ class PptxDocumentLoader(IDocumentLoader):
         repeated_lines = self._detect_repeated_slide_lines(prs)
         image_analysis_started_at = time.perf_counter()
         total_images_analyzed = 0
+        analyzed_slides = 0
+        seen_image_hashes: set[str] = set()
 
         for slide_index, slide in enumerate(prs.slides, start=1):
             parts: list[str] = []
@@ -98,14 +104,21 @@ class PptxDocumentLoader(IDocumentLoader):
             slide_text_snapshot = "\n".join(parts)
             slide_prefers_cjk = self._contains_substantial_cjk(slide_text_snapshot)
 
-            if self._should_analyze_slide_images(
+            picture_shapes = [
+                shape for shape in slide.shapes
+                if shape.shape_type == MSO_SHAPE_TYPE.PICTURE
+            ]
+
+            should_analyze_images = self._should_analyze_slide_images(
                 text_snapshot=slide_text_snapshot,
                 total_images_analyzed=total_images_analyzed,
+                analyzed_slides=analyzed_slides,
                 started_at=image_analysis_started_at,
-            ):
-                for shape in slide.shapes:
-                    if shape.shape_type != MSO_SHAPE_TYPE.PICTURE:
-                        continue
+                picture_count=len(picture_shapes),
+            )
+            if should_analyze_images:
+                analyzed_slides += 1
+                for shape in picture_shapes:
 
                     image_counter += 1
                     if image_counter > self._max_images_per_slide:
@@ -118,6 +131,11 @@ class PptxDocumentLoader(IDocumentLoader):
                     image_bytes = getattr(getattr(shape, "image", None), "blob", b"")
                     if not image_bytes:
                         continue
+
+                    image_hash = self._fingerprint_image_bytes(image_bytes)
+                    if image_hash in seen_image_hashes:
+                        continue
+                    seen_image_hashes.add(image_hash)
 
                     result = self._image_understanding_service.analyze_image(
                         image_bytes,
@@ -195,12 +213,20 @@ class PptxDocumentLoader(IDocumentLoader):
         *,
         text_snapshot: str,
         total_images_analyzed: int,
+        analyzed_slides: int,
         started_at: float,
+        picture_count: int,
     ) -> bool:
         if self._image_understanding_service is None:
             return False
 
+        if picture_count <= 0:
+            return False
+
         if total_images_analyzed >= self._max_images_per_document:
+            return False
+
+        if analyzed_slides >= self._max_slides_with_image_analysis:
             return False
 
         elapsed_seconds = time.perf_counter() - started_at
@@ -212,12 +238,25 @@ class PptxDocumentLoader(IDocumentLoader):
             return True
 
         if len(compact_text) >= self._text_char_threshold_for_image_analysis:
+            if picture_count < 2:
+                return False
+            if len(compact_text) >= int(self._text_char_threshold_for_image_analysis * 1.4):
+                return False
+
+        if picture_count >= 2 and len(compact_text) < int(self._text_char_threshold_for_image_analysis * 1.25):
+            return True
+
+        if len(compact_text) >= self._text_char_threshold_for_image_analysis:
             return False
 
-        if len(self._LATIN_WORD_RE.findall(compact_text)) >= 120:
+        if len(self._LATIN_WORD_RE.findall(compact_text)) >= 120 and picture_count < 3:
             return False
 
         return True
+
+    @staticmethod
+    def _fingerprint_image_bytes(image_bytes: bytes) -> str:
+        return hashlib.sha1(image_bytes).hexdigest()[:24]
 
     @classmethod
     def _detect_repeated_slide_lines(cls, presentation: Presentation) -> set[str]:
@@ -265,7 +304,7 @@ class PptxDocumentLoader(IDocumentLoader):
 
             seen.add(lowered)
             cleaned_lines.append(line)
-            if len(cleaned_lines) >= 3:
+            if len(cleaned_lines) >= 5:
                 break
 
         return "\n".join(cleaned_lines).strip()
@@ -300,8 +339,16 @@ class PptxDocumentLoader(IDocumentLoader):
         if len(stripped_symbols) > len(compact) * 0.35:
             return False
 
-        if not has_cjk and len(cls._LATIN_WORD_RE.findall(compact)) < 2:
-            return False
+        if not has_cjk:
+            latin_word_count = len(cls._LATIN_WORD_RE.findall(compact))
+            if latin_word_count < 2:
+                numeric_count = len(cls._NUMERIC_TOKEN_RE.findall(compact))
+                if not (
+                    (latin_word_count >= 1 and numeric_count >= 3)
+                    or numeric_count >= 5
+                    or "%" in compact
+                ):
+                    return False
 
         return True
 

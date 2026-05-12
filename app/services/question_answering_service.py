@@ -2073,13 +2073,16 @@ class QuestionAnsweringService(IQuestionAnsweringService):
                 filename = filename.split("_", 1)[1]
 
             page = doc.metadata.get("page")
-            chunk_index = doc.metadata.get("chunk_index")
+            slide_number = doc.metadata.get("slide_number") or doc.metadata.get("slide")
+            sheet_name = doc.metadata.get("sheet_name") or doc.metadata.get("sheet")
 
             source_ref = filename
             if page is not None:
                 source_ref += f" (trang {page})"
-            if chunk_index is not None:
-                source_ref += f" [đoạn {chunk_index}]"
+            elif slide_number is not None:
+                source_ref += f" (slide {slide_number})"
+            elif sheet_name:
+                source_ref += f" (sheet {sheet_name})"
 
             if source_ref in seen:
                 continue

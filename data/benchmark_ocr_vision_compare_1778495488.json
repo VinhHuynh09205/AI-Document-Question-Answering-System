@@ -1,0 +1,53 @@
+{
+  "files": [
+    "/app/data/uploads/249b7486dd7e48d7904701d9ee43e19c/d993f6f8e7b94c6ba67742a898447482_khong-gian-lam-viec-workspace-moi-2-2026-05-04T03-05-55-074Z.pdf",
+    "/app/data/uploads/249b7486dd7e48d7904701d9ee43e19c/eedfbe50a66e45cd96fb9efc8d36d49f_Chuong 2-Testing trong vong doi phat trien PM (1).pdf",
+    "/app/data/uploads/43d83f5b1c664d64a3547a1725c8baf9_29e3adebe0924339a382dfd7562b5d06__D\u1ef1 \u00e1n SMD.docx",
+    "/app/data/uploads/vinhhnq@edu.ut.vn/15fccd875a044253ab01d123f30c872e/72d2793a94474696afd46bf90e8303ed_2021_ Buoi 1.pptx"
+  ],
+  "optimized": {
+    "profile": "optimized",
+    "elapsed_seconds": 57.14,
+    "files_processed": 4,
+    "chunks_indexed": 148,
+    "image_calls": 6,
+    "image_total_seconds": 126.317,
+    "image_provider_counts": {
+      "local_ocr": 4,
+      "no_result": 2
+    },
+    "pipeline_timing": {
+      "ingestion_total_time_ms": 57139.525,
+      "chunking_time_ms": 11.432,
+      "embedding_generation_time_ms": 43163.284,
+      "vector_index_time_ms": 43172.637
+    }
+  },
+  "baseline_like": {
+    "profile": "baseline_like",
+    "elapsed_seconds": 245.166,
+    "files_processed": 4,
+    "chunks_indexed": 150,
+    "image_calls": 43,
+    "image_total_seconds": 747.051,
+    "image_provider_counts": {
+      "local_ocr": 30,
+      "no_result": 9,
+      "image_too_small": 4
+    },
+    "pipeline_timing": {
+      "ingestion_total_time_ms": 245165.939,
+      "chunking_time_ms": 103.959,
+      "embedding_generation_time_ms": 49243.555,
+      "vector_index_time_ms": 49260.706
+    }
+  },
+  "comparison": {
+    "speedup_x": 4.291,
+    "elapsed_seconds_saved": 188.026,
+    "elapsed_reduction_percent": 76.69,
+    "image_time_seconds_saved": 620.734,
+    "image_time_reduction_percent": 83.09,
+    "image_calls_reduction": 37
+  }
+}
