@@ -1863,6 +1863,19 @@ function buildSourceListHtml(sources) {
   `;
 }
 
+function setAssistantSources(message, sources = []) {
+  if (!message) return;
+  for (const sourceList of Array.from(message.querySelectorAll(".source-list"))) {
+    sourceList.remove();
+  }
+
+  const html = buildSourceListHtml(sources);
+  if (!html) return;
+
+  const stack = message.querySelector(".assistant-message-stack") || message;
+  stack.insertAdjacentHTML("beforeend", html);
+}
+
 function appendAssistantMessage(text) {
   const persisted = extractPersistedSourcesFromText(text);
   const id = `msg_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -1873,9 +1886,12 @@ function appendAssistantMessage(text) {
     <div class="avatar assistant-avatar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div class="bubble"><div class="bubble-content"></div>${buildSourceListHtml(persisted.sources)}</div>
+    <div class="assistant-message-stack">
+      <div class="bubble"><div class="bubble-content"></div></div>
+    </div>
   `;
   chatTimeline.append(article);
+  setAssistantSources(article, persisted.sources);
   const bubble = article.querySelector(".bubble");
   void setAssistantBubbleContent(bubble, persisted.text, { streaming: false });
   scrollTimeline();
@@ -1891,12 +1907,14 @@ function showThinkingIndicator() {
     <div class="avatar assistant-avatar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" stroke="#0D9488" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
-    <div class="bubble">
-      <div class="thinking-indicator">
-        <div class="thinking-dots">
-          <span></span><span></span><span></span>
+    <div class="assistant-message-stack">
+      <div class="bubble">
+        <div class="thinking-indicator">
+          <div class="thinking-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="thinking-text">Đang suy nghĩ...</span>
         </div>
-        <span class="thinking-text">Đang suy nghĩ...</span>
       </div>
     </div>
   `;
@@ -1914,8 +1932,8 @@ function replaceAssistantMessage(messageId, text, sources = []) {
 
   bubble.innerHTML = `
     <div class="bubble-content"></div>
-    ${buildSourceListHtml(mergedSources)}
   `;
+  setAssistantSources(message, mergedSources);
   void setAssistantBubbleContent(bubble, persisted.text, { streaming: false });
   scrollTimeline();
 }
@@ -1937,7 +1955,7 @@ function replaceAssistantMessagePlainText(messageId, text) {
   contentEl.dataset.rawText = String(text ?? "");
   contentEl.textContent = String(text ?? "");
 
-  const sourceList = bubble.querySelector(".source-list");
+  const sourceList = message.querySelector(".source-list");
   if (sourceList) {
     sourceList.remove();
   }
@@ -4045,6 +4063,12 @@ async function buildChatExportDocumentElement(options = {}) {
     normalizeExportBubbleClone(bubbleClone);
     await prepareBubbleCloneForExport(bubbleClone, options);
 
+    const sourceList = message.querySelector(".source-list");
+    const sourceClone = sourceList ? sourceList.cloneNode(true) : null;
+    if (sourceClone) {
+      normalizeExportBubbleClone(sourceClone);
+    }
+
     const item = document.createElement("section");
     item.className = `chat-export-message ${roleClass}`;
 
@@ -4055,6 +4079,9 @@ async function buildChatExportDocumentElement(options = {}) {
     const content = document.createElement("div");
     content.className = "chat-export-content";
     content.innerHTML = bubbleClone.innerHTML || "<p>(Không có nội dung)</p>";
+    if (sourceClone) {
+      content.appendChild(sourceClone);
+    }
 
     item.appendChild(roleLine);
     item.appendChild(content);

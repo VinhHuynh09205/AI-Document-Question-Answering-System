@@ -1,0 +1,744 @@
+{
+  "scope": "file-scoped hybrid retrieval on current FAISS index",
+  "owner": "__guest__-rqreal9d1bfed0f204417f9617",
+  "chat_id": "2c680870f54d4f528cf5949c3bf338f4",
+  "total": 43,
+  "hit5_count": 43,
+  "hit5": 1.0,
+  "mrr": 0.8992248062015503,
+  "mean_latency_ms": 510.56302325581396,
+  "results": [
+    {
+      "id": "RQ-DOCX-01",
+      "file": "Test docx.docx",
+      "question": "Đề tài nghiên cứu trong báo cáo là gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 8060.84,
+      "matched_ref": "Test docx.docx (trang 1)",
+      "top5": [
+        "Test docx.docx (trang 1)",
+        "Test docx.docx (trang 6)",
+        "Test docx.docx (trang 16)",
+        "Test docx.docx (trang 40)",
+        "Test docx.docx (trang 4)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX-02",
+      "file": "Test docx.docx",
+      "question": "Giảng viên hướng dẫn là ai?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 414.88,
+      "matched_ref": "Test docx.docx (trang 4)",
+      "top5": [
+        "Test docx.docx (trang 4)",
+        "Test docx.docx (trang 1)",
+        "Test docx.docx (trang 32)",
+        "Test docx.docx (trang 3)",
+        "Test docx.docx (trang 42)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX-03",
+      "file": "Test docx.docx",
+      "question": "Kiến trúc retrieval nổi bật được nêu là gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 613.32,
+      "matched_ref": "Test docx.docx (trang 2)",
+      "top5": [
+        "Test docx.docx (trang 2)",
+        "Test docx.docx (trang 29)",
+        "Test docx.docx (trang 3)",
+        "Test docx.docx (trang 9)",
+        "Test docx.docx (trang 33)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX-04",
+      "file": "Test docx.docx",
+      "question": "Sinh viên thực hiện là ai?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 546.43,
+      "matched_ref": "Test docx.docx (trang 4)",
+      "top5": [
+        "Test docx.docx (trang 4)",
+        "Test docx.docx (trang 1)",
+        "Test docx.docx (trang 41)",
+        "Test docx.docx (trang 3)",
+        "Test docx.docx (trang 9)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX-05",
+      "file": "Test docx.docx",
+      "question": "Chỉ số của kiến trúc Hybrid là bao nhiêu?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 879.96,
+      "matched_ref": "Test docx.docx (trang 37)",
+      "top5": [
+        "Test docx.docx (trang 37)",
+        "Test docx.docx (trang 31)",
+        "Test docx.docx (trang 42)",
+        "Test docx.docx (trang 34)",
+        "Test docx.docx (trang 38)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX-06",
+      "file": "Test docx.docx",
+      "question": "Hạn chế vận hành nào được nêu trong báo cáo?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 766.59,
+      "matched_ref": "Test docx.docx (trang 41)",
+      "top5": [
+        "Test docx.docx (trang 41)",
+        "Test docx.docx (trang 41)",
+        "Test docx.docx (trang 23)",
+        "Test docx.docx (trang 4)",
+        "Test docx.docx (trang 29)"
+      ]
+    },
+    {
+      "id": "RQ-XLSX-01",
+      "file": "Test xlsx.xlsx",
+      "question": "Workbook có bao nhiêu sheet và tên gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 320.21,
+      "matched_ref": "Test xlsx.xlsx (sheet Sheet4)",
+      "top5": [
+        "Test xlsx.xlsx (sheet Sheet4)",
+        "Test xlsx.xlsx (sheet Sheet2)",
+        "Test xlsx.xlsx (sheet Sheet4)",
+        "Test xlsx.xlsx (sheet Sheet4)",
+        "Test xlsx.xlsx (sheet Sheet2)"
+      ]
+    },
+    {
+      "id": "RQ-XLSX-02",
+      "file": "Test xlsx.xlsx",
+      "question": "Ở Sheet1, thí sinh No.1 có tổng điểm và kết quả gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 487.45,
+      "matched_ref": "Test xlsx.xlsx (sheet Sheet1)",
+      "top5": [
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)"
+      ]
+    },
+    {
+      "id": "RQ-XLSX-03",
+      "file": "Test xlsx.xlsx",
+      "question": "Ở Sheet1, ai có tổng điểm cao nhất trong các dòng mẫu?",
+      "rank": 2,
+      "hit5": 1,
+      "rr": 0.5,
+      "status": "Pass",
+      "latency_ms": 470.25,
+      "matched_ref": "Test xlsx.xlsx (sheet Sheet1)",
+      "top5": [
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)",
+        "Test xlsx.xlsx (sheet Sheet1)"
+      ]
+    },
+    {
+      "id": "RQ-IMG-OCR-01",
+      "file": "Test JPG.jpg",
+      "question": "Email liên hệ trong tài liệu OCR là gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 195.59,
+      "matched_ref": "Test JPG.jpg",
+      "top5": [
+        "Test JPG.jpg"
+      ]
+    },
+    {
+      "id": "RQ-IMG-OCR-02",
+      "file": "Test JPG.jpg",
+      "question": "Module nào có trạng thái Warning?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 175.31,
+      "matched_ref": "Test JPG.jpg",
+      "top5": [
+        "Test JPG.jpg"
+      ]
+    },
+    {
+      "id": "RQ-IMG-OCR-03",
+      "file": "Test JPG.jpg",
+      "question": "Workspace ghi trên tài liệu là gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 182.66,
+      "matched_ref": "Test JPG.jpg",
+      "top5": [
+        "Test JPG.jpg"
+      ]
+    },
+    {
+      "id": "RQ-MD-01",
+      "file": "Test md.md",
+      "question": "RAG là viết tắt của cụm từ nào?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 266.88,
+      "matched_ref": "Test md.md",
+      "top5": [
+        "Test md.md",
+        "Test md.md",
+        "Test md.md",
+        "Test md.md",
+        "Test md.md"
+      ]
+    },
+    {
+      "id": "RQ-MD-02",
+      "file": "Test md.md",
+      "question": "Top-k Retrieval được mô tả ra sao?",
+      "rank": 2,
+      "hit5": 1,
+      "rr": 0.5,
+      "status": "Pass",
+      "latency_ms": 229.92,
+      "matched_ref": "Test md.md",
+      "top5": [
+        "Test md.md",
+        "Test md.md",
+        "Test md.md",
+        "Test md.md",
+        "Test md.md"
+      ]
+    },
+    {
+      "id": "RQ-MD-03",
+      "file": "Test md.md",
+      "question": "Fallback dùng khi nào?",
+      "rank": 4,
+      "hit5": 1,
+      "rr": 0.25,
+      "status": "Pass",
+      "latency_ms": 200.18,
+      "matched_ref": "Test md.md",
+      "top5": [
+        "Test md.md",
+        "Test md.md",
+        "Test md.md",
+        "Test md.md",
+        "Test md.md"
+      ]
+    },
+    {
+      "id": "RQ-PDFT-01",
+      "file": "Test pdf.pdf",
+      "question": "Chương 1 của tài liệu PDF nói về nội dung gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 356.46,
+      "matched_ref": "Test pdf.pdf (trang 1)",
+      "top5": [
+        "Test pdf.pdf (trang 1)",
+        "Test pdf.pdf (trang 6)",
+        "Test pdf.pdf (trang 2)",
+        "Test pdf.pdf (trang 2)",
+        "Test pdf.pdf (trang 4)"
+      ]
+    },
+    {
+      "id": "RQ-PDFT-02",
+      "file": "Test pdf.pdf",
+      "question": "Bài thực hành chương 1 yêu cầu cài thư viện gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 371.82,
+      "matched_ref": "Test pdf.pdf (trang 18)",
+      "top5": [
+        "Test pdf.pdf (trang 18)",
+        "Test pdf.pdf (trang 15)",
+        "Test pdf.pdf (trang 14)",
+        "Test pdf.pdf (trang 14)",
+        "Test pdf.pdf (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-PDFT-03",
+      "file": "Test pdf.pdf",
+      "question": "Trang cuối tài liệu là mục gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 329.28,
+      "matched_ref": "Test pdf.pdf (trang 19)",
+      "top5": [
+        "Test pdf.pdf (trang 19)",
+        "Test pdf.pdf (trang 2)",
+        "Test pdf.pdf (trang 14)",
+        "Test pdf.pdf (trang 6)",
+        "Test pdf.pdf (trang 3)"
+      ]
+    },
+    {
+      "id": "RQ-PDFS-01",
+      "file": "Test pdf scan.pdf",
+      "question": "Trang 1 file scan hiển thị nhãn gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 191.16,
+      "matched_ref": "Test pdf scan.pdf (trang 1)",
+      "top5": [
+        "Test pdf scan.pdf (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-PDFS-02",
+      "file": "Test pdf scan.pdf",
+      "question": "File scan có bao nhiêu trang?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 166.08,
+      "matched_ref": "Test pdf scan.pdf (trang 1)",
+      "top5": [
+        "Test pdf scan.pdf (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-PDFS-03",
+      "file": "Test pdf scan.pdf",
+      "question": "Có trích được thông tin liên hệ từ file scan này không?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 293.57,
+      "matched_ref": "Test pdf scan.pdf (trang 1)",
+      "top5": [
+        "Test pdf scan.pdf (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-PPTX-01",
+      "file": "Test pptx.pptx",
+      "question": "Tiêu đề slide đầu là gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 223.7,
+      "matched_ref": "Test pptx.pptx (slide 1)",
+      "top5": [
+        "Test pptx.pptx (slide 1)",
+        "Test pptx.pptx (slide 2)",
+        "Test pptx.pptx (slide 3)",
+        "Test pptx.pptx (slide 4)",
+        "Test pptx.pptx (slide 6)"
+      ]
+    },
+    {
+      "id": "RQ-PPTX-02",
+      "file": "Test pptx.pptx",
+      "question": "Bài giảng khuyến nghị làm việc tối thiểu bao lâu ở cùng công ty?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 482.82,
+      "matched_ref": "Test pptx.pptx (slide 25)",
+      "top5": [
+        "Test pptx.pptx (slide 25)",
+        "Test pptx.pptx (slide 6)",
+        "Test pptx.pptx (slide 43)",
+        "Test pptx.pptx (slide 34)",
+        "Test pptx.pptx (slide 14)"
+      ]
+    },
+    {
+      "id": "RQ-PPTX-03",
+      "file": "Test pptx.pptx",
+      "question": "Thông điệp về khác biệt văn hóa là gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 342.19,
+      "matched_ref": "Test pptx.pptx (slide 42)",
+      "top5": [
+        "Test pptx.pptx (slide 42)",
+        "Test pptx.pptx (slide 14)",
+        "Test pptx.pptx (slide 6)",
+        "Test pptx.pptx (slide 43)",
+        "Test pptx.pptx (slide 11)"
+      ]
+    },
+    {
+      "id": "RQ-TXT-01",
+      "file": "test txt.txt",
+      "question": "Du lịch sinh thái là gì?",
+      "rank": 2,
+      "hit5": 1,
+      "rr": 0.5,
+      "status": "Pass",
+      "latency_ms": 199.1,
+      "matched_ref": "test txt.txt",
+      "top5": [
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt"
+      ]
+    },
+    {
+      "id": "RQ-TXT-02",
+      "file": "test txt.txt",
+      "question": "Cần Giờ có vai trò gì trong hệ sinh thái?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 292.05,
+      "matched_ref": "test txt.txt",
+      "top5": [
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt"
+      ]
+    },
+    {
+      "id": "RQ-TXT-03",
+      "file": "test txt.txt",
+      "question": "Nguyên tắc phát triển du lịch sinh thái bền vững gồm gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 444.4,
+      "matched_ref": "test txt.txt",
+      "top5": [
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt",
+        "test txt.txt"
+      ]
+    },
+    {
+      "id": "RQ-IMGTXT-01",
+      "file": "Test PNG.png",
+      "question": "Quán mở cửa khung giờ nào?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 188.86,
+      "matched_ref": "Test PNG.png",
+      "top5": [
+        "Test PNG.png"
+      ]
+    },
+    {
+      "id": "RQ-IMGTXT-02",
+      "file": "Test jpeg.jpeg",
+      "question": "Tổng đơn hàng là bao nhiêu?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 177.92,
+      "matched_ref": "Test jpeg.jpeg",
+      "top5": [
+        "Test jpeg.jpeg"
+      ]
+    },
+    {
+      "id": "RQ-IMGTXT-03",
+      "file": "Test jpeg.jpeg",
+      "question": "Tổng doanh thu là bao nhiêu?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 338.92,
+      "matched_ref": "Test jpeg.jpeg",
+      "top5": [
+        "Test jpeg.jpeg"
+      ]
+    },
+    {
+      "id": "RQ-PPTX2-01",
+      "file": "AI Document Question Answering System.pptx",
+      "question": "Đề tài ở slide đầu là gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 112.64,
+      "matched_ref": "AI Document Question Answering System.pptx (slide 1)",
+      "top5": [
+        "AI Document Question Answering System.pptx (slide 1)",
+        "AI Document Question Answering System.pptx (slide 2)",
+        "AI Document Question Answering System.pptx (slide 3)",
+        "AI Document Question Answering System.pptx (slide 4)",
+        "AI Document Question Answering System.pptx (slide 5)"
+      ]
+    },
+    {
+      "id": "RQ-PPTX2-02",
+      "file": "AI Document Question Answering System.pptx",
+      "question": "Kiến trúc tổng thể của hệ thống có backend và data layer nào?",
+      "rank": 4,
+      "hit5": 1,
+      "rr": 0.25,
+      "status": "Pass",
+      "latency_ms": 352.67,
+      "matched_ref": "AI Document Question Answering System.pptx (slide 6)",
+      "top5": [
+        "AI Document Question Answering System.pptx (slide 6)",
+        "AI Document Question Answering System.pptx (slide 2)",
+        "AI Document Question Answering System.pptx (slide 9)",
+        "AI Document Question Answering System.pptx (slide 6)",
+        "AI Document Question Answering System.pptx (slide 12)"
+      ]
+    },
+    {
+      "id": "RQ-PPTX2-03",
+      "file": "AI Document Question Answering System.pptx",
+      "question": "Pipeline xử lý tài liệu dùng chunk_size và overlap bao nhiêu?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 352.97,
+      "matched_ref": "AI Document Question Answering System.pptx (slide 8)",
+      "top5": [
+        "AI Document Question Answering System.pptx (slide 8)",
+        "AI Document Question Answering System.pptx (slide 2)",
+        "AI Document Question Answering System.pptx (slide 8)",
+        "AI Document Question Answering System.pptx (slide 5)",
+        "AI Document Question Answering System.pptx (slide 9)"
+      ]
+    },
+    {
+      "id": "RQ-XLSX2-01",
+      "file": "file_excel_mau_song_xanh.xlsx",
+      "question": "Workbook sống xanh có những sheet nào?",
+      "rank": 3,
+      "hit5": 1,
+      "rr": 0.3333333333333333,
+      "status": "Pass",
+      "latency_ms": 408.05,
+      "matched_ref": "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+      "top5": [
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)"
+      ]
+    },
+    {
+      "id": "RQ-XLSX2-02",
+      "file": "file_excel_mau_song_xanh.xlsx",
+      "question": "Tổng lượt tham gia trong sheet tổng quan là bao nhiêu?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 384.88,
+      "matched_ref": "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+      "top5": [
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)"
+      ]
+    },
+    {
+      "id": "RQ-XLSX2-03",
+      "file": "file_excel_mau_song_xanh.xlsx",
+      "question": "Ở sheet tổng quan, khu vực Căn tin có bao nhiêu người tham gia và rác tái chế?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 385.48,
+      "matched_ref": "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+      "top5": [
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Tong_quan)"
+      ]
+    },
+    {
+      "id": "RQ-XLSX2-04",
+      "file": "file_excel_mau_song_xanh.xlsx",
+      "question": "Ngày 2026-05-03 có hoạt động gì và ai phụ trách?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 361.6,
+      "matched_ref": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+      "top5": [
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX2-01",
+      "file": "bao_cao_an_toan_du_lieu_ca_nhan.docx",
+      "question": "Báo cáo DOCX nói về vấn đề gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 196.85,
+      "matched_ref": "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+      "top5": [
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX2-02",
+      "file": "bao_cao_an_toan_du_lieu_ca_nhan.docx",
+      "question": "Nguyên nhân chính gây rủi ro dữ liệu cá nhân là gì?",
+      "rank": 3,
+      "hit5": 1,
+      "rr": 0.3333333333333333,
+      "status": "Pass",
+      "latency_ms": 280.51,
+      "matched_ref": "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+      "top5": [
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-DOCX2-03",
+      "file": "bao_cao_an_toan_du_lieu_ca_nhan.docx",
+      "question": "Bảng đề xuất biện pháp gồm các nhóm giải pháp nào?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 278.04,
+      "matched_ref": "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+      "top5": [
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)",
+        "bao_cao_an_toan_du_lieu_ca_nhan.docx (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-PDF2-01",
+      "file": "bao_cao_quan_ly_rac_thai_nhua.pdf",
+      "question": "Báo cáo PDF nói về vấn đề gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 174.1,
+      "matched_ref": "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+      "top5": [
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-PDF2-02",
+      "file": "bao_cao_quan_ly_rac_thai_nhua.pdf",
+      "question": "Vi nhựa gây hậu quả gì?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 177.54,
+      "matched_ref": "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+      "top5": [
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)"
+      ]
+    },
+    {
+      "id": "RQ-PDF2-03",
+      "file": "bao_cao_quan_ly_rac_thai_nhua.pdf",
+      "question": "Kế hoạch hành động đề xuất gồm những hoạt động nào?",
+      "rank": 1,
+      "hit5": 1,
+      "rr": 1.0,
+      "status": "Pass",
+      "latency_ms": 280.08,
+      "matched_ref": "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+      "top5": [
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)",
+        "bao_cao_quan_ly_rac_thai_nhua.pdf (trang 1)"
+      ]
+    }
+  ]
+}

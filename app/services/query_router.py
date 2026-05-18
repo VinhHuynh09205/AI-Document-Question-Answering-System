@@ -22,7 +22,9 @@ _TABLE_CALC_HINT_RE = re.compile(
     re.IGNORECASE,
 )
 _TABLE_LOOKUP_HINT_RE = re.compile(
-    r"\b(lookup|tra\s*cứu|tra\s*cuu|liet\s*ke|liệt\s*kê|co\s*nhung|nhung|row|dong|dòng|sheet|excel|xlsx|xls|table|bang|bảng)\b",
+    r"\b(lookup|tra\s*cứu|tra\s*cuu|liet\s*ke|liệt\s*kê|co\s*nhung|nhung|"
+    r"row|dong|dòng|sheet|excel|xlsx|xls|table|bang|bảng|"
+    r"thi\s*sinh|hoc\s*vien|student|no\.?\s*\d{1,4})\b",
     re.IGNORECASE,
 )
 _IMAGE_OCR_HINT_RE = re.compile(
@@ -171,7 +173,12 @@ class QueryRouter:
 
     @staticmethod
     def extract_slide_number_hint(question: str) -> int | None:
-        match = _SLIDE_NUMBER_HINT_RE.search(str(question or ""))
+        raw_question = str(question or "")
+        folded_question = QueryRouter.fold_text(raw_question)
+        if re.search(r"\bslide\s*(?:dau|dau\s*tien|first)\b", folded_question):
+            return 1
+
+        match = _SLIDE_NUMBER_HINT_RE.search(raw_question)
         if match is None:
             return None
         try:
@@ -181,7 +188,12 @@ class QueryRouter:
 
     @staticmethod
     def extract_page_number_hint(question: str) -> int | None:
-        match = _PAGE_NUMBER_HINT_RE.search(str(question or ""))
+        raw_question = str(question or "")
+        folded_question = QueryRouter.fold_text(raw_question)
+        if re.search(r"\b(?:page|trang)\s*(?:dau|dau\s*tien|first)\b", folded_question):
+            return 1
+
+        match = _PAGE_NUMBER_HINT_RE.search(raw_question)
         if match is None:
             return None
         try:

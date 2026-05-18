@@ -131,4 +131,4 @@ def test_ask_unrelated_question_returns_fallback() -> None:
         assert ask_response.status_code == 200
         payload = ask_response.json()
         assert len(payload["answer"]) > 0
-        assert payload["answer"] != FALLBACK_ANSWER
+        assert payload["answer"] == FALLBACK_ANSWER

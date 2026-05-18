@@ -137,6 +137,14 @@ class PoliteBulletSheetSummaryDumpLLMProvider:
         yield self.generate_grounded_answer(question, context_docs)
 
 
+class InlineSourceLLMProvider:
+    def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
+        return 'Dạ, Tiêu đề slide 1 là "オフィス業務" (nguồn: deck.pptx slide 1).'
+
+    def stream_grounded_answer(self, question: str, context_docs: list[Document]):
+        yield self.generate_grounded_answer(question, context_docs)
+
+
 def test_complex_question_uses_query_expansion_and_keeps_relevant_context() -> None:
     raw_question = "So sanh dieu khoan thanh toan trong hop dong; danh gia rui ro cham giao hang?"
 
@@ -574,6 +582,37 @@ def test_pptx_scoped_queries_expand_retrieval_window_for_cross_language_question
     assert max(k for _, k, _ in fake_repo.keyword_calls) >= 32
 
 
+def test_answer_style_strips_deferential_prefix_and_inline_source() -> None:
+    question = "Slide 1 có tiêu đề là gì?"
+    slide_1 = Document(
+        page_content="Slide: 1\nTitle: オフィス業務\nNội dung giới thiệu.",
+        metadata={"source": "deck.pptx", "extension": ".pptx", "slide_number": 1, "slide_title": "オフィス業務"},
+    )
+    slide_2 = Document(
+        page_content="Slide: 2\nTitle: 会社の文化\nNội dung khác.",
+        metadata={"source": "deck.pptx", "extension": ".pptx", "slide_number": 2, "slide_title": "会社の文化"},
+    )
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [slide_1, slide_2]},
+        listed_docs=[slide_1, slide_2],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=InlineSourceLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"source": "deck.pptx"})
+
+    assert result.context_found is True
+    assert result.answer == 'Tiêu đề slide 1 là "オフィス業務".'
+    assert result.sources == ["deck.pptx (slide 1, オフィス業務)"]
+
+
 def test_spreadsheet_row_lookup_returns_structured_answer_when_llm_misses() -> None:
     question = "Ở Sheet1, thí sinh No.1 có tổng điểm và kết quả gì?"
     row_doc = Document(
@@ -613,6 +652,98 @@ def test_spreadsheet_row_lookup_returns_structured_answer_when_llm_misses() -> N
     assert "no.1" in normalized_answer
     assert "tổng điểm: 26" in normalized_answer
     assert "kết quả: đậu" in normalized_answer
+
+
+def test_scoped_context_prioritizes_spreadsheet_identifier_row() -> None:
+    question = "In Sheet1, candidate No.1 total score and result?"
+    wrong_row = Document(
+        page_content=(
+            "File: test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Structured Rows:\n"
+            "- Row 5 [A5:J5]: No. (A5): 3.0; Name: Wrong; Total Score: 18; Result: Fail"
+        ),
+        metadata={
+            "source": "test.xlsx",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Sheet1",
+            "chunk_index": 5,
+        },
+    )
+    correct_row = Document(
+        page_content=(
+            "File: test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Structured Rows:\n"
+            "- Row 3 [A3:J3]: No. (A3): 1.0; Name: Correct; Total Score: 34; Result: Pass"
+        ),
+        metadata={
+            "source": "test.xlsx",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Sheet1",
+            "chunk_index": 3,
+        },
+    )
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [wrong_row]},
+        listed_docs=[wrong_row, correct_row],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    merged_docs = service._merge_scoped_context_docs(
+        raw_question=question,
+        normalized_question=question,
+        metadata_filter={"source": "test.xlsx"},
+        context_docs=[wrong_row],
+        top_k=3,
+    )
+
+    assert merged_docs[0].page_content == correct_row.page_content
+
+
+def test_scoped_context_prioritizes_last_page_question() -> None:
+    question = "Trang cuoi tai lieu la muc gi?"
+    page_2 = Document(
+        page_content="File: lesson.pdf\nPage: 2\nText: Noi dung chuong 1",
+        metadata={"source": "lesson.pdf", "extension": ".pdf", "content_type": "pdf_page", "page": 2, "total_pages": 19},
+    )
+    page_19 = Document(
+        page_content="File: lesson.pdf\nPage: 19\nText:\nQ & A",
+        metadata={"source": "lesson.pdf", "extension": ".pdf", "content_type": "pdf_page", "page": 19, "total_pages": 19},
+    )
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [page_2]},
+        listed_docs=[page_2, page_19],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    merged_docs = service._merge_scoped_context_docs(
+        raw_question=question,
+        normalized_question=question,
+        metadata_filter={"source": "lesson.pdf"},
+        context_docs=[page_2],
+        top_k=3,
+    )
+
+    assert merged_docs[0].metadata["page"] == 19
 
 
 def test_spreadsheet_row_lookup_supports_sheet_summary_sample_rows() -> None:
@@ -1372,8 +1503,8 @@ def test_table_query_group_by_sum_returns_grouped_totals_with_citations() -> Non
     assert result.context_found is True
     assert "North: 450000" in result.answer
     assert "South: 250000" in result.answer
-    assert "campaign.xlsx" in result.answer
-    assert "Du_lieu_chien_dich" in result.answer
+    assert "campaign.xlsx" not in result.answer
+    assert result.sources == ["campaign.xlsx (sheet Du_lieu_chien_dich)"]
 
 
 def test_table_query_top_rows_returns_ranked_rows_with_citations() -> None:
@@ -1414,7 +1545,8 @@ def test_table_query_top_rows_returns_ranked_rows_with_citations() -> None:
     assert "95" in result.answer
     assert "Giảng đường" in result.answer
     assert "68" in result.answer
-    assert "nguồn:" in result.answer
+    assert "nguồn:" not in result.answer
+    assert result.sources == ["campaign.xlsx (sheet Tong_quan)"]
 
 
 def test_table_query_compare_answer_aggregates_selected_values() -> None:
@@ -1485,7 +1617,8 @@ def test_table_query_parses_pipe_table_for_ranked_docx_like_query() -> None:
     assert "250" in result.answer
     assert "Sản phẩm C" in result.answer
     assert "180" in result.answer
-    assert "report.docx" in result.answer
+    assert "report.docx" not in result.answer
+    assert result.sources == ["report.docx (trang 2)"]
 
 
 def test_query_metadata_hints_extract_slide_number_filter() -> None:

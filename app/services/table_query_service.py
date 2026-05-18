@@ -267,10 +267,7 @@ class TableQueryService:
             "count": "số lượng",
         }[operation]
         fragments = [
-            (
-                f"{group_value}: {self._format_spreadsheet_numeric(metric)}"
-                f" (nguồn: {self._format_scope(payload_rows, numeric_column if operation != 'count' else group_column)})"
-            )
+            f"{group_value}: {self._format_spreadsheet_numeric(metric)}"
             for group_value, metric, payload_rows in summaries[:6]
         ]
 
@@ -331,9 +328,7 @@ class TableQueryService:
             if result_fragment:
                 value_fragment = f"{value_fragment}; {result_fragment}"
 
-            fragments.append(
-                f"{value_fragment} (nguồn: {self._format_scope([row], numeric_column)})"
-            )
+            fragments.append(value_fragment)
 
         if not fragments:
             return ""
@@ -403,10 +398,7 @@ class TableQueryService:
                 metric = self._reduce_metric(operation, numeric_values)
 
             metrics.append(metric)
-            fragments.append(
-                f"{compare_value}: {self._format_spreadsheet_numeric(metric)}"
-                f" (nguồn: {self._format_scope(matched_rows, numeric_column if operation != 'count' else compare_column)})"
-            )
+            fragments.append(f"{compare_value}: {self._format_spreadsheet_numeric(metric)}")
 
         if len(fragments) < 2:
             return ""
@@ -455,9 +447,7 @@ class TableQueryService:
                 if dedup_key in seen:
                     continue
                 seen.add(dedup_key)
-                fragments.append(
-                    f"{display_column} {display_value} (nguồn: {self._format_scope([row], display_column)})"
-                )
+                fragments.append(f"{display_column} {display_value}")
                 continue
 
             display_parts: list[str] = []
@@ -477,7 +467,7 @@ class TableQueryService:
             if row_signature in seen:
                 continue
             seen.add(row_signature)
-            fragments.append(f"{row_signature} (nguồn: {self._format_scope([row], filter_column)})")
+            fragments.append(row_signature)
 
         if not fragments:
             return ""
