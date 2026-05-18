@@ -1,4 +1,7 @@
 import time
+from pathlib import Path
+
+from pptx import Presentation
 
 from app.services.document_loaders.pptx_document_loader import PptxDocumentLoader
 
@@ -103,3 +106,48 @@ def test_pptx_loader_honors_max_slides_with_image_analysis() -> None:
     )
 
     assert should_analyze is False
+
+
+def test_pptx_loader_emits_structured_slide_blocks_and_layout(tmp_path: Path) -> None:
+    pptx_path = tmp_path / "demo.pptx"
+
+    presentation = Presentation()
+    slide = presentation.slides.add_slide(presentation.slide_layouts[1])
+    slide.shapes.title.text = "Roadmap"
+    body = slide.shapes.placeholders[1].text_frame
+    body.text = "Milestone planning"
+    bullet = body.add_paragraph()
+    bullet.text = "Phase 1 deliverables"
+    bullet.level = 1
+    slide.notes_slide.notes_text_frame.text = "Discuss risk mitigation options."
+
+    table_slide = presentation.slides.add_slide(presentation.slide_layouts[5])
+    table_shape = table_slide.shapes.add_table(2, 2, left=0, top=0, width=2_000_000, height=800_000)
+    table_shape.table.cell(0, 0).text = "Metric"
+    table_shape.table.cell(0, 1).text = "Value"
+    table_shape.table.cell(1, 0).text = "Revenue"
+    table_shape.table.cell(1, 1).text = "120"
+
+    presentation.save(pptx_path)
+
+    loader = PptxDocumentLoader()
+    docs = loader.load(pptx_path)
+
+    assert len(docs) == 2
+
+    first_slide = docs[0]
+    assert first_slide.metadata.get("content_type") == "slide_structured"
+    assert first_slide.metadata.get("slide_number") == 1
+    assert first_slide.metadata.get("slide_layout")
+    assert first_slide.metadata.get("text_block_count", 0) >= 1
+    assert first_slide.metadata.get("has_notes") is True
+
+    blocks = first_slide.metadata.get("slide_blocks")
+    assert isinstance(blocks, list)
+    assert blocks
+    assert all("reading_order" in block for block in blocks)
+    assert all("position" in block for block in blocks)
+
+    second_slide = docs[1]
+    assert second_slide.metadata.get("slide_number") == 2
+    assert second_slide.metadata.get("has_table") is True

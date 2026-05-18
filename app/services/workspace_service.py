@@ -68,6 +68,9 @@ class WorkspaceService(IWorkspaceService):
     def list_documents(self, username: str, chat_id: str) -> list[StoredDocument]:
         return self._workspace_repository.list_documents(username, chat_id)
 
+    def list_all_documents(self) -> list[StoredDocument]:
+        return self._workspace_repository.list_all_documents()
+
     def add_message(self, username: str, chat_id: str, role: str, content: str) -> ChatMessage:
         return self._workspace_repository.add_message(
             username=username,

@@ -300,7 +300,10 @@ def main() -> None:
         "--local-model",
         type=str,
         default="",
-        help="Optional local embedding model override (for example: all-MiniLM-L6-v2)",
+        help=(
+            "Optional local embedding model override "
+            "(for example: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2)"
+        ),
     )
     args = parser.parse_args()
 

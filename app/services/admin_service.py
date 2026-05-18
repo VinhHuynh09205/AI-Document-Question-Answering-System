@@ -132,6 +132,7 @@ class AdminService(IAdminService):
 
     def get_system_config(self) -> dict:
         s = self._settings
+        effective_extensions = ",".join(sorted(s.get_supported_upload_extensions()))
         return {
             "app_name": s.app_name,
             "app_env": s.app_env,
@@ -150,7 +151,7 @@ class AdminService(IAdminService):
             "upload_rate_limit_per_window": s.upload_rate_limit_per_window,
             "enable_registration": s.enable_registration,
             "enable_security_headers": s.enable_security_headers,
-            "supported_upload_extensions": s.supported_upload_extensions,
+            "supported_upload_extensions": effective_extensions,
             "has_openai_key": bool(s.openai_api_key),
             "has_google_key": bool(s.google_api_key),
             "has_groq_key": bool(s.groq_api_key),

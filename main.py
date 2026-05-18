@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -19,6 +20,86 @@ from app.core.security_headers_middleware import SecurityHeadersMiddleware
 logger = logging.getLogger(__name__)
 
 
+def _rebuild_vector_store_if_needed(application: FastAPI) -> None:
+    container = application.state.container
+    requires_rebuild = bool(
+        getattr(container.vector_store_repository, "requires_startup_rebuild", lambda: False)()
+    )
+    if not requires_rebuild:
+        return
+
+    stored_documents = container.workspace_service.list_all_documents()
+    if not stored_documents:
+        logger.info("vector_store_startup_rebuild_skipped reason=no_stored_documents")
+        return
+
+    grouped_paths: dict[tuple[str, str], list[Path]] = defaultdict(list)
+    seen_paths: set[tuple[str, str, str]] = set()
+    missing_paths = 0
+
+    for document in stored_documents:
+        raw_path = str(document.stored_path or "").strip()
+        if not raw_path:
+            continue
+
+        dedupe_key = (document.username, document.chat_id, raw_path)
+        if dedupe_key in seen_paths:
+            continue
+        seen_paths.add(dedupe_key)
+
+        file_path = Path(raw_path)
+        if not file_path.exists():
+            missing_paths += 1
+            logger.warning(
+                "vector_store_startup_rebuild_missing_file username=%s chat_id=%s path=%s",
+                document.username,
+                document.chat_id,
+                raw_path,
+            )
+            continue
+
+        grouped_paths[(document.username, document.chat_id)].append(file_path)
+
+    if not grouped_paths:
+        logger.warning(
+            "vector_store_startup_rebuild_skipped reason=no_accessible_files documents=%s missing=%s",
+            len(stored_documents),
+            missing_paths,
+        )
+        return
+
+    processed_groups = 0
+    processed_files = 0
+    indexed_chunks = 0
+
+    for (username, chat_id), file_paths in grouped_paths.items():
+        try:
+            result = container.ingestion_service.ingest(
+                file_paths,
+                {"owner": username, "chat_id": chat_id},
+            )
+        except Exception:
+            logger.exception(
+                "vector_store_startup_rebuild_group_failed username=%s chat_id=%s files=%s",
+                username,
+                chat_id,
+                len(file_paths),
+            )
+            continue
+
+        processed_groups += 1
+        processed_files += len(file_paths)
+        indexed_chunks += result.chunks_indexed
+
+    logger.info(
+        "vector_store_startup_rebuild_completed groups=%s files=%s chunks=%s missing=%s",
+        processed_groups,
+        processed_files,
+        indexed_chunks,
+        missing_paths,
+    )
+
+
 def create_app() -> FastAPI:
     settings = get_settings()
     configure_logging(settings.log_level)
@@ -26,8 +107,15 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(application: FastAPI):
+        runtime_container = application.state.container
+
         try:
-            container.upload_job_service.start_worker()
+            _rebuild_vector_store_if_needed(application)
+        except Exception:
+            logger.exception("vector_store_startup_rebuild_failed")
+
+        try:
+            runtime_container.upload_job_service.start_worker()
             logger.info("upload_worker_started")
         except Exception:
             logger.exception("upload_worker_start_failed")
@@ -35,13 +123,13 @@ def create_app() -> FastAPI:
         yield
 
         try:
-            container.upload_job_service.stop_worker()
+            runtime_container.upload_job_service.stop_worker()
             logger.info("upload_worker_stopped")
         except Exception:
             logger.exception("upload_worker_stop_failed")
 
         try:
-            container.vector_store_repository.save()
+            runtime_container.vector_store_repository.save()
             logger.info("graceful_shutdown_vector_store_saved")
         except Exception:
             logger.exception("graceful_shutdown_vector_store_save_failed")

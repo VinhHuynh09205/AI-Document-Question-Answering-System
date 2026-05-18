@@ -24,6 +24,14 @@ class IVectorStoreRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def list_documents(
+        self,
+        metadata_filter: dict[str, str | list[str]] | None = None,
+        limit: int | None = None,
+    ) -> list[Document]:
+        raise NotImplementedError
+
+    @abstractmethod
     def save(self) -> None:
         raise NotImplementedError
 

@@ -2,7 +2,13 @@ from collections import OrderedDict
 
 from langchain_core.documents import Document
 
+from app.services.llm_providers.prompt_contract import (
+    build_visual_first_human_prompt,
+    build_visual_first_system_prompt,
+)
+from app.services.query_router import QueryRouter
 from app.services.question_answering_service import QuestionAnsweringService
+from app.services.qa_constants import FALLBACK_ANSWER
 
 
 class FakeVectorStoreRepository:
@@ -10,11 +16,14 @@ class FakeVectorStoreRepository:
         self,
         docs_by_query: dict[str, list[Document]],
         keyword_docs_by_query: dict[str, list[Document]] | None = None,
+        listed_docs: list[Document] | None = None,
     ) -> None:
         self._docs_by_query = docs_by_query
         self._keyword_docs_by_query = keyword_docs_by_query or {}
+        self._listed_docs = listed_docs or []
         self.calls: list[tuple[str, int, dict[str, str | list[str]] | None]] = []
         self.keyword_calls: list[tuple[str, int, dict[str, str | list[str]] | None]] = []
+        self.list_calls: list[tuple[dict[str, str | list[str]] | None, int | None]] = []
 
     def similarity_search(
         self,
@@ -34,11 +43,95 @@ class FakeVectorStoreRepository:
         self.keyword_calls.append((query, k, metadata_filter))
         return list(self._keyword_docs_by_query.get(query, []))[:k]
 
+    def list_documents(
+        self,
+        metadata_filter: dict[str, str | list[str]] | None = None,
+        limit: int | None = None,
+    ) -> list[Document]:
+        self.list_calls.append((metadata_filter, limit))
+        docs = list(self._listed_docs)
+        if metadata_filter:
+            filtered_docs: list[Document] = []
+            for doc in docs:
+                matches = True
+                for key, value in metadata_filter.items():
+                    actual = str(doc.metadata.get(key) or "")
+                    if isinstance(value, list):
+                        if actual not in {str(item) for item in value}:
+                            matches = False
+                            break
+                    elif actual != str(value):
+                        matches = False
+                        break
+                if matches:
+                    filtered_docs.append(doc)
+            docs = filtered_docs
+        if limit is not None:
+            return docs[:limit]
+        return docs
+
 
 class FakeLLMProvider:
     def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
         joined_context = "\n".join(doc.page_content for doc in context_docs)
         return f"Q: {question}\n{joined_context}".strip()
+
+    def stream_grounded_answer(self, question: str, context_docs: list[Document]):
+        yield self.generate_grounded_answer(question, context_docs)
+
+
+class AlwaysMissingLLMProvider:
+    def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
+        return "Không tìm thấy thông tin về mục được hỏi trong CONTEXT."
+
+    def stream_grounded_answer(self, question: str, context_docs: list[Document]):
+        yield self.generate_grounded_answer(question, context_docs)
+
+
+class HallucinatedAcronymLLMProvider:
+    def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
+        return "Hệ thống hỏi đáp dựa trên kỹ thuật RAG (Relevance-Aware Graph) để giảm thiểu hallucination của AI model."
+
+    def stream_grounded_answer(self, question: str, context_docs: list[Document]):
+        yield self.generate_grounded_answer(question, context_docs)
+
+
+class RawStructuredDumpLLMProvider:
+    def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
+        return (
+            "Row 30 [A30:L30]: Ngày (A30): 2026-05-28 00:00:00; Khu vực (B30): Căn tin; "
+            "Hoạt động (C30): Dọn vệ sinh khu vực; formula==IF(H30>=4.5,\"Rất tốt\",IF(H30>=4,\"Tốt\",\"Cần cải thiện\")) "
+            "Row 12 [A12:L12]: Ngày (A12): 2026-05-10 00:00:00; Khu vực (B12): Thư viện; Hoạt động (C12): Đổi rác lấy cây."
+        )
+
+    def stream_grounded_answer(self, question: str, context_docs: list[Document]):
+        yield self.generate_grounded_answer(question, context_docs)
+
+
+class SheetSummaryDumpLLMProvider:
+    def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
+        return (
+            "Sheet Index: 1\n"
+            "Header Columns: Khoa, Số người tham gia, Chi phí(VND)\n"
+            "Rows With Data: 120\n"
+            "Detected Tables/Ranges: used_range_1"
+        )
+
+    def stream_grounded_answer(self, question: str, context_docs: list[Document]):
+        yield self.generate_grounded_answer(question, context_docs)
+
+
+class PoliteBulletSheetSummaryDumpLLMProvider:
+    def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
+        return (
+            "Dạ, Sheet Index:1\n"
+            "- Hidden Sheet:False\n"
+            "- HeaderColumns: Ngày, Khu vực, Hoạt động, Chi phí(VND)\n"
+            "- HeaderUnits: Chi phí(VND)=VND\n"
+            "- RowsWithData:32\n"
+            "- Tables/Ranges:1\n"
+            "- used_range_1[used_range] A1:L32"
+        )
 
     def stream_grounded_answer(self, question: str, context_docs: list[Document]):
         yield self.generate_grounded_answer(question, context_docs)
@@ -82,6 +175,84 @@ def test_complex_question_uses_query_expansion_and_keeps_relevant_context() -> N
     assert len(fake_repo.calls) >= 2
 
 
+def test_secret_value_question_falls_back_instead_of_answering_from_loose_context() -> None:
+    raw_question = "Mat khau admin la gi?"
+    doc = Document(
+        page_content="Admin co quyen quan ly nguoi dung va giam sat he thong.",
+        metadata={"source": "security.md", "chunk_index": 0},
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={raw_question: [doc]}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+    assert result.sources == []
+
+
+def test_private_identifier_question_requires_direct_evidence() -> None:
+    raw_question = "Tai lieu nao co ma so thue doanh nghiep?"
+    doc = Document(
+        page_content="Doanh nghiep co the so huu hang nghin file va tai lieu noi bo khac nhau.",
+        metadata={"source": "rag.md", "chunk_index": 0},
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={raw_question: [doc]}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_explicit_model_page_question_requires_model_term_in_context() -> None:
+    raw_question = "Test pdf.pdf co nhac chi tiet mo hinh YOLOv8 o trang nao?"
+    doc = Document(
+        page_content="Tai lieu noi ve thi giac may tinh, xu ly anh va cac ung dung thuc te.",
+        metadata={"source": "Test pdf.pdf", "page": 3},
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={raw_question: [doc]}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_explicit_model_page_question_allows_grounded_term() -> None:
+    raw_question = "Test pdf.pdf co nhac chi tiet mo hinh YOLOv8 o trang nao?"
+    doc = Document(
+        page_content="Trang 12 trinh bay chi tiet mo hinh YOLOv8 cho object detection.",
+        metadata={"source": "Test pdf.pdf", "page": 12},
+    )
+    service = object.__new__(QuestionAnsweringService)
+
+    assert service._try_build_missing_evidence_fallback(raw_question, [doc]) == ""
+
+
 def test_complex_question_adapts_top_k_for_better_retrieval_coverage() -> None:
     raw_question = (
         "Hay phan tich chi tiet va so sanh cac dieu khoan thanh toan, thoi han giao hang, "
@@ -109,6 +280,146 @@ def test_complex_question_adapts_top_k_for_better_retrieval_coverage() -> None:
 
     assert fake_repo.calls
     assert max(k for _, k, _ in fake_repo.calls) > 3
+
+
+def test_document_scoped_context_rescue_uses_full_selected_document_when_retrieval_misses() -> None:
+    question = "What is the refund period?"
+    scoped_doc = Document(
+        page_content="Refund policy: customers can request a refund within 30 days of purchase.",
+        metadata={
+            "source": "policy.pdf",
+            "document_id": "doc-1",
+            "extension": ".pdf",
+            "section_title": "Refund policy",
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={},
+        listed_docs=[scoped_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "30 days" in result.answer
+    assert fake_repo.list_calls
+
+
+def test_metadata_alignment_boost_prefers_matching_section_path() -> None:
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    plain_doc = Document(
+        page_content="Customers can submit a request within 30 days.",
+        metadata={"source": "policy.docx", "extension": ".docx"},
+    )
+    structured_doc = Document(
+        page_content="Customers can submit a request within 30 days.",
+        metadata={
+            "source": "policy.docx",
+            "extension": ".docx",
+            "section_path": "Policies > Refund policy",
+            "structure_path": "Policies > Refund policy",
+        },
+    )
+
+    plain_boost = service._metadata_alignment_boost("What is the refund policy?", plain_doc)
+    structured_boost = service._metadata_alignment_boost("What is the refund policy?", structured_doc)
+
+    assert structured_boost > plain_boost
+
+
+def test_rank_scoped_context_docs_prefers_structure_match_when_content_ties() -> None:
+    question = "What is the refund policy?"
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    generic_doc = Document(
+        page_content="Customers can submit a request within 30 days.",
+        metadata={
+            "source": "policy.docx",
+            "chunk_index": 1,
+            "chunk_quality_score": 0.82,
+        },
+    )
+    structured_doc = Document(
+        page_content="Customers can submit a request within 30 days.",
+        metadata={
+            "source": "policy.docx",
+            "chunk_index": 2,
+            "chunk_quality_score": 0.82,
+            "section_path": "Policies > Refund policy",
+            "structure_path": "Policies > Refund policy",
+        },
+    )
+
+    ranked_docs = service._rank_scoped_context_docs(
+        raw_question=question,
+        normalized_question=question,
+        docs=[generic_doc, structured_doc],
+        limit=2,
+    )
+
+    assert ranked_docs[0].metadata["chunk_index"] == 2
+
+
+def test_raw_structured_dump_summary_is_rewritten_instead_of_leaking_rows() -> None:
+    question = "Tài liệu nói gì về nội dung chính?"
+    spreadsheet_doc = Document(
+        page_content="Campaign spreadsheet summary",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [spreadsheet_doc]},
+        listed_docs=[spreadsheet_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=RawStructuredDumpLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "row" not in result.answer.lower()
+    assert "sheet index" not in result.answer.lower()
+    assert "tài liệu dạng bảng" in result.answer.lower()
 
 
 def test_hybrid_retrieval_uses_keyword_candidates_when_vector_misses() -> None:
@@ -203,7 +514,1404 @@ def test_query_metadata_hints_keep_spreadsheet_filter_for_explicit_excel_request
     extensions = metadata_filter.get("extension")
     assert isinstance(extensions, list)
     assert "xlsx" in extensions
-    assert "csv" in extensions
+    assert "xls" in extensions
+
+
+def test_query_metadata_hints_detect_sheet_reference_as_spreadsheet_intent() -> None:
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    metadata_filter = service._build_query_metadata_filter(
+        "Ở Sheet1, thí sinh No.1 có tổng điểm và kết quả gì?",
+        {"source": ["test.xlsx", "notes.md"]},
+    )
+
+    assert metadata_filter is not None
+    assert metadata_filter.get("source") == ["test.xlsx", "notes.md"]
+    extensions = metadata_filter.get("extension")
+    assert isinstance(extensions, list)
+    assert "xlsx" in extensions
+    assert "xls" in extensions
+
+
+def test_pptx_scoped_queries_expand_retrieval_window_for_cross_language_questions() -> None:
+    question = "Người Nhật muốn làm việc cùng kiểu người nào?"
+    docs = [
+        Document(
+            page_content=f"slide {index}: 日本人は、どんな人と一緒に仕事がしたいと考えていますか？",
+            metadata={"source": "deck.pptx", "extension": ".pptx", "slide_number": index},
+        )
+        for index in range(1, 11)
+    ]
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: docs})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+        hybrid_retrieval_enabled=True,
+        reranking_enabled=True,
+    )
+
+    result = service.ask(question, metadata_filter={"source": "deck.pptx"})
+
+    assert result.context_found is True
+    assert "slide 10" in result.answer
+    assert fake_repo.calls
+    assert max(k for _, k, _ in fake_repo.calls) >= 32
+    assert fake_repo.keyword_calls
+    assert max(k for _, k, _ in fake_repo.keyword_calls) >= 32
+
+
+def test_spreadsheet_row_lookup_returns_structured_answer_when_llm_misses() -> None:
+    question = "Ở Sheet1, thí sinh No.1 có tổng điểm và kết quả gì?"
+    row_doc = Document(
+        page_content=(
+            "File: Test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Row: 2\n"
+            "No: 1\n"
+            "Họ tên: Nguyễn Văn A\n"
+            "Tổng điểm: 26\n"
+            "Kết quả: Đậu\n"
+        ),
+        metadata={
+            "source": "test.xlsx",
+            "content_type": "spreadsheet_row",
+            "sheet_name": "Sheet1",
+            "row_index": 2,
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [row_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    normalized_answer = result.answer.lower()
+    assert "không tìm thấy" not in normalized_answer
+    assert "no.1" in normalized_answer
+    assert "tổng điểm: 26" in normalized_answer
+    assert "kết quả: đậu" in normalized_answer
+
+
+def test_spreadsheet_row_lookup_supports_sheet_summary_sample_rows() -> None:
+    question = "Ở Sheet1, thí sinh No.1 có tổng điểm và kết quả gì?"
+    summary_doc = Document(
+        page_content=(
+            "File: Test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Columns: No, Họ tên, Tổng điểm, Kết quả\n"
+            "Rows: 2\n"
+            "Sample Rows:\n"
+            "- Row 1: No: 1; Họ tên: Nguyễn Văn A; Tổng điểm: 26; Kết quả: Đậu\n"
+            "- Row 2: No: 2; Họ tên: Nguyễn Văn B; Tổng điểm: 18; Kết quả: Rớt\n"
+        ),
+        metadata={
+            "source": "test.xlsx",
+            "content_type": "spreadsheet_sheet",
+            "sheet_name": "Sheet1",
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [summary_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    normalized_answer = result.answer.lower()
+    assert "no.1" in normalized_answer
+    assert "tổng điểm: 26" in normalized_answer
+    assert "kết quả: đậu" in normalized_answer
+
+
+def test_spreadsheet_row_lookup_supports_japanese_score_and_result_labels() -> None:
+    question = "Ở Sheet1, thí sinh No.1 có tổng điểm và kết quả gì?"
+    row_doc = Document(
+        page_content=(
+            "File: Test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Row: 3\n"
+            "No.: 1\n"
+            "受験番号: KI2\n"
+            "総計: 34\n"
+            "結果: 合格\n"
+        ),
+        metadata={
+            "source": "test.xlsx",
+            "content_type": "spreadsheet_row",
+            "sheet_name": "Sheet1",
+            "row_index": 3,
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [row_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    normalized_answer = result.answer.lower()
+    assert "no.1" in normalized_answer
+    assert "34" in normalized_answer
+    assert "合格" in result.answer
+
+
+def test_spreadsheet_row_lookup_prefers_candidate_with_total_and_result_fields() -> None:
+    question = "Ở Sheet1, thí sinh No.1 có tổng điểm và kết quả gì?"
+    summary_doc = Document(
+        page_content=(
+            "File: Test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Columns: No., 受験番号, 氏名, 性別, 学科名, 日本語, 数学, 文学\n"
+            "Rows: 2\n"
+            "Sample Rows:\n"
+            "- Row 1: No.: 1.0; 受験番号: KI2; 氏名: のび太 徳田; 性別: 男; 学科名: 教育学科; 日本語: 9.0; 数学: 8.5; 文学: 7.5\n"
+        ),
+        metadata={
+            "source": "test.xlsx",
+            "content_type": "spreadsheet_sheet",
+            "sheet_name": "Sheet1",
+        },
+    )
+    row_doc = Document(
+        page_content=(
+            "File: Test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Row: 3\n"
+            "No.: 1.0\n"
+            "受験番号: KI2\n"
+            "氏名: のび太 徳田\n"
+            "総計: 34\n"
+            "結果: 合格\n"
+        ),
+        metadata={
+            "source": "test.xlsx",
+            "content_type": "spreadsheet_row",
+            "sheet_name": "Sheet1",
+            "row_index": 3,
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [summary_doc, row_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "34" in result.answer
+    assert "合格" in result.answer
+
+
+def test_spreadsheet_aggregate_sum_is_computed_from_structured_rows() -> None:
+    question = "Trong sheet sales, tong revenue la bao nhieu?"
+    table_doc = Document(
+        page_content="Structured sales table",
+        metadata={
+            "source": "sales.xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Sales",
+            "headers": ["Code", "Revenue"],
+            "structured_rows": [
+                {"row_number": 2, "values": {"Code": "A01", "Revenue": "100"}},
+                {"row_number": 3, "values": {"Code": "A02", "Revenue": "150"}},
+                {"row_number": 4, "values": {"Code": "A03", "Revenue": "200"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [table_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "revenue" in result.answer.lower()
+    assert "450" in result.answer
+
+
+def test_spreadsheet_aggregate_sum_expands_to_full_document_scope() -> None:
+    question = "Tong chi phi la bao nhieu?"
+    retrieved_doc = Document(
+        page_content="Retrieved spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {"row_number": 3, "values": {"Ngay": "2026-05-01", "Chi phí (VND)": "450000"}},
+                {"row_number": 4, "values": {"Ngay": "2026-05-02", "Chi phí (VND)": "550000"}},
+            ],
+        },
+    )
+    additional_doc = Document(
+        page_content="Additional spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {"row_number": 5, "values": {"Ngay": "2026-05-03", "Chi phí (VND)": "1000000"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [retrieved_doc]},
+        listed_docs=[retrieved_doc, additional_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "2000000" in result.answer
+    assert fake_repo.list_calls
+    assert all(call == ({"document_id": "doc-1"}, None) for call in fake_repo.list_calls)
+
+
+def test_spreadsheet_aggregate_max_returns_descriptor_value_from_full_document_scope() -> None:
+    question = "Khu vực nào có số người tham gia cao nhất?"
+    retrieved_doc = Document(
+        page_content="Retrieved spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 3,
+                    "values": {
+                        "Khu vực": "Ký túc xá",
+                        "Số người tham gia": "32",
+                    },
+                },
+            ],
+        },
+    )
+    additional_doc = Document(
+        page_content="Additional spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 14,
+                    "values": {
+                        "Khu vực": "Thư viện",
+                        "Số người tham gia": "95",
+                    },
+                },
+                {
+                    "row_number": 15,
+                    "values": {
+                        "Khu vực": "Giảng đường",
+                        "Số người tham gia": "68",
+                    },
+                },
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [retrieved_doc]},
+        listed_docs=[retrieved_doc, additional_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "95" in result.answer
+    assert "Thư viện" in result.answer
+    assert "Khu vực" in result.answer
+
+
+def test_spreadsheet_aggregate_supports_multi_token_sheet_hint_question() -> None:
+    question = "ở sheet Du_lieu_chien_dich rác tái chế lớn nhất là bao nhiêu kg"
+    table_doc = Document(
+        page_content="Spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 3,
+                    "values": {
+                        "Khu vực": "Ký túc xá",
+                        "Rác tái chế (kg)": "4.1",
+                    },
+                },
+                {
+                    "row_number": 5,
+                    "values": {
+                        "Khu vực": "Thư viện",
+                        "Rác tái chế (kg)": "12.2",
+                    },
+                },
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [table_doc]},
+        listed_docs=[table_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "12.2" in result.answer
+    assert "Thư viện" in result.answer
+
+
+def test_spreadsheet_structured_answer_uses_scoped_docs_when_retrieval_returns_nothing() -> None:
+    question = "mức hài lòng lớn nhất là bao nhiêu"
+    table_doc = Document(
+        page_content="Spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {"row_number": 3, "values": {"Mức hài lòng": "4.6", "Khu vực": "Ký túc xá"}},
+                {"row_number": 5, "values": {"Mức hài lòng": "4.9", "Khu vực": "Thư viện"}},
+                {"row_number": 7, "values": {"Mức hài lòng": "3.8", "Khu vực": "Khoa CNTT"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={},
+        listed_docs=[table_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "4.9" in result.answer
+    assert fake_repo.list_calls
+    assert all(call == ({"document_id": "doc-1"}, None) for call in fake_repo.list_calls)
+
+
+def test_spreadsheet_text_list_returns_all_distinct_activities_for_owner() -> None:
+    question = "người phụ trách An có những hoạt động cụ thể nào"
+    retrieved_doc = Document(
+        page_content="Retrieved spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 3,
+                    "values": {
+                        "Người phụ trách": "An",
+                        "Hoạt động": "Đổi rác lấy cây",
+                    },
+                },
+                {
+                    "row_number": 13,
+                    "values": {
+                        "Người phụ trách": "An",
+                        "Hoạt động": "Thu gom rác tái chế",
+                    },
+                },
+            ],
+        },
+    )
+    additional_doc = Document(
+        page_content="Additional spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 15,
+                    "values": {
+                        "Người phụ trách": "An",
+                        "Hoạt động": "Dọn vệ sinh khu vực",
+                    },
+                },
+                {
+                    "row_number": 24,
+                    "values": {
+                        "Người phụ trách": "An",
+                        "Hoạt động": "Workshop sống xanh",
+                    },
+                },
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [retrieved_doc]},
+        listed_docs=[retrieved_doc, additional_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "Đổi rác lấy cây" in result.answer
+    assert "Thu gom rác tái chế" in result.answer
+    assert "Dọn vệ sinh khu vực" in result.answer
+    assert "Workshop sống xanh" in result.answer
+
+
+def test_spreadsheet_text_count_counts_all_matching_rows_for_text_condition() -> None:
+    question = "Có bao nhiêu đánh giá cần cải thiện"
+    retrieved_doc = Document(
+        page_content="Retrieved spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {"row_number": 3, "values": {"Đánh giá": "Cần cải thiện"}},
+                {"row_number": 4, "values": {"Đánh giá": "Tốt"}},
+            ],
+        },
+    )
+    additional_doc = Document(
+        page_content="Additional spreadsheet chunk",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {"row_number": 5, "values": {"Đánh giá": "Cần cải thiện"}},
+                {"row_number": 6, "values": {"Đánh giá": "Cần cải thiện"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [retrieved_doc]},
+        listed_docs=[retrieved_doc, additional_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "Có 3 đánh giá 'Cần cải thiện'" in result.answer
+    assert "Row" not in result.answer
+
+
+def test_spreadsheet_sheet_count_returns_direct_answer_from_sheet_metadata() -> None:
+    question = "Có bao nhiêu sheet?"
+    docs = [
+        Document(
+            page_content="File: campaign.xlsx\nSheet: Tong_quan\nSheet Index: 1\nHidden Sheet: False",
+            metadata={
+                "source": "campaign.xlsx",
+                "content_type": "spreadsheet_sheet_summary",
+                "sheet_name": "Tong_quan",
+                "sheet_index": 1,
+            },
+        ),
+        Document(
+            page_content="File: campaign.xlsx\nSheet: Du_lieu_chien_dich\nSheet Index: 2\nHidden Sheet: False",
+            metadata={
+                "source": "campaign.xlsx",
+                "content_type": "spreadsheet_sheet_summary",
+                "sheet_name": "Du_lieu_chien_dich",
+                "sheet_index": 2,
+            },
+        ),
+    ]
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: docs})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "Tài liệu có 2 sheet" in result.answer
+    assert "Tong_quan" in result.answer
+    assert "Du_lieu_chien_dich" in result.answer
+
+
+def test_spreadsheet_summary_request_rewrites_metadata_dump_to_narrative() -> None:
+    question = "Tóm tắt toàn bộ tài liệu"
+    docs = [
+        Document(
+            page_content=(
+                "File: campaign.xlsx\n"
+                "Sheet: Tong_quan\n"
+                "Sheet Index: 1\n"
+                "Header Columns: Khoa, Số người tham gia, Chi phí(VND)\n"
+                "Rows With Data: 120"
+            ),
+            metadata={
+                "source": "campaign.xlsx",
+                "document_id": "doc-1",
+                "content_type": "spreadsheet_sheet_summary",
+                "sheet_name": "Tong_quan",
+                "headers": ["Khoa", "Số người tham gia", "Chi phí(VND)"],
+                "rows_with_data": 120,
+            },
+        )
+    ]
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: docs}, listed_docs=docs)
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=SheetSummaryDumpLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "Sheet Index" not in result.answer
+    assert "Header Columns" not in result.answer
+    assert "các cột chính" in result.answer.lower()
+    assert "tài liệu dạng bảng" in result.answer.lower()
+
+
+def test_spreadsheet_summary_request_rewrites_polite_bullet_dump_to_narrative() -> None:
+    question = "Tóm tắt toàn bộ tài liệu"
+    docs = [
+        Document(
+            page_content=(
+                "File: campaign.xlsx\n"
+                "Sheet: Du_lieu_chien_dich\n"
+                "Sheet Index: 1\n"
+                "Header Columns: Ngày, Khu vực, Hoạt động, Chi phí(VND)\n"
+                "Rows With Data: 32"
+            ),
+            metadata={
+                "source": "campaign.xlsx",
+                "document_id": "doc-1",
+                "content_type": "spreadsheet_sheet_summary",
+                "sheet_name": "Du_lieu_chien_dich",
+                "headers": ["Ngày", "Khu vực", "Hoạt động", "Chi phí(VND)"],
+                "rows_with_data": 32,
+            },
+        )
+    ]
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: docs}, listed_docs=docs)
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=PoliteBulletSheetSummaryDumpLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "Sheet Index" not in result.answer
+    assert "RowsWithData" not in result.answer
+    assert "HeaderColumns" not in result.answer
+    assert "tài liệu dạng bảng" in result.answer.lower()
+
+
+def test_spreadsheet_filtered_value_answer_returns_numeric_value_for_named_group() -> None:
+    question = "Số người tham gia của khoa CNTT là bao nhiêu?"
+    table_doc = Document(
+        page_content="Participation by group",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Tong_quan",
+            "structured_rows": [
+                {"row_number": 2, "values": {"Khoa": "CNTT", "Số người tham gia": "120", "Chi phí(VND)": "480000"}},
+                {"row_number": 3, "values": {"Khoa": "Kinh tế", "Số người tham gia": "85", "Chi phí(VND)": "320000"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [table_doc]},
+        listed_docs=[table_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "CNTT" in result.answer
+    assert "120" in result.answer
+    assert "Số người tham gia" in result.answer
+
+
+def test_spreadsheet_date_lookup_returns_requested_column_from_matching_row() -> None:
+    question = "Chi phí ngày 1/5/2026 là bao nhiêu?"
+    table_doc = Document(
+        page_content="Structured campaign table",
+        metadata={
+            "source": "campaign.xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 2,
+                    "values": {
+                        "Ngày": "2026-05-01 00:00:00",
+                        "Khu vực": "Thư viện",
+                        "Chi phí(VND)": "480000",
+                    },
+                },
+                {
+                    "row_number": 3,
+                    "values": {
+                        "Ngày": "2026-05-03 00:00:00",
+                        "Khu vực": "Ký túc xá",
+                        "Chi phí(VND)": "450000",
+                    },
+                },
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [table_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "Du_lieu_chien_dich" in result.answer
+    assert "Chi phí(VND): 480000" in result.answer
+
+
+def test_table_query_group_by_sum_returns_grouped_totals_with_citations() -> None:
+    question = "Tổng chi phí theo khu vực là bao nhiêu?"
+    table_doc = Document(
+        page_content="Campaign table",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "table_name": "CampaignTable",
+            "structured_rows": [
+                {"row_number": 3, "values": {"Khu vực": "North", "Chi phí (VND)": "100000"}},
+                {"row_number": 4, "values": {"Khu vực": "South", "Chi phí (VND)": "250000"}},
+                {"row_number": 5, "values": {"Khu vực": "North", "Chi phí (VND)": "350000"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [table_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "North: 450000" in result.answer
+    assert "South: 250000" in result.answer
+    assert "campaign.xlsx" in result.answer
+    assert "Du_lieu_chien_dich" in result.answer
+
+
+def test_table_query_top_rows_returns_ranked_rows_with_citations() -> None:
+    question = "Top 2 khu vực có số người tham gia cao nhất là gì?"
+    table_doc = Document(
+        page_content="Participation table",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Tong_quan",
+            "table_name": "ParticipationTable",
+            "structured_rows": [
+                {"row_number": 3, "values": {"Khu vực": "Thư viện", "Số người tham gia": "95"}},
+                {"row_number": 4, "values": {"Khu vực": "Giảng đường", "Số người tham gia": "68"}},
+                {"row_number": 5, "values": {"Khu vực": "Ký túc xá", "Số người tham gia": "32"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [table_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "Top 2" in result.answer
+    assert "Thư viện" in result.answer
+    assert "95" in result.answer
+    assert "Giảng đường" in result.answer
+    assert "68" in result.answer
+    assert "nguồn:" in result.answer
+
+
+def test_table_query_compare_answer_aggregates_selected_values() -> None:
+    question = "So sánh doanh thu giữa North và South"
+    table_doc = Document(
+        page_content="Revenue table",
+        metadata={
+            "source": "revenue.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Sales",
+            "table_name": "RevenueTable",
+            "structured_rows": [
+                {"row_number": 2, "values": {"Khu vực": "North", "Doanh thu": "100"}},
+                {"row_number": 3, "values": {"Khu vực": "South", "Doanh thu": "80"}},
+                {"row_number": 4, "values": {"Khu vực": "North", "Doanh thu": "50"}},
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [table_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "North: 150" in result.answer
+    assert "South: 80" in result.answer
+    assert "Chênh lệch: 70" in result.answer
+
+
+def test_table_query_parses_pipe_table_for_ranked_docx_like_query() -> None:
+    question = "Top 2 sản phẩm có doanh thu cao nhất là gì?"
+    doc = Document(
+        page_content="Sản phẩm | Doanh thu | Trạng thái\nA | 120 | Tốt\nB | 250 | Tốt\nC | 180 | Trễ",
+        metadata={
+            "source": "report.docx",
+            "content_type": "document_page",
+            "page_number": 2,
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "Top 2" in result.answer
+    assert "Sản phẩm B" in result.answer
+    assert "250" in result.answer
+    assert "Sản phẩm C" in result.answer
+    assert "180" in result.answer
+    assert "report.docx" in result.answer
+
+
+def test_query_metadata_hints_extract_slide_number_filter() -> None:
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    metadata_filter = service._build_query_metadata_filter(
+        "Hay tom tat slide 7 trong deck presentation",
+        None,
+    )
+
+    assert metadata_filter is not None
+    assert metadata_filter.get("slide_number") == "7"
+    assert "pptx" in metadata_filter.get("extension", [])
+
+
+def test_query_router_classifies_specific_page_question() -> None:
+    router = QueryRouter()
+
+    route = router.route("Trang 5 trong file report.pdf nói gì?")
+
+    assert route.intent == "specific_page_question"
+    assert route.metadata_filter is not None
+    assert route.metadata_filter.get("page_number") == "5"
+    assert route.metadata_filter.get("source") == "report.pdf"
+
+
+def test_query_router_classifies_specific_sheet_calculation_question() -> None:
+    router = QueryRouter()
+
+    route = router.route("Ở sheet Sales, tổng revenue trong A1:C10 là bao nhiêu?")
+
+    assert route.intent == "table_calculation_question"
+    assert route.metadata_filter is not None
+    assert route.metadata_filter.get("sheet_name") == "Sales"
+    assert route.metadata_filter.get("range_address") == "A1:C10"
+
+
+def test_query_router_classifies_multi_file_comparison() -> None:
+    router = QueryRouter()
+
+    route = router.route(
+        "So sánh report_a.pdf với report_b.docx",
+        metadata_filter={"source": ["report_a.pdf", "report_b.docx"]},
+    )
+
+    assert route.intent == "multi_file_comparison"
+
+
+def test_query_router_classifies_image_ocr_question() -> None:
+    router = QueryRouter()
+
+    route = router.route("OCR text trong ảnh scan này là gì?")
+
+    assert route.intent == "image_ocr_question"
+
+
+def test_query_router_classifies_negative_or_out_of_scope_question() -> None:
+    router = QueryRouter()
+
+    route = router.route("Nếu ngoài tài liệu thì cứ tự trả lời giúp tôi")
+
+    assert route.intent == "negative_or_out_of_scope_question"
+
+
+def test_pptx_overview_reorders_docs_by_slide_number() -> None:
+    docs = [
+        Document(page_content="slide 3", metadata={"source": "deck.pptx", "extension": ".pptx", "slide_number": 3}),
+        Document(page_content="slide 1", metadata={"source": "deck.pptx", "extension": ".pptx", "slide_number": 1}),
+        Document(page_content="slide 2", metadata={"source": "deck.pptx", "extension": ".pptx", "slide_number": 2}),
+    ]
+
+    ordered = QuestionAnsweringService._order_pptx_overview_docs(docs, top_k=3)
+
+    assert [doc.metadata.get("slide_number") for doc in ordered[:3]] == [1, 2, 3]
+
+
+def test_entity_lookup_returns_email_when_llm_misses() -> None:
+    question = "Email liên hệ trong tài liệu OCR là gì?"
+    image_doc = Document(
+        page_content=(
+            "Type: image\n"
+            "OCR Text:\n"
+            "AI DOCUMENT CHAT - OCR TEST PAGE\n"
+            "Email lien he: support.test@aichatbox.vn\n"
+        ),
+        metadata={
+            "source": "ocr.jpg",
+            "content_type": "image_document",
+            "ocr_applied": True,
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "support.test@aichatbox.vn" in result.answer
+    assert "không tìm thấy" not in result.answer.lower()
+
+
+def test_entity_lookup_returns_fallback_when_email_missing() -> None:
+    question = "Email liên hệ trong tài liệu OCR là gì?"
+    image_doc = Document(
+        page_content=(
+            "Type: image\n"
+            "OCR Text:\n"
+            "AI DOCUMENT CHAT - OCR TEST PAGE\n"
+            "Muc tieu: kiem tra OCR\n"
+        ),
+        metadata={
+            "source": "ocr.jpg",
+            "content_type": "image_document",
+            "ocr_applied": True,
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_email_lookup_returns_extracted_email_when_present() -> None:
+    question = "Email liên hệ trong tài liệu OCR là gì?"
+    image_doc = Document(
+        page_content=(
+            "OCR Text:\n"
+            "Lien he: support.team@example.com de duoc ho tro nhanh nhat.\n"
+        ),
+        metadata={"source": "ocr.jpg", "content_type": "image_document"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "support.team@example.com" in result.answer
+
+
+def test_email_lookup_supports_common_ocr_punctuation_noise() -> None:
+    question = "Email liên hệ trong tài liệu OCR là gì?"
+    image_doc = Document(
+        page_content=(
+            "OCR Text:\n"
+            "Lien he: qa-team@example,com de duoc ho tro.\n"
+        ),
+        metadata={"source": "ocr.jpg", "content_type": "image_document"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "qa-team@example.com" in result.answer
+
+
+def test_email_lookup_returns_fallback_when_no_email_found() -> None:
+    question = "Email liên hệ trong tài liệu OCR là gì?"
+    image_doc = Document(
+        page_content=(
+            "OCR Text:\n"
+            "Kiem tra trich xuat bang, ngay thang, email va so dien thoai.\n"
+            "Khong co email cu the trong doan nay.\n"
+        ),
+        metadata={"source": "ocr.jpg", "content_type": "image_document"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_website_lookup_returns_fallback_when_no_url_found() -> None:
+    question = "Website trong tài liệu là gì?"
+    image_doc = Document(
+        page_content=(
+            "OCR Text:\n"
+            "Quan mo cua 07:00 - 22:00\n"
+            "Wi-Fi: MayCoffee_Free\n"
+        ),
+        metadata={"source": "menu.png", "content_type": "image_document"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_address_lookup_returns_fallback_when_no_address_found() -> None:
+    question = "Trong file này có địa chỉ nhà riêng của thí sinh không?"
+    row_doc = Document(
+        page_content=(
+            "File: Test.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Row: 3\n"
+            "No.: 1\n"
+            "氏名: のび太 徳田\n"
+            "総計: 34\n"
+            "結果: 合格\n"
+        ),
+        metadata={"source": "test.xlsx", "content_type": "spreadsheet_row", "sheet_name": "Sheet1"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [row_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_weekly_revenue_lookup_returns_highest_week_when_llm_misses() -> None:
+    question = "Doanh thu tuần nào cao nhất?"
+    image_doc = Document(
+        page_content=(
+            "Monthly Sales Summary 05/2026\n"
+            "Week 1: 18\n"
+            "Week 2: 20\n"
+            "Week 3: 18.7\n"
+            "Week 4: 22\n"
+        ),
+        metadata={"source": "sales.jpeg", "content_type": "image_document"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "tuần 4" in result.answer.lower()
+    assert "22" in result.answer
+
+
+def test_weekly_revenue_lookup_handles_chart_style_lines_without_inline_week_value() -> None:
+    question = "Doanh thu tuần nào cao nhất?"
+    image_doc = Document(
+        page_content=(
+            "Monthly Sales Summary\n"
+            "Doanh thu theo tuan (trieu dong)\n"
+            "Trieu dong\n"
+            "30\n"
+            "25\n"
+            "22\n"
+            "20\n"
+            "18\n"
+            "Tuan 1\n"
+            "Tuan 2\n"
+            "Tuan 3\n"
+            "Tuan 4\n"
+            "Tuan 4 dat doanh thu cao nhat.\n"
+            "Kenh ban hang\n"
+        ),
+        metadata={"source": "sales.jpeg", "content_type": "image_document"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "tuần 4" in result.answer.lower()
+    assert "22" in result.answer
+
+
+def test_weekly_revenue_lookup_handles_split_highest_hint_lines() -> None:
+    question = "Doanh thu tuần nào cao nhất?"
+    image_doc = Document(
+        page_content=(
+            "Monthly Sales Summary\n"
+            "Doanh thu theo tuan (trieu dong)\n"
+            "30\n"
+            "25\n"
+            "22\n"
+            "20\n"
+            "18\n"
+            "Tuan 1\n"
+            "Tuan 2\n"
+            "Tuan 3\n"
+            "Tuan 4\n"
+            "Tuan 4 dat doanh thu\n"
+            "cao nhat.\n"
+            "Kenh ban hang\n"
+        ),
+        metadata={"source": "sales.jpeg", "content_type": "image_document"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [image_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "tuần 4" in result.answer.lower()
+    assert "22" in result.answer
+
+
+def test_llm_not_found_phrase_is_normalized_to_canonical_fallback() -> None:
+    question = "Website liên hệ là gì?"
+    generic_doc = Document(
+        page_content="Tai lieu noi ve quy trinh noi bo, khong de cap website.",
+        metadata={"source": "policy.md", "content_type": "text"},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [generic_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
 
 
 def test_context_compression_merges_adjacent_chunks_from_same_section() -> None:
@@ -673,6 +2381,7 @@ def test_ensure_visual_answer_combines_table_and_flowchart_for_process_compariso
         normalized_question="so sanh quy trinh xu ly",
     )
 
+    assert "### Tóm tắt nhanh" not in enriched
     assert "### Bảng so sánh" in enriched
     assert "### Sơ đồ quy trình" in enriched
     assert "flowchart LR" in enriched
@@ -704,7 +2413,7 @@ def test_visual_plan_prefers_table_for_comparison_question() -> None:
         branches,
     )
 
-    assert add_summary is True
+    assert add_summary is False
     assert table_variant == "matrix"
     assert mermaid_variant is None
 
@@ -734,7 +2443,7 @@ def test_visual_plan_prefers_flowchart_for_sequential_content() -> None:
         branches,
     )
 
-    assert add_summary is True
+    assert add_summary is False
     assert table_variant is None
     assert mermaid_variant == "flowchart"
 
@@ -987,6 +2696,82 @@ def test_strip_presentation_meta_removes_format_narration() -> None:
     assert cleaned == "This is the actual answer."
 
 
+def test_sanitize_context_references_removes_prompt_echo_prefix() -> None:
+    cleaned = QuestionAnsweringService._sanitize_context_references(
+        "Trả lời câu hỏi dựa trên CONTEXT:\n\nSlide 6 là slide mô tả kiến trúc tổng thể của hệ thống."
+    )
+
+    assert cleaned == "Slide 6 là slide mô tả kiến trúc tổng thể của hệ thống."
+
+
+def test_sanitize_context_references_rewrites_context_to_tai_lieu() -> None:
+    cleaned = QuestionAnsweringService._sanitize_context_references(
+        "Thông điệp về khác biệt văn hóa trong CONTEXT này không rõ ràng và cụ thể."
+    )
+
+    assert "CONTEXT" not in cleaned
+    assert cleaned == "Thông điệp về khác biệt văn hóa trong tài liệu này không rõ ràng và cụ thể."
+
+
+def test_sanitize_unverified_acronym_expansions_removes_ungrounded_expansion() -> None:
+    doc = Document(
+        page_content="Hệ thống hỏi đáp dựa trên kỹ thuật RAG để giảm thiểu hallucination của AI model.",
+        metadata={"source": "architecture.md", "chunk_index": 0},
+    )
+
+    cleaned = QuestionAnsweringService._sanitize_unverified_acronym_expansions(
+        "Hệ thống hỏi đáp dựa trên kỹ thuật RAG (Relevance-Aware Graph) để giảm thiểu hallucination của AI model.",
+        [doc],
+    )
+
+    assert "Relevance-Aware Graph" not in cleaned
+    assert "RAG" in cleaned
+
+
+def test_sanitize_unverified_acronym_expansions_keeps_grounded_expansion() -> None:
+    doc = Document(
+        page_content="RAG (Retrieval-Augmented Generation) là cách kết hợp truy xuất và sinh câu trả lời.",
+        metadata={"source": "architecture.md", "chunk_index": 0},
+    )
+    answer = "Hệ thống hỏi đáp sử dụng RAG (Retrieval-Augmented Generation) để bám sát tài liệu."
+
+    cleaned = QuestionAnsweringService._sanitize_unverified_acronym_expansions(answer, [doc])
+
+    assert cleaned == answer
+
+
+def test_ask_removes_ungrounded_acronym_expansion_from_llm_answer() -> None:
+    question = "RAG là gì trong tài liệu?"
+    doc = Document(
+        page_content="Hệ thống hỏi đáp dựa trên kỹ thuật RAG để giảm thiểu hallucination của AI model.",
+        metadata={"source": "architecture.md", "chunk_index": 0},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=HallucinatedAcronymLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "Relevance-Aware Graph" not in result.answer
+    assert "RAG" in result.answer
+
+
+def test_visual_prompt_contract_avoids_context_wording() -> None:
+    assert "CONTEXT" not in build_visual_first_system_prompt()
+    assert "CONTEXT" not in build_visual_first_human_prompt()
+    assert "TÀI LIỆU:" in build_visual_first_human_prompt()
+    assert "Không tự mở rộng hoặc giải thích từ viết tắt" in build_visual_first_system_prompt()
+
+
 def test_build_overview_diagram_block_uses_flowchart_for_process_intent() -> None:
     fake_repo = FakeVectorStoreRepository(docs_by_query={})
     service = QuestionAnsweringService(
@@ -1195,8 +2980,136 @@ def test_collect_branches_from_context_skips_image_noise_lines() -> None:
     assert all("Image" not in branch for branch in branches)
 
 
+def test_collect_branches_from_context_skips_pptx_structural_lines() -> None:
+    fake_repo = FakeVectorStoreRepository(docs_by_query={})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    doc = Document(
+        page_content=(
+            "Title: Slide 7\n"
+            "Layout: Blank\n"
+            "Reading Order: 3-4\n"
+            "Slide Blocks:\n"
+            "- [3] bullet/text_box @ x=-191954,y=199903,w=5982191,h=685800: Ch\n"
+            "Upload đa định dạng: PDF, DOCX, PPTX, TXT MD CSV, ảnh\n"
+        ),
+        metadata={"source": "slide.pptx", "chunk_index": 0},
+    )
+
+    branches = service._collect_branches_from_context([doc])
+
+    assert "Upload đa định dạng" in branches
+    assert "PDF, DOCX, PPTX, TXT MD CSV, ảnh" in branches["Upload đa định dạng"]
+    assert "Title" not in branches
+    assert "Layout" not in branches
+    assert "Reading Order" not in branches
+    assert "Slide Blocks" not in branches
+
+
 def test_normalize_question_rewrites_quiz_with_no_repeat_constraint() -> None:
     rewritten = QuestionAnsweringService._normalize_question("tao cau hoi trac nghiem")
 
     assert "5-10 câu hỏi trắc nghiệm" in rewritten
     assert "không lặp lại câu hỏi hoặc đáp án" in rewritten
+
+
+def test_clear_question_without_visual_request_stays_text_only() -> None:
+    doc = Document(
+        page_content=(
+            "Han thanh toan: 30 ngay sau khi nhan hoa don.\n"
+            "Dieu kien phat: 5 phan tram gia tri hop dong."
+        ),
+        metadata={"source": "contract.md", "chunk_index": 0},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    answer = "Han thanh toan la 30 ngay sau khi nhan hoa don."
+    enriched = service._ensure_visual_answer(
+        answer,
+        context_docs=[doc],
+        normalized_question="Han thanh toan la bao nhieu",
+    )
+
+    assert enriched == answer
+    assert "```mermaid" not in enriched
+    assert "### Bảng" not in enriched
+
+
+def test_explicit_table_request_adds_table_support_when_missing() -> None:
+    doc = Document(
+        page_content=(
+            "Phuong an A: chi phi thap, trien khai nhanh, rui ro trung binh.\n"
+            "Phuong an B: chi phi cao, trien khai cham, rui ro thap."
+        ),
+        metadata={"source": "options.md", "chunk_index": 0},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    enriched = service._ensure_visual_answer(
+        "So sanh hai phuong an theo chi phi, tien do va rui ro.",
+        context_docs=[doc],
+        normalized_question="Hay tao bang so sanh hai phuong an",
+    )
+
+    assert "### Bảng" in enriched
+    assert "|" in enriched
+
+
+def test_explicit_mermaid_request_adds_flowchart_when_missing() -> None:
+    doc = Document(
+        page_content=(
+            "Buoc 1: Tiep nhan yeu cau\n"
+            "Buoc 2: Phan loai\n"
+            "Buoc 3: Xu ly\n"
+            "Buoc 4: Kiem tra"
+        ),
+        metadata={"source": "workflow.md", "chunk_index": 0},
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    enriched = service._ensure_visual_answer(
+        "Quy trinh gom 4 buoc lien tiep tu tiep nhan den kiem tra.",
+        context_docs=[doc],
+        normalized_question="Ve so do mermaid cho quy trinh xu ly",
+    )
+
+    assert "```mermaid" in enriched
+    assert "flowchart" in enriched

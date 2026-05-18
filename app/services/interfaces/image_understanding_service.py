@@ -16,5 +16,6 @@ class IImageUnderstandingService(ABC):
         *,
         source: str,
         hint: str,
+        preserve_full_text: bool = False,
     ) -> ImageAnalysisResult:
         raise NotImplementedError

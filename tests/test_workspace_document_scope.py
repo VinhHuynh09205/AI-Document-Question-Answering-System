@@ -171,7 +171,7 @@ def test_inject_document_mapping_into_question_keeps_workspace_numbers() -> None
     assert "- Tài liệu 3: ghi-chu-du-an.md" in mapped_question
 
 
-def test_resolve_ask_routing_prefers_explicit_selected_document_ids() -> None:
+def test_resolve_ask_routing_explicit_selected_document_ids_default_to_combined_scope() -> None:
     docs = _make_documents()
     workspace_service = _FakeWorkspaceService(docs)
 
@@ -185,6 +185,26 @@ def test_resolve_ask_routing_prefers_explicit_selected_document_ids() -> None:
 
     assert routing.clarification_answer is None
     assert routing.metadata_filter.get("source") == ["/tmp/doc-1.pdf", "/tmp/doc-3.md"]
+    assert routing.scoped_documents is None
+    assert routing.scoped_document_numbers is None
+    assert routing.prefer_combined_answer is False
+
+
+def test_resolve_ask_routing_explicit_selected_document_ids_can_force_per_document_mode() -> None:
+    docs = _make_documents()
+    workspace_service = _FakeWorkspaceService(docs)
+
+    routing = _resolve_ask_routing(
+        username="alice",
+        chat_id="chat-1",
+        question="Tom tat tung tai lieu da chon",
+        selected_document_ids=["doc-1", "doc-3"],
+        workspace_service=workspace_service,
+    )
+
+    assert routing.clarification_answer is None
+    assert routing.metadata_filter.get("source") == ["/tmp/doc-1.pdf", "/tmp/doc-3.md"]
+    assert routing.scoped_documents is not None
     assert routing.scoped_document_numbers == [1, 3]
     assert routing.prefer_combined_answer is False
 

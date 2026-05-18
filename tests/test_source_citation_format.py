@@ -51,3 +51,38 @@ def test_extract_sources_does_not_show_chunk_index_when_page_missing() -> None:
     sources = QuestionAnsweringService._extract_sources(docs)
 
     assert sources == ["report.docx"]
+
+
+def test_extract_sources_uses_section_path_for_docx_chunks() -> None:
+    docs = [
+        Document(
+            page_content="Chi tiet noi dung",
+            metadata={
+                "source": "c:/tmp/guide.docx",
+                "section_path": "Introduction > Constraints",
+                "chunk_index": 4,
+            },
+        )
+    ]
+
+    sources = QuestionAnsweringService._extract_sources(docs)
+
+    assert sources == ["guide.docx (Introduction > Constraints)"]
+
+
+def test_extract_sources_uses_sheet_and_range_for_spreadsheet_chunks() -> None:
+    docs = [
+        Document(
+            page_content="Bang du lieu",
+            metadata={
+                "source": "c:/tmp/data.xlsx",
+                "sheet_name": "Finance",
+                "range_address": "A1:C18",
+                "row_range": "2:8",
+            },
+        )
+    ]
+
+    sources = QuestionAnsweringService._extract_sources(docs)
+
+    assert sources == ["data.xlsx (sheet Finance, A1:C18)"]

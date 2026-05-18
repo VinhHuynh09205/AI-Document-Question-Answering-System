@@ -3,12 +3,18 @@ from threading import Lock
 
 from langchain_core.embeddings import Embeddings
 
+from app.core.config import DEFAULT_LOCAL_EMBEDDING_MODEL
+
 
 logger = logging.getLogger(__name__)
 
 _DEFAULT_LOCAL_EMBEDDING_MODELS = [
-    "BAAI/bge-small-en-v1.5",
+    DEFAULT_LOCAL_EMBEDDING_MODEL,
+    "sentence-transformers/all-MiniLM-L12-v2",
+    "all-MiniLM-L12-v2",
     "BAAI/bge-base-en-v1.5",
+    "BAAI/bge-small-en-v1.5",
+    "BAAI/bge-m3",
     "all-MiniLM-L6-v2",
 ]
 _MODEL_CACHE_LOCK = Lock()

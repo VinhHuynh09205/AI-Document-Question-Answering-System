@@ -118,3 +118,37 @@ def test_keyword_search_and_embedding_cache_metrics_are_recorded() -> None:
         snapshot = metrics.snapshot()
         assert snapshot["counters"].get("cache_hits", 0) >= 1
         assert snapshot["counters"].get("cache_misses", 0) >= 2
+
+
+def test_legacy_store_without_manifest_is_cleared_and_marked_for_rebuild() -> None:
+    embeddings = CountingEmbeddings()
+
+    with TemporaryDirectory() as tmp_dir:
+        index_dir = Path(tmp_dir)
+        seeded_repository = FaissVectorStoreRepository(
+            index_dir=index_dir,
+            embeddings=embeddings,
+        )
+        seeded_repository.add_documents(
+            [
+                Document(
+                    page_content="legacy chunk",
+                    metadata={"owner": "user-a", "chat_id": "chat-1", "source": "doc-a.txt"},
+                )
+            ]
+        )
+        seeded_repository.save()
+
+        manifest_file = index_dir / "manifest.json"
+        assert manifest_file.exists()
+        manifest_file.unlink()
+
+        reloaded_repository = FaissVectorStoreRepository(
+            index_dir=index_dir,
+            embeddings=embeddings,
+        )
+
+        assert reloaded_repository.document_count() == 0
+        assert reloaded_repository.requires_startup_rebuild() is True
+        assert not (index_dir / "index.faiss").exists()
+        assert not (index_dir / "documents.json").exists()

@@ -82,6 +82,10 @@ _CROSS_DOCUMENT_COMPARE_RE = re.compile(
     r"tong\s*hop|tổng\s*hợp)\b",
     re.IGNORECASE,
 )
+_PER_DOCUMENT_MULTI_DOC_RE = re.compile(
+    r"\b(tung|moi|each|separately|lan\s*luot|rieng|per\s*document|per\s*file)\b",
+    re.IGNORECASE,
+)
 _SOURCES_META_PREFIX = "<!--aichatbox:sources:"
 _SOURCES_META_SUFFIX = "-->"
 
@@ -98,8 +102,9 @@ class _AskRoutingDecision:
     effective_question: str
     metadata_filter: dict[str, str | list[str]]
     clarification_answer: str | None = None
-    # When multiple specific documents are selected we store them so that
-    # ask endpoints can iterate per-document rather than doing one combined search.
+    # Only set when routing should preserve document identity across multiple
+    # selected documents, either to compare them together or answer each one
+    # separately. Otherwise multi-select acts as a combined retrieval scope.
     scoped_documents: list[StoredDocument] | None = None
     # 1-based indexes in current workspace order (after deletes, indexes are compacted).
     scoped_document_numbers: list[int] | None = None
@@ -306,6 +311,11 @@ def _is_cross_document_compare_question(question: str) -> bool:
     return bool(_CROSS_DOCUMENT_COMPARE_RE.search(normalized_question))
 
 
+def _should_force_per_document_answer(question: str) -> bool:
+    normalized_question = _normalize_scope_text(question)
+    return bool(_PER_DOCUMENT_MULTI_DOC_RE.search(normalized_question))
+
+
 def _inject_document_mapping_into_question(
     question: str,
     scoped_documents: list[StoredDocument],
@@ -345,23 +355,23 @@ def _resolve_ask_routing(
 
     if explicit_scoped_documents:
         _clear_pending_scope_question(username=username, chat_id=chat_id)
+        explicit_multi_doc = len(explicit_scoped_documents) > 1
+        prefer_combined_answer = explicit_multi_doc and _is_cross_document_compare_question(question)
+        force_per_document_answer = explicit_multi_doc and _should_force_per_document_answer(question)
         return _AskRoutingDecision(
             effective_question=question,
             metadata_filter=_build_metadata_filter(username, chat_id, explicit_scoped_documents),
             scoped_documents=(
                 explicit_scoped_documents
-                if len(explicit_scoped_documents) > 1
+                if prefer_combined_answer or force_per_document_answer
                 else None
             ),
             scoped_document_numbers=(
                 explicit_scoped_document_numbers
-                if len(explicit_scoped_documents) > 1
+                if prefer_combined_answer or force_per_document_answer
                 else None
             ),
-            prefer_combined_answer=(
-                len(explicit_scoped_documents) > 1
-                and _is_cross_document_compare_question(question)
-            ),
+            prefer_combined_answer=prefer_combined_answer,
         )
 
     pending_question = _get_pending_scope_question(username=username, chat_id=chat_id)

@@ -43,8 +43,24 @@ _ANALYSIS_NOISE_RE = re.compile(
     r"(local_ocr|local_vision|provider[:=]|image\s*analysis|slide\s*image)",
     re.IGNORECASE,
 )
+_LOW_VALUE_ANALYSIS_TOKEN_RE = re.compile(
+    r"[A-Za-z0-9\u00C0-\u024F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]+"
+)
+_NUMERIC_ENRICH_HINT_RE = re.compile(
+    r"(doanh\s*thu|revenue|sales|orders?|tong|total|score|result|week|tuan)",
+    re.IGNORECASE,
+)
 _MEANINGFUL_CHAR_RE = re.compile(r"[A-Za-z\u00C0-\u024F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]")
 _SYMBOL_ONLY_RE = re.compile(r"^[^A-Za-z\u00C0-\u024F\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF0-9]+$")
+_LOW_VALUE_ANALYSIS_TOKENS = {
+    "image", "images", "picture", "photo", "document", "page", "slide", "figure",
+    "diagram", "chart", "graphic", "content", "summary", "overview", "detected",
+    "shows", "show", "preview", "scan", "screenshot", "file", "png", "jpg",
+    "jpeg", "webp", "bmp", "gif", "tif", "tiff", "pdf", "docx", "pptx", "xlsx",
+}
+_LOW_VALUE_STOPWORDS = {
+    "a", "an", "the", "and", "or", "for", "of", "to", "in", "on", "with", "this", "that",
+}
 _DEFAULT_LOCAL_VISION_MODEL_CANDIDATES = (
     "qwen2.5vl:7b",
     "llava:13b",
@@ -78,6 +94,7 @@ class ImageUnderstandingService(IImageUnderstandingService):
         *,
         source: str,
         hint: str,
+        preserve_full_text: bool = False,
     ) -> ImageAnalysisResult:
         if not self._settings.enable_image_understanding:
             return ImageAnalysisResult(text="", provider="disabled")
@@ -115,9 +132,25 @@ class ImageUnderstandingService(IImageUnderstandingService):
                     source=source,
                     hint=hint,
                 )
-                cleaned_gemini_text = self._clean_analysis_text(gemini_text)
+                cleaned_gemini_text = self._clean_analysis_text(
+                    gemini_text,
+                    preserve_full_text=preserve_full_text,
+                )
                 if cleaned_gemini_text:
-                    return ImageAnalysisResult(text=cleaned_gemini_text, provider="gemini")
+                    if self._is_low_value_analysis_text(cleaned_gemini_text):
+                        logger.info(
+                            "image_analysis_provider_low_value provider=gemini source=%s hint=%s",
+                            source,
+                            hint,
+                        )
+                    else:
+                        enriched_text, provider_name = self._maybe_enrich_with_local_ocr(
+                            cleaned_gemini_text,
+                            normalized_bytes,
+                            provider="gemini",
+                            preserve_full_text=preserve_full_text,
+                        )
+                        return ImageAnalysisResult(text=enriched_text, provider=provider_name)
 
             if (
                 self._settings.enable_local_vision_fallback
@@ -128,13 +161,38 @@ class ImageUnderstandingService(IImageUnderstandingService):
                     source=source,
                     hint=hint,
                 )
-                cleaned_local_vision_text = self._clean_analysis_text(local_vision_text)
+                cleaned_local_vision_text = self._clean_analysis_text(
+                    local_vision_text,
+                    preserve_full_text=preserve_full_text,
+                )
                 if cleaned_local_vision_text:
-                    return ImageAnalysisResult(text=cleaned_local_vision_text, provider="local_vision")
+                    if self._is_low_value_analysis_text(cleaned_local_vision_text):
+                        logger.info(
+                            "image_analysis_provider_low_value provider=local_vision source=%s hint=%s",
+                            source,
+                            hint,
+                        )
+                    else:
+                        enriched_text, provider_name = self._maybe_enrich_with_local_ocr(
+                            cleaned_local_vision_text,
+                            normalized_bytes,
+                            provider="local_vision",
+                            preserve_full_text=preserve_full_text,
+                        )
+                        return ImageAnalysisResult(text=enriched_text, provider=provider_name)
 
             if self._settings.enable_local_ocr_fallback:
-                local_ocr_text = self._analyze_with_local_ocr(normalized_bytes)
-                cleaned_local_ocr_text = self._clean_analysis_text(local_ocr_text)
+                if preserve_full_text:
+                    local_ocr_text = self._analyze_with_local_ocr(
+                        normalized_bytes,
+                        preserve_full_text=True,
+                    )
+                else:
+                    local_ocr_text = self._analyze_with_local_ocr(normalized_bytes)
+                cleaned_local_ocr_text = self._clean_analysis_text(
+                    local_ocr_text,
+                    preserve_full_text=preserve_full_text,
+                )
                 if cleaned_local_ocr_text:
                     return ImageAnalysisResult(text=cleaned_local_ocr_text, provider="local_ocr")
 
@@ -144,6 +202,110 @@ class ImageUnderstandingService(IImageUnderstandingService):
             return ImageAnalysisResult(text="", provider="no_result")
         finally:
             self._image_analysis_semaphore.release()
+
+    def _maybe_enrich_with_local_ocr(
+        self,
+        provider_text: str,
+        image_bytes: bytes,
+        *,
+        provider: str,
+        preserve_full_text: bool = False,
+    ) -> tuple[str, str]:
+        if not self._settings.enable_local_ocr_fallback:
+            return provider_text, provider
+
+        if not self._needs_numeric_enrichment(provider_text):
+            return provider_text, provider
+
+        if preserve_full_text:
+            raw_local_ocr_text = self._analyze_with_local_ocr(
+                image_bytes,
+                preserve_full_text=True,
+            )
+        else:
+            raw_local_ocr_text = self._analyze_with_local_ocr(image_bytes)
+
+        local_ocr_text = self._clean_analysis_text(
+            raw_local_ocr_text,
+            preserve_full_text=preserve_full_text,
+        )
+        if not local_ocr_text:
+            return provider_text, provider
+
+        merged = self._merge_analysis_texts(
+            local_ocr_text,
+            provider_text,
+            preserve_full_text=preserve_full_text,
+        )
+        if not merged:
+            return provider_text, provider
+
+        return merged, f"{provider}+local_ocr"
+
+    @staticmethod
+    def _needs_numeric_enrichment(text: str) -> bool:
+        normalized = ImageUnderstandingService._normalize_extracted_text(text)
+        if not normalized:
+            return False
+
+        if not _NUMERIC_ENRICH_HINT_RE.search(normalized):
+            return False
+
+        numeric_lines = sum(1 for line in normalized.splitlines() if re.search(r"\d", line))
+        if numeric_lines < 4:
+            return True
+
+        folded = normalized.casefold()
+        if not any(token in folded for token in ("doanh thu", "revenue", "week", "tuan")):
+            return False
+
+        numeric_tokens = re.findall(r"\d+(?:[.,]\d+)?", folded)
+        meaningful_values: set[float] = set()
+        for token in numeric_tokens:
+            try:
+                value = float(token.replace(",", "."))
+            except ValueError:
+                continue
+
+            # Skip common week labels and year-like values.
+            if value <= 9.0 or value >= 1000.0:
+                continue
+
+            meaningful_values.add(round(value, 2))
+
+        return len(meaningful_values) < 3
+
+    def _merge_analysis_texts(
+        self,
+        primary_text: str,
+        secondary_text: str,
+        *,
+        preserve_full_text: bool = False,
+    ) -> str:
+        line_limit = self._resolve_line_limit(preserve_full_text)
+        merged_lines: list[str] = []
+        seen: set[str] = set()
+
+        for text in (primary_text, secondary_text):
+            normalized = self._normalize_extracted_text(text)
+            if not normalized:
+                continue
+
+            for raw_line in normalized.splitlines():
+                line = " ".join(raw_line.split()).strip("-•\t ")
+                if not line:
+                    continue
+
+                key = line.casefold()
+                if key in seen:
+                    continue
+
+                seen.add(key)
+                merged_lines.append(line)
+                if line_limit is not None and len(merged_lines) >= line_limit:
+                    return "\n".join(merged_lines)
+
+        return "\n".join(merged_lines)
 
     def _normalize_image(self, image_bytes: bytes) -> tuple[bytes, str]:
         try:
@@ -720,7 +882,12 @@ class ImageUnderstandingService(IImageUnderstandingService):
     def _is_running_in_docker() -> bool:
         return Path("/.dockerenv").exists()
 
-    def _analyze_with_local_ocr(self, image_bytes: bytes) -> str:
+    def _analyze_with_local_ocr(
+        self,
+        image_bytes: bytes,
+        *,
+        preserve_full_text: bool = False,
+    ) -> str:
         try:
             from rapidocr_onnxruntime import RapidOCR
             import numpy as np
@@ -754,8 +921,10 @@ class ImageUnderstandingService(IImageUnderstandingService):
             line_scores: dict[str, float] = {}
             ordered_lines: list[str] = []
             min_confidence = float(self._settings.image_ocr_min_confidence)
-            max_lines = max(3, int(self._settings.image_analysis_max_lines))
-            target_high_conf_lines = max(2, min(4, max_lines))
+            line_limit = self._resolve_line_limit(preserve_full_text)
+            target_high_conf_lines = 0
+            if line_limit is not None:
+                target_high_conf_lines = max(6, min(16, line_limit))
 
             for image_array in variants:
                 if time.perf_counter() >= deadline:
@@ -786,7 +955,7 @@ class ImageUnderstandingService(IImageUnderstandingService):
                     for line in ordered_lines
                     if line_scores.get(line, 0.0) >= min_confidence
                 )
-                if high_conf_lines >= target_high_conf_lines:
+                if target_high_conf_lines > 0 and high_conf_lines >= target_high_conf_lines:
                     break
 
             if not ordered_lines:
@@ -795,17 +964,36 @@ class ImageUnderstandingService(IImageUnderstandingService):
             primary_lines = [
                 line for line in ordered_lines
                 if line_scores.get(line, 0.0) >= min_confidence
-            ][:max_lines]
+            ]
+            if line_limit is not None:
+                primary_lines = primary_lines[:line_limit]
+            relaxed_confidence = max(0.2, min_confidence - 0.15)
             if len(primary_lines) >= 2:
-                return self._normalize_extracted_text("\n".join(primary_lines))
+                enriched_lines = list(primary_lines)
+                seen_lines = {line for line in enriched_lines}
+                for line in ordered_lines:
+                    if line_limit is not None and len(enriched_lines) >= line_limit:
+                        break
+                    if line in seen_lines:
+                        continue
+                    if line_scores.get(line, 0.0) < relaxed_confidence:
+                        continue
+                    if not re.search(r"\d", line):
+                        continue
+                    seen_lines.add(line)
+                    enriched_lines.append(line)
+
+                output_lines = enriched_lines if line_limit is None else enriched_lines[:line_limit]
+                return self._normalize_extracted_text("\n".join(output_lines))
 
             # Keep recall high for document OCR: if strict filtering keeps too little text,
             # relax threshold slightly and keep useful low-confidence lines.
-            relaxed_confidence = max(0.2, min_confidence - 0.15)
             relaxed_lines = [
                 line for line in ordered_lines
                 if line_scores.get(line, 0.0) >= relaxed_confidence
-            ][:max_lines]
+            ]
+            if line_limit is not None:
+                relaxed_lines = relaxed_lines[:line_limit]
 
             return self._normalize_extracted_text("\n".join(relaxed_lines))
         finally:
@@ -881,12 +1069,12 @@ class ImageUnderstandingService(IImageUnderstandingService):
                 return ImageUnderstandingService._normalize_extracted_text(merged)
         return ""
 
-    def _clean_analysis_text(self, text: str) -> str:
+    def _clean_analysis_text(self, text: str, *, preserve_full_text: bool = False) -> str:
         normalized = self._normalize_extracted_text(text)
         if not normalized:
             return ""
 
-        max_lines = max(3, int(self._settings.image_analysis_max_lines))
+        line_limit = self._resolve_line_limit(preserve_full_text)
         min_chars = max(4, int(self._settings.image_analysis_min_meaningful_chars))
 
         cleaned_lines: list[str] = []
@@ -908,7 +1096,7 @@ class ImageUnderstandingService(IImageUnderstandingService):
 
             seen.add(normalized_key)
             cleaned_lines.append(line)
-            if len(cleaned_lines) >= max_lines:
+            if line_limit is not None and len(cleaned_lines) >= line_limit:
                 break
 
         if not cleaned_lines:
@@ -924,8 +1112,42 @@ class ImageUnderstandingService(IImageUnderstandingService):
         return merged
 
     @staticmethod
+    def _is_low_value_analysis_text(text: str) -> bool:
+        normalized = ImageUnderstandingService._normalize_extracted_text(text)
+        if not normalized:
+            return True
+
+        tokens = _LOW_VALUE_ANALYSIS_TOKEN_RE.findall(normalized.casefold())
+        if not tokens:
+            return True
+
+        meaningful_tokens = [
+            token for token in tokens
+            if token not in _LOW_VALUE_ANALYSIS_TOKENS
+            and token not in _LOW_VALUE_STOPWORDS
+            and not token.isdigit()
+        ]
+        numeric_tokens = [token for token in tokens if token.isdigit()]
+
+        if len(meaningful_tokens) >= 2:
+            return False
+        if len(numeric_tokens) >= 2:
+            return False
+        if len(meaningful_tokens) >= 1 and len(numeric_tokens) >= 1 and len(tokens) >= 4:
+            return False
+
+        return len(tokens) <= 8 or len(normalized) < 28
+
+    def _resolve_line_limit(self, preserve_full_text: bool) -> int | None:
+        if preserve_full_text:
+            return None
+        return max(3, int(self._settings.image_analysis_max_lines))
+
+    @staticmethod
     def _is_garbled_line(line: str) -> bool:
         stripped = line.strip()
+        if re.fullmatch(r"\d+(?:[.,]\d+)?(?:\s*[A-Za-z%])?", stripped):
+            return False
         if len(stripped) < 3:
             return True
 

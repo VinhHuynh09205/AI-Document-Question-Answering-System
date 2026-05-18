@@ -46,3 +46,51 @@ def test_local_provider_returns_fallback_for_translation_request() -> None:
     answer = provider.generate_grounded_answer("Dịch tài liệu sang tiếng Anh", docs)
 
     assert answer == FALLBACK_ANSWER
+
+
+def test_local_provider_returns_fallback_instead_of_raw_slide_metadata_for_specific_question() -> None:
+    provider = LocalGroundedLLMProvider(max_answer_chars=2000)
+    docs = [
+        Document(
+            page_content=(
+                "File: Test pptx.pptx\n"
+                "Slide: 13\n"
+                "Title: 日本人は、どんな人と一緒に仕事がしたいと考えていますか？\n"
+                "Layout: TitleSlide\n"
+                "Slide Blocks:\n"
+                "- [1] textbox/auto_shape @ x=1,y=2,w=3,h=4: 日本の文化・習慣を理解している人\n"
+            ),
+            metadata={"source": "deck.pptx"},
+        )
+    ]
+
+    answer = provider.generate_grounded_answer("Thông điệp về khác biệt văn hóa là gì?", docs)
+
+    assert answer == FALLBACK_ANSWER
+
+
+def test_local_summary_omits_structural_slide_metadata_and_keeps_meaningful_block_text() -> None:
+    provider = LocalGroundedLLMProvider(max_answer_chars=2000)
+    docs = [
+        Document(
+            page_content=(
+                "File: Test pptx.pptx\n"
+                "Slide: 14\n"
+                "Title: 日本人は、どんな人と一緒に仕事がしたいと考えていますか？\n"
+                "Layout: TitleAndContent\n"
+                "Slide Blocks:\n"
+                "- [1] textbox/auto_shape @ x=1,y=2,w=3,h=4: 日本の文化・習慣を理解している人\n"
+                "- [2] textbox/auto_shape @ x=1,y=5,w=3,h=4: 素直な人\n"
+            ),
+            metadata={"source": "deck.pptx"},
+        )
+    ]
+
+    answer = provider.generate_grounded_answer("Tóm tắt toàn bộ tài liệu", docs)
+
+    assert "File:" not in answer
+    assert "Slide:" not in answer
+    assert "Layout:" not in answer
+    assert "Slide Blocks:" not in answer
+    assert "日本の文化・習慣を理解している人" in answer
+    assert "素直な人" in answer

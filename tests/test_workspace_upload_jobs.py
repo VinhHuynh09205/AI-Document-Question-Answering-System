@@ -473,6 +473,54 @@ def test_workspace_upload_replace_reindexes_without_creating_duplicate_record() 
             app.state.container = original_container
 
 
+def test_workspace_startup_rebuilds_vector_store_when_manifest_is_missing() -> None:
+    with TemporaryDirectory() as tmp_dir:
+        base_path = Path(tmp_dir)
+        settings = _build_test_settings(base_path)
+        manifest_path = Path(settings.vector_store_path) / "manifest.json"
+
+        original_container = app.state.container
+        try:
+            app.state.container = build_container(settings)
+            with TestClient(app) as client:
+                headers, chat_id = _create_user_and_chat(client)
+
+                upload_response = _upload_chat_files(
+                    client,
+                    chat_id=chat_id,
+                    headers=headers,
+                    files=[("files", ("startup-rebuild.md", b"# Startup rebuild\nRecovered context", "text/markdown"))],
+                )
+                assert upload_response.status_code == 200
+
+                completed_payload = _wait_for_job_terminal_status(
+                    client,
+                    chat_id=chat_id,
+                    job_id=upload_response.json()["job_id"],
+                    headers=headers,
+                )
+                assert completed_payload["status"] == "completed"
+                assert manifest_path.exists()
+
+            manifest_path.unlink()
+
+            app.state.container = build_container(settings)
+            with TestClient(app) as restarted_client:
+                status_response = restarted_client.get("/api/v1/ops/vector/status")
+                assert status_response.status_code == 200
+                assert status_response.json()["document_count"] >= 1
+                assert manifest_path.exists()
+
+                docs_response = restarted_client.get(
+                    f"/api/v1/workspace/chats/{chat_id}/documents",
+                    headers=headers,
+                )
+                assert docs_response.status_code == 200
+                assert len(docs_response.json()["documents"]) == 1
+        finally:
+            app.state.container = original_container
+
+
 def test_workspace_upload_same_filename_different_content_is_not_duplicate() -> None:
     with TemporaryDirectory() as tmp_dir:
         base_path = Path(tmp_dir)

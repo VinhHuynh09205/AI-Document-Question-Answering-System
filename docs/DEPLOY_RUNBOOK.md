@@ -59,6 +59,27 @@ Alternative (run from host venv):
 python scripts/smoke_test.py --base-url http://127.0.0.1:8000
 ```
 
+## 4.1 Re-index Requirement Check
+
+Re-index is required when the deployed build changes ingestion or retrieval metadata semantics, especially structured chunking, section/structure metadata, table metadata, query routing, hybrid retrieval, or reranking signals.
+
+Re-index indicators:
+
+- Existing FAISS index was created before current chunking/citation/table metadata rollout.
+- Retrieval quality drops after deploy even though API health is green.
+- Table-aware answers or citations miss `sheet`, `table`, `row`, `slide`, or `section` context that should now exist.
+
+Recommended procedure:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/ops/vector/backup
+curl -X POST http://127.0.0.1:8000/api/v1/ops/vector/clear
+```
+
+After clearing, re-upload or re-ingest the production document set before reopening normal traffic.
+
+If you keep the old index, the service may remain healthy but retrieval/reranking/table-query quality can be inconsistent because old chunks do not contain the newer metadata fields.
+
 ## 5. Bootstrap First Admin (One-Time)
 
 Run only if no admin exists and `ADMIN_SETUP_SECRET` is configured.
@@ -143,6 +164,11 @@ docker compose logs --tail=200 postgres
 - Verify admin analytics endpoint is reachable:
   - `GET /api/v1/admin/analytics/usage` (admin token required)
 - Verify workspace upload jobs and ask flow from UI/API.
+- When re-index was required, run the evaluation harness against golden ask cases:
+
+```bash
+python scripts/evaluate_ask.py --base-url http://127.0.0.1:8000 --cases tmp/eval_cases.jsonl --output tmp/eval_report.json
+```
 
 ## 10. Common Incident Commands
 

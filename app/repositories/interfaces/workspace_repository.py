@@ -43,6 +43,10 @@ class IWorkspaceRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def list_all_documents(self) -> list[StoredDocument]:
+        raise NotImplementedError
+
+    @abstractmethod
     def add_message(self, username: str, chat_id: str, role: str, content: str) -> ChatMessage:
         raise NotImplementedError
 

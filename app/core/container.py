@@ -8,18 +8,13 @@ from app.repositories.faiss_vector_store_repository import FaissVectorStoreRepos
 from app.repositories.interfaces.vector_store_repository import IVectorStoreRepository
 from app.services.document_ingestion_service import DocumentIngestionService
 from app.services.document_loader_registry import DocumentLoaderRegistry
-from app.services.document_loaders.csv_document_loader import CsvDocumentLoader
-from app.services.document_loaders.doc_document_loader import DocDocumentLoader
 from app.services.document_loaders.docx_document_loader import DocxDocumentLoader
 from app.services.document_loaders.excel_document_loader import ExcelDocumentLoader
-from app.services.document_loaders.html_document_loader import HtmlDocumentLoader
 from app.services.document_loaders.image_document_loader import ImageDocumentLoader
-from app.services.document_loaders.json_document_loader import JsonDocumentLoader
 from app.services.document_loaders.markdown_document_loader import MarkdownDocumentLoader
 from app.services.document_loaders.pdf_document_loader import PdfDocumentLoader
 from app.services.document_loaders.pptx_document_loader import PptxDocumentLoader
 from app.services.document_loaders.text_document_loader import TextDocumentLoader
-from app.services.document_loaders.xml_document_loader import XmlDocumentLoader
 from app.services.image_understanding_service import ImageUnderstandingService
 from app.services.in_memory_rate_limiter import InMemoryRateLimiter
 from app.services.interfaces.document_ingestion_service import IDocumentIngestionService
@@ -82,7 +77,6 @@ def build_container(settings: Settings) -> AppContainer:
                 text_char_threshold_for_image_analysis=settings.pdf_image_analysis_text_char_threshold,
                 max_image_analysis_seconds=settings.pdf_image_analysis_max_seconds_per_document,
             ),
-            DocDocumentLoader(),
             DocxDocumentLoader(
                 image_understanding_service=image_understanding_service,
                 max_images_per_document=settings.docx_max_images_per_document,
@@ -98,12 +92,8 @@ def build_container(settings: Settings) -> AppContainer:
                 text_char_threshold_for_image_analysis=settings.pptx_image_analysis_text_char_threshold,
                 max_image_analysis_seconds=settings.pptx_image_analysis_max_seconds_per_document,
             ),
-            HtmlDocumentLoader(),
-            JsonDocumentLoader(),
-            XmlDocumentLoader(),
             TextDocumentLoader(),
             MarkdownDocumentLoader(),
-            CsvDocumentLoader(),
             ImageDocumentLoader(
                 image_understanding_service=image_understanding_service,
             ),
@@ -112,6 +102,7 @@ def build_container(settings: Settings) -> AppContainer:
     chunking_service = TextChunkingService(
         chunk_size=settings.chunk_size,
         chunk_overlap=settings.chunk_overlap,
+        chunk_profiles=settings.get_chunk_profiles(),
     )
     ingestion_service = DocumentIngestionService(
         loader_registry=loader_registry,

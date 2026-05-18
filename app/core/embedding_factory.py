@@ -4,7 +4,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from langchain_openai import OpenAIEmbeddings
 
-from app.core.config import Settings
+from app.core.config import DEFAULT_LOCAL_EMBEDDING_MODEL, Settings
 from app.services.embeddings.deterministic_embeddings import DeterministicEmbeddings
 from app.services.embeddings.local_semantic_embeddings import LocalSemanticEmbeddings
 from app.services.embeddings.resilient_embeddings import ResilientEmbeddings
@@ -36,8 +36,12 @@ def build_embeddings(settings: Settings) -> Embeddings:
             device=settings.embedding_device,
             batch_size=settings.embedding_batch_size,
             fallback_models=[
-                "BAAI/bge-small-en-v1.5",
+                DEFAULT_LOCAL_EMBEDDING_MODEL,
+                "sentence-transformers/all-MiniLM-L12-v2",
+                "all-MiniLM-L12-v2",
                 "BAAI/bge-base-en-v1.5",
+                "BAAI/bge-small-en-v1.5",
+                "BAAI/bge-m3",
                 "all-MiniLM-L6-v2",
             ],
         )

@@ -3,7 +3,7 @@ import sys
 from langchain_core.embeddings import Embeddings
 
 from app.core import embedding_factory
-from app.core.config import Settings
+from app.core.config import DEFAULT_LOCAL_EMBEDDING_MODEL, Settings
 from app.services.embeddings.deterministic_embeddings import DeterministicEmbeddings
 from app.services.embeddings.resilient_embeddings import ResilientEmbeddings
 
@@ -47,7 +47,19 @@ def test_build_embeddings_prefers_local_when_enabled(monkeypatch) -> None:
     provider = embedding_factory.build_embeddings(settings)
 
     assert isinstance(provider, _DummyEmbeddings)
+    assert provider.kwargs["model_name"] == DEFAULT_LOCAL_EMBEDDING_MODEL
     assert provider.kwargs["device"] == "cpu"
+
+
+def test_default_local_embedding_model_is_multilingual_minilm_l12() -> None:
+    settings = Settings(
+        local_semantic_embeddings_enabled=True,
+        local_semantic_embeddings=True,
+        google_api_key="",
+        openai_api_key="",
+    )
+
+    assert settings.get_local_embedding_model() == DEFAULT_LOCAL_EMBEDDING_MODEL
 
 
 def test_build_embeddings_uses_google_when_local_disabled(monkeypatch) -> None:

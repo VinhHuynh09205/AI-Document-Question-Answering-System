@@ -15,6 +15,7 @@ Hệ thống được xây dựng với FastAPI + LangChain + FAISS, theo hướ
 - Session đăng nhập theo tab (ưu tiên sessionStorage, có fallback localStorage)
 - Upload nền (background job) + theo dõi trạng thái job + retry
 - RAG pipeline: Ingest → Chunk → Embed → Retrieve → Grounded Answer
+- Query routing + hybrid retrieval + reranking + table-aware structured answers
 - Hỗ trợ hỏi đáp theo chat, theo tài liệu đã chọn, và streaming SSE
 - Admin dashboard: thống kê, quản lý user, audit log, analytics
 - Auth đầy đủ: register/login, forgot/reset password, OAuth (Google/GitHub)
@@ -201,10 +202,9 @@ Có thể cấu hình qua `SUPPORTED_UPLOAD_EXTENSIONS`.
 
 Mặc định hệ thống hỗ trợ:
 
-- `.pdf`, `.doc`, `.docx`
+- `.pdf`, `.docx`
 - `.xlsx`, `.pptx`
-- `.html`, `.htm`, `.json`, `.xml`
-- `.txt`, `.md`, `.csv`
+- `.txt`, `.md`
 - `.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp`, `.tif`, `.tiff`, `.gif`
 
 ## 🧠 Hành vi RAG
@@ -212,10 +212,12 @@ Mặc định hệ thống hỗ trợ:
 - Ingestion lưu vector vào `VECTOR_STORE_PATH`.
 - Nếu có API key embeddings phù hợp, hệ thống dùng provider tương ứng.
 - Nếu không có API key, hệ thống dùng local semantic embeddings/local grounded fallback để chạy ổn định ở môi trường dev/test.
+- Default local semantic embedding hiện là `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2` để giảm độ trễ CPU khi upload/hỏi tóm tắt trong khi vẫn hỗ trợ retrieval đa ngôn ngữ (Việt, Anh, Nhật) cho tài liệu văn phòng; đổi model embedding sau khi đã có index cũ thì cần re-index lại vector store.
+- Retrieval hiện dùng query routing + hybrid retrieval (dense + keyword) + reranking; structured table queries ưu tiên tính trực tiếp từ dữ liệu bảng thay vì để LLM tự suy đoán.
 - Khi không đủ ngữ cảnh liên quan, API trả fallback:
 
   ```
-  Không tìm thấy trong tài liệu
+   Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.
   ```
 
 ## 🔐 Security & Reliability
@@ -256,6 +258,65 @@ Pipeline hiện tại:
   ```bash
   python scripts/benchmark_ingestion.py --runs 1 --output tmp/benchmark_ingestion_results.json
   ```
+
+- Ask evaluation harness:
+
+   ```bash
+   python scripts/evaluate_ask.py --base-url http://127.0.0.1:8000 --cases tmp/eval_cases.jsonl --output tmp/eval_report.json
+   ```
+
+   File case khởi đầu đã được check in tại `tmp/eval_cases.jsonl`.
+
+   Schema chính cho mỗi case `JSONL`:
+
+   ```json
+   {"id":"pdf-page-01","enabled":true,"question":"Ở trang 18 của Test pdf.pdf, bài thực hành chương 1 yêu cầu cài thư viện gì?","metadata_filter":{"source":"Test pdf.pdf"},"expected_answer_contains":["OpenCV","Pillow"],"expected_source":"Test pdf.pdf","expected_file_type":".pdf","expected_page":18,"expected_context_found":true,"tags":["pdf","page"]}
+   {"id":"pptx-table-template-01","enabled":false,"question":"Trong TODO_TABLE_DECK.pptx, bảng ở slide TODO nói gì về metric chính?","expected_answer_contains":["TODO metric name"],"expected_source":"TODO_TABLE_DECK.pptx","expected_file_type":".pptx","expected_slide":"TODO","expected_table":"TODO_TABLE","expected_context_found":true,"tags":["pptx","table","template"],"notes":"Bật lại sau khi có deck có bảng thật."}
+   ```
+
+   Trường hỗ trợ chính:
+
+- `id`, `question`, `expected_context_found`, `tags`, `notes`
+- `expected_answer` hoặc `expected_answer_contains`
+- `expected_source`, `expected_file_type`
+- `expected_page`, `expected_slide`, `expected_sheet`, `expected_table`, `expected_row_span` khi cần kiểm tra citation/location
+- `metadata_filter` để scope đúng file hoặc nhóm file
+- `enabled=false` cho template case chưa có ground truth thật; harness sẽ `SKIP` thay vì làm fail cả đợt
+
+   Harness sẽ gọi trực tiếp API hiện có, kiểm tra `answer`, `sources`, `context_found`, citation/location kỳ vọng, và ghi report JSON để so sánh trước/sau khi đổi chunking, retrieval hoặc re-index.
+
+   Cách đọc `tmp/eval_report.json`:
+
+- `total_cases`: tổng số case trong file
+- `executed_cases`: số case đang thực thi (`enabled=true`)
+- `skipped_cases`: số template case bị bỏ qua
+- `passed` / `failed`: kết quả trên các case được thực thi
+- `pass_rate`: tỷ lệ pass trên `executed_cases`
+- `results[]`: chi tiết từng case, gồm `failures`, `answer`, `sources`, `context_found`, `tags`, `notes`
+
+   Tiêu chí pass/fail đề xuất sau re-index:
+
+1. `failed == 0` cho toàn bộ case `enabled=true` trước khi dùng làm release gate.
+2. Các case `enabled=false` phải được thay bằng case grounded thật dần theo từng loại tài liệu mới.
+3. Nếu fail do `missing_source_substring` hoặc `missing_expected_page/slide/sheet`, xem đây là lỗi retrieval/citation quan trọng hơn lỗi diễn đạt câu chữ.
+4. Nếu fail do `missing_answer_substring` nhưng nguồn đúng, ưu tiên xem lại prompting/structured answer logic trước khi đổi retrieval.
+
+## 🔄 Re-index Requirement
+
+Re-index là bắt buộc nếu vector index hiện tại được build trước các thay đổi làm thay đổi metadata hoặc cách chunking/retrieval hoạt động, đặc biệt các phần sau:
+
+- `structure_path`, `section_path`, `chunk_quality_score`, `citation_hint`
+- metadata bảng như `table_name`, `range_address`, `row_range`, `column_range`, `structured_rows`
+- query routing, hybrid retrieval và reranking dựa trên metadata mới
+
+Nếu tiếp tục dùng index cũ, API vẫn chạy nhưng chất lượng retrieval/citation/table answer có thể lệch vì document chunks cũ không có đủ metadata mới.
+
+Quy trình khuyến nghị:
+
+1. Backup vector store hiện tại qua `POST /api/v1/ops/vector/backup`.
+2. Clear vector store qua `POST /api/v1/ops/vector/clear`.
+3. Re-upload hoặc re-ingest lại toàn bộ tài liệu đang phục vụ production/workspace cần giữ.
+4. Chạy smoke test và evaluation harness trước khi mở traffic đầy đủ.
 
 ## 📦 Release management
 

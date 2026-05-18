@@ -19,6 +19,17 @@ from app.services.interfaces.runtime_metrics import IRuntimeMetrics
 
 logger = logging.getLogger(__name__)
 
+_VECTOR_STORE_SCHEMA_VERSION = 3
+
+_KEYWORD_TOKEN_RE = re.compile(
+    r"[A-Za-z0-9]+(?:[._@:/\\-][A-Za-z0-9]+)+"
+    r"|(?=[A-Za-z0-9]*[A-Za-z])(?=[A-Za-z0-9]*\d)[A-Za-z0-9]{3,}"
+    r"|\b\d{2,}\b"
+    r"|[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]{2,}"
+    r"|[^\W\d_]{2,}",
+    re.UNICODE,
+)
+
 
 class FaissVectorStoreRepository(IVectorStoreRepository):
     def __init__(
@@ -37,12 +48,14 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
         self._runtime_metrics = runtime_metrics
         self._index_file = self._index_dir / "index.faiss"
         self._metadata_file = self._index_dir / "documents.json"
+        self._manifest_file = self._index_dir / "manifest.json"
         self._index_dir.mkdir(parents=True, exist_ok=True)
 
         self._index: faiss.Index | None = None
         self._documents: list[dict] = []
         self._keyword_documents: list[dict[str, int | dict[str, int]]] = []
         self._avg_keyword_doc_length = 1.0
+        self._requires_startup_rebuild = False
         self._load_existing_store()
 
     def add_documents(
@@ -264,6 +277,33 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
 
         return results
 
+    def list_documents(
+        self,
+        metadata_filter: dict[str, str | list[str]] | None = None,
+        limit: int | None = None,
+    ) -> list[Document]:
+        if not self._documents:
+            return []
+
+        results: list[Document] = []
+        max_results = max(1, int(limit)) if limit is not None else None
+
+        for payload in self._documents:
+            metadata = payload.get("metadata", {})
+            if metadata_filter and not self._match_metadata_filter(metadata, metadata_filter):
+                continue
+
+            results.append(
+                Document(
+                    page_content=payload.get("page_content", ""),
+                    metadata=metadata,
+                )
+            )
+            if max_results is not None and len(results) >= max_results:
+                break
+
+        return results
+
     def save(self) -> None:
         if self._index is None:
             return
@@ -273,6 +313,18 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
             json.dumps(self._documents, ensure_ascii=True, indent=2, default=str),
             encoding="utf-8",
         )
+        self._manifest_file.write_text(
+            json.dumps(
+                {
+                    "schema_version": _VECTOR_STORE_SCHEMA_VERSION,
+                    "document_count": len(self._documents),
+                },
+                ensure_ascii=True,
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        self._requires_startup_rebuild = False
 
     def backup(self, backup_dir: Path) -> dict:
         self.save()
@@ -287,6 +339,8 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
 
         copy2(self._index_file, backup_dir / self._index_file.name)
         copy2(self._metadata_file, backup_dir / self._metadata_file.name)
+        if self._manifest_file.exists():
+            copy2(self._manifest_file, backup_dir / self._manifest_file.name)
 
         return {
             "backed_up": True,
@@ -296,6 +350,7 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
     def restore(self, backup_dir: Path) -> dict:
         index_source = backup_dir / self._index_file.name
         metadata_source = backup_dir / self._metadata_file.name
+        manifest_source = backup_dir / self._manifest_file.name
 
         if not index_source.exists() or not metadata_source.exists():
             return {
@@ -306,6 +361,10 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
 
         copy2(index_source, self._index_file)
         copy2(metadata_source, self._metadata_file)
+        if manifest_source.exists():
+            copy2(manifest_source, self._manifest_file)
+        elif self._manifest_file.exists():
+            self._manifest_file.unlink()
         self._load_existing_store()
 
         return {
@@ -387,6 +446,8 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
             self._index_file.unlink()
         if self._metadata_file.exists():
             self._metadata_file.unlink()
+        if self._manifest_file.exists():
+            self._manifest_file.unlink()
 
     def clear(self) -> dict:
         self._reset_index(None)
@@ -395,14 +456,42 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
             "document_count": 0,
         }
 
+    def requires_startup_rebuild(self) -> bool:
+        return self._requires_startup_rebuild
+
     def _load_existing_store(self) -> None:
         if not self._index_file.exists() or not self._metadata_file.exists():
+            return
+
+        manifest_payload = self._load_manifest_payload()
+        stored_schema_version = int(manifest_payload.get("schema_version", 0) or 0) if manifest_payload else 0
+        if stored_schema_version != _VECTOR_STORE_SCHEMA_VERSION:
+            logger.warning(
+                "faiss_schema_mismatch expected=%s actual=%s index_dir=%s clearing_legacy_store",
+                _VECTOR_STORE_SCHEMA_VERSION,
+                stored_schema_version,
+                self._index_dir,
+            )
+            self._requires_startup_rebuild = True
+            self._reset_index(None)
             return
 
         self._index = faiss.read_index(str(self._index_file))
         payload = self._metadata_file.read_text(encoding="utf-8").strip()
         self._documents = json.loads(payload) if payload else []
         self._rebuild_keyword_index()
+        self._requires_startup_rebuild = False
+
+    def _load_manifest_payload(self) -> dict[str, object] | None:
+        if not self._manifest_file.exists():
+            return None
+
+        payload = self._manifest_file.read_text(encoding="utf-8").strip()
+        if not payload:
+            return None
+
+        parsed = json.loads(payload)
+        return parsed if isinstance(parsed, dict) else None
 
     def _embedding_provider_details(self) -> tuple[str, str]:
         provider = self._embeddings.__class__.__name__
@@ -418,7 +507,13 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
 
     @staticmethod
     def _tokenize_keywords(text: str) -> list[str]:
-        return [token.lower() for token in re.findall(r"[a-zA-Z0-9_]+", str(text or "")) if len(token) > 1]
+        tokens: list[str] = []
+        for raw_token in _KEYWORD_TOKEN_RE.findall(str(text or "")):
+            token = str(raw_token).strip(" .,:;!?()[]{}<>\"'`|+")
+            if len(token) <= 1:
+                continue
+            tokens.append(token.casefold())
+        return tokens
 
     def _build_keyword_payload(self, text: str) -> dict[str, int | dict[str, int]]:
         frequencies: dict[str, int] = {}

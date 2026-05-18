@@ -8,7 +8,7 @@ from app.core.container import build_container
 from main import app
 
 
-def test_upload_accepts_markdown_and_csv() -> None:
+def test_upload_accepts_markdown_and_text() -> None:
     with TemporaryDirectory() as tmp_dir:
         base_path = Path(tmp_dir)
         upload_dir = base_path / "uploads"
@@ -19,7 +19,7 @@ def test_upload_accepts_markdown_and_csv() -> None:
             vector_store_path=str(vector_store_dir),
             users_file_path=str(users_file),
             database_path=str(base_path / "app.db"),
-            supported_upload_extensions=".pdf,.docx,.txt,.md,.csv",
+            supported_upload_extensions=".pdf,.docx,.txt,.md",
             openai_api_key="",
             google_api_key="",
             groq_api_key="",
@@ -34,7 +34,7 @@ def test_upload_accepts_markdown_and_csv() -> None:
                 "/api/v1/upload",
                 files=[
                     ("files", ("notes.md", b"# Heading\nBody", "text/markdown")),
-                    ("files", ("table.csv", b"name,age\nAna,30", "text/csv")),
+                    ("files", ("notes.txt", b"plain text body", "text/plain")),
                 ],
             )
         finally:
@@ -60,7 +60,7 @@ def test_upload_rejects_unsupported_extension() -> None:
             vector_store_path=str(vector_store_dir),
             users_file_path=str(users_file),
             database_path=str(base_path / "app.db"),
-            supported_upload_extensions=".pdf,.docx,.txt,.md,.csv",
+            supported_upload_extensions=".pdf,.docx,.txt,.md",
             openai_api_key="",
             google_api_key="",
             groq_api_key="",
@@ -99,7 +99,7 @@ def test_legacy_upload_replace_mode_does_not_clear_workspace_vectors() -> None:
             vector_store_path=str(vector_store_dir),
             users_file_path=str(users_file),
             database_path=str(base_path / "app.db"),
-            supported_upload_extensions=".pdf,.docx,.txt,.md,.csv",
+            supported_upload_extensions=".pdf,.docx,.txt,.md",
             replace_existing_documents_on_upload=True,
             openai_api_key="",
             google_api_key="",

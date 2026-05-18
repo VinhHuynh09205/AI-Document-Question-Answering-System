@@ -146,6 +146,12 @@ class DocumentIngestionService(IDocumentIngestionService):
 
                 global_chunk_index += 1
 
+            self._log_structured_ingestion_validation(
+                file_path=loaded_file.path,
+                documents=enriched_documents,
+                chunks=chunks,
+            )
+
             total_chunks += len(chunks)
 
             if progress_callback is not None:
@@ -242,6 +248,180 @@ class DocumentIngestionService(IDocumentIngestionService):
             files_processed=files_total,
             chunks_indexed=total_indexed,
         )
+
+    def _log_structured_ingestion_validation(
+        self,
+        *,
+        file_path: Path,
+        documents: list[Document],
+        chunks: list[Document],
+    ) -> None:
+        self._log_chunk_quality_metrics(file_path=file_path, chunks=chunks)
+
+        extension = file_path.suffix.lower()
+        if extension in {".xlsx", ".xls", ".xlsm"}:
+            self._log_excel_ingestion_validation(file_path=file_path, documents=documents, chunks=chunks)
+            return
+        if extension == ".pptx":
+            self._log_pptx_ingestion_validation(file_path=file_path, documents=documents, chunks=chunks)
+
+    def _log_chunk_quality_metrics(
+        self,
+        *,
+        file_path: Path,
+        chunks: list[Document],
+    ) -> None:
+        if not chunks:
+            return
+
+        quality_scores = [float(chunk.metadata.get("chunk_quality_score") or 0.0) for chunk in chunks]
+        avg_quality = sum(quality_scores) / max(1, len(quality_scores))
+        avg_chars = sum(int(chunk.metadata.get("chunk_chars") or len(chunk.page_content)) for chunk in chunks) / max(1, len(chunks))
+        structure_coverage = sum(1 for chunk in chunks if str(chunk.metadata.get("structure_path") or "").strip()) / max(1, len(chunks))
+        low_count = sum(1 for score in quality_scores if score < 0.45)
+        medium_count = sum(1 for score in quality_scores if 0.45 <= score < 0.75)
+        high_count = sum(1 for score in quality_scores if score >= 0.75)
+
+        logger.info(
+            "chunking_quality_validation file=%s chunks=%s avg_chars=%.1f avg_quality=%.3f structure_coverage=%.2f low=%s medium=%s high=%s",
+            self._safe_document_name(file_path.name),
+            len(chunks),
+            avg_chars,
+            avg_quality,
+            structure_coverage,
+            low_count,
+            medium_count,
+            high_count,
+        )
+
+        if structure_coverage < 0.8:
+            logger.warning(
+                "chunking_quality_validation_low_structure_coverage file=%s structure_coverage=%.2f",
+                self._safe_document_name(file_path.name),
+                structure_coverage,
+            )
+
+        if low_count > max(2, len(chunks) // 3):
+            logger.warning(
+                "chunking_quality_validation_many_low_quality_chunks file=%s low_quality_chunks=%s total_chunks=%s",
+                self._safe_document_name(file_path.name),
+                low_count,
+                len(chunks),
+            )
+
+    def _log_excel_ingestion_validation(
+        self,
+        *,
+        file_path: Path,
+        documents: list[Document],
+        chunks: list[Document],
+    ) -> None:
+        sheet_docs = [
+            doc for doc in documents
+            if str(doc.metadata.get("content_type") or "").lower() == "spreadsheet_sheet_summary"
+        ]
+        table_docs = [
+            doc for doc in documents
+            if str(doc.metadata.get("content_type") or "").lower() == "spreadsheet_table"
+        ]
+
+        sheet_count = len(sheet_docs)
+        data_cell_count = sum(int(doc.metadata.get("data_cell_count") or 0) for doc in sheet_docs)
+        table_count = len(table_docs)
+        headers_count = sum(1 for doc in table_docs if doc.metadata.get("headers"))
+
+        excel_chunks = [
+            chunk for chunk in chunks
+            if str(chunk.metadata.get("extension") or "").lower() in {".xlsx", ".xls", ".xlsm"}
+        ]
+        chunk_missing_sheet = sum(1 for chunk in excel_chunks if not chunk.metadata.get("sheet_name"))
+        chunk_missing_range = sum(
+            1
+            for chunk in excel_chunks
+            if str(chunk.metadata.get("content_type") or "").lower() in {"spreadsheet_table", "spreadsheet_table_chunk"}
+            and not chunk.metadata.get("range_address")
+        )
+        chunk_missing_headers = sum(
+            1
+            for chunk in excel_chunks
+            if str(chunk.metadata.get("content_type") or "").lower() in {"spreadsheet_table", "spreadsheet_table_chunk"}
+            and not chunk.metadata.get("headers")
+        )
+
+        logger.info(
+            "excel_ingestion_validation file=%s sheets=%s data_cells=%s tables_or_ranges=%s headers_present=%s chunks=%s",
+            self._safe_document_name(file_path.name),
+            sheet_count,
+            data_cell_count,
+            table_count,
+            headers_count,
+            len(excel_chunks),
+        )
+
+        if chunk_missing_sheet > 0:
+            logger.warning(
+                "excel_ingestion_validation_missing_sheet_name file=%s chunks=%s",
+                self._safe_document_name(file_path.name),
+                chunk_missing_sheet,
+            )
+        if chunk_missing_range > 0:
+            logger.warning(
+                "excel_ingestion_validation_missing_range file=%s chunks=%s",
+                self._safe_document_name(file_path.name),
+                chunk_missing_range,
+            )
+        if chunk_missing_headers > 0:
+            logger.warning(
+                "excel_ingestion_validation_missing_headers file=%s chunks=%s",
+                self._safe_document_name(file_path.name),
+                chunk_missing_headers,
+            )
+
+    def _log_pptx_ingestion_validation(
+        self,
+        *,
+        file_path: Path,
+        documents: list[Document],
+        chunks: list[Document],
+    ) -> None:
+        slide_docs = [
+            doc for doc in documents
+            if str(doc.metadata.get("content_type") or "").lower() in {"slide", "slide_structured"}
+        ]
+
+        slide_count = len(slide_docs)
+        title_count = sum(1 for doc in slide_docs if str(doc.metadata.get("slide_title") or "").strip())
+        text_blocks = sum(int(doc.metadata.get("text_block_count") or 0) for doc in slide_docs)
+        table_blocks = sum(int(doc.metadata.get("table_block_count") or 0) for doc in slide_docs)
+        chart_blocks = sum(int(doc.metadata.get("chart_block_count") or 0) for doc in slide_docs)
+        image_blocks = sum(int(doc.metadata.get("image_block_count") or 0) for doc in slide_docs)
+        notes_blocks = sum(int(doc.metadata.get("notes_block_count") or 0) for doc in slide_docs)
+
+        ppt_chunks = [
+            chunk for chunk in chunks
+            if str(chunk.metadata.get("extension") or "").lower() in {".ppt", ".pptx"}
+        ]
+        chunk_missing_slide_number = sum(1 for chunk in ppt_chunks if chunk.metadata.get("slide_number") is None)
+
+        logger.info(
+            "pptx_ingestion_validation file=%s slides=%s titles=%s text_blocks=%s table_blocks=%s chart_blocks=%s image_blocks=%s notes_blocks=%s chunks=%s",
+            self._safe_document_name(file_path.name),
+            slide_count,
+            title_count,
+            text_blocks,
+            table_blocks,
+            chart_blocks,
+            image_blocks,
+            notes_blocks,
+            len(ppt_chunks),
+        )
+
+        if chunk_missing_slide_number > 0:
+            logger.warning(
+                "pptx_ingestion_validation_missing_slide_number file=%s chunks=%s",
+                self._safe_document_name(file_path.name),
+                chunk_missing_slide_number,
+            )
 
     def _iter_loaded_files(
         self,

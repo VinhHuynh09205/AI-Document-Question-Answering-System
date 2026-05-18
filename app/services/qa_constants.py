@@ -1,1 +1,1 @@
-FALLBACK_ANSWER = "Không tìm thấy trong tài liệu"
+FALLBACK_ANSWER = "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác."

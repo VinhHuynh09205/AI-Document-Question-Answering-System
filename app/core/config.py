@@ -3,6 +3,28 @@ from functools import lru_cache
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+DEFAULT_LOCAL_EMBEDDING_MODEL = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
+
+_UPLOAD_EXTENSION_ALLOWLIST = {
+    ".pdf",
+    ".docx",
+    ".xlsx",
+    ".xls",
+    ".pptx",
+    ".txt",
+    ".md",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".bmp",
+    ".tif",
+    ".tiff",
+    ".gif",
+}
+
+
 class Settings(BaseSettings):
     app_name: str = "AIChatBox"
     app_env: str = "development"
@@ -17,8 +39,8 @@ class Settings(BaseSettings):
     embeddings_model: str = "text-embedding-3-small"
     local_semantic_embeddings_enabled: bool = False
     local_semantic_embeddings: bool = False
-    local_embedding_model: str = "BAAI/bge-small-en-v1.5"
-    local_semantic_model_name: str = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+    local_embedding_model: str = DEFAULT_LOCAL_EMBEDDING_MODEL
+    local_semantic_model_name: str = DEFAULT_LOCAL_EMBEDDING_MODEL
     local_semantic_normalize_embeddings: bool = True
     embedding_device: str = "auto"
     embedding_cache_enabled: bool = True
@@ -34,7 +56,7 @@ class Settings(BaseSettings):
     pg_user: str = "aichatbox"
     pg_password: str = "aichatbox"
     users_file_path: str = "data/users.json"
-    supported_upload_extensions: str = ".pdf,.doc,.docx,.xlsx,.xls,.pptx,.html,.htm,.json,.xml,.txt,.md,.csv,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,.gif"
+    supported_upload_extensions: str = ".pdf,.docx,.xlsx,.xls,.pptx,.txt,.md,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,.gif"
     replace_existing_documents_on_upload: bool = True
     allow_duplicate_keep_both_uploads: bool = True
 
@@ -58,7 +80,7 @@ class Settings(BaseSettings):
     ocr_max_seconds_per_image: float = 6.0
     image_analysis_max_concurrency: int = 2
     image_analysis_timeout_seconds: float = 25.0
-    image_analysis_max_lines: int = 12
+    image_analysis_max_lines: int = 48
     image_analysis_min_meaningful_chars: int = 10
     image_analysis_min_area_pixels: int = 14400
     image_analysis_min_entropy: float = 2.2
@@ -96,6 +118,16 @@ class Settings(BaseSettings):
 
     chunk_size: int = 800
     chunk_overlap: int = 100
+    paragraph_chunk_size: int = 800
+    paragraph_chunk_overlap: int = 100
+    section_chunk_size: int = 1000
+    section_chunk_overlap: int = 120
+    slide_chunk_size: int = 700
+    slide_chunk_overlap: int = 80
+    structured_chunk_size: int = 940
+    structured_chunk_overlap: int = 80
+    image_chunk_size: int = 640
+    image_chunk_overlap: int = 60
     top_k: int = 6
     min_context_token_overlap: float = 0.15
     min_relevant_chunks: int = 1
@@ -129,11 +161,12 @@ class Settings(BaseSettings):
 
     def get_supported_upload_extensions(self) -> set[str]:
         tokens = self.supported_upload_extensions.split(",")
-        return {
+        extensions = {
             f".{token.strip().lower().lstrip('.')}"
             for token in tokens
             if token.strip()
         }
+        return extensions.intersection(_UPLOAD_EXTENSION_ALLOWLIST)
 
     def get_rate_limit_config(self) -> dict[str, int]:
         return {
@@ -141,6 +174,15 @@ class Settings(BaseSettings):
             "register": self.register_rate_limit_per_window,
             "ask": self.ask_rate_limit_per_window,
             "upload": self.upload_rate_limit_per_window,
+        }
+
+    def get_chunk_profiles(self) -> dict[str, tuple[int, int]]:
+        return {
+            "paragraph": (self.paragraph_chunk_size, self.paragraph_chunk_overlap),
+            "section": (self.section_chunk_size, self.section_chunk_overlap),
+            "slide": (self.slide_chunk_size, self.slide_chunk_overlap),
+            "structured": (self.structured_chunk_size, self.structured_chunk_overlap),
+            "image": (self.image_chunk_size, self.image_chunk_overlap),
         }
 
     def use_local_semantic_embeddings(self) -> bool:

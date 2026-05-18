@@ -46,7 +46,8 @@ class PdfDocumentLoader(IDocumentLoader):
 
         for index, page in enumerate(reader.pages, start=1):
             text = self._extract_page_text(page)
-            image_notes: list[str] = []
+            ocr_image_notes: list[str] = []
+            vision_image_notes: list[str] = []
             providers_used: set[str] = set()
             page_images = list(getattr(page, "images", []) or [])
 
@@ -57,29 +58,36 @@ class PdfDocumentLoader(IDocumentLoader):
                 page_image_count=len(page_images),
             )
             if should_analyze_images:
-                image_notes, providers_used = self._analyze_page_images(
+                ocr_image_notes, vision_image_notes, providers_used = self._analyze_page_images(
                     page_images=page_images,
                     file_path=file_path,
                     page_number=index,
                     page_text_snapshot=text,
                     seen_image_hashes=seen_image_hashes,
                 )
-                if image_notes:
+                if ocr_image_notes or vision_image_notes:
                     analyzed_pages += 1
 
-            if image_notes:
-                text = self._merge_text_and_image_notes(text=text, image_notes=image_notes)
+            content = self._build_page_document_content(
+                file_name=file_path.name,
+                page_number=index,
+                text=text,
+                ocr_image_notes=ocr_image_notes,
+                vision_image_notes=vision_image_notes,
+            )
 
             documents.append(
                 Document(
-                    page_content=text,
+                    page_content=content,
                     metadata={
                         "source": str(file_path),
                         "page": index,
+                        "page_number": index,
                         "extension": ".pdf",
                         "content_type": "pdf_page",
-                        "image_analysis_applied": bool(image_notes),
-                        "ocr_applied": "local_ocr" in providers_used,
+                        "image_count": len(page_images),
+                        "image_analysis_applied": bool(ocr_image_notes or vision_image_notes),
+                        "ocr_applied": bool(ocr_image_notes) or ("local_ocr" in providers_used),
                     },
                 )
             )
@@ -141,14 +149,15 @@ class PdfDocumentLoader(IDocumentLoader):
         page_number: int,
         page_text_snapshot: str,
         seen_image_hashes: set[str],
-    ) -> tuple[list[str], set[str]]:
+    ) -> tuple[list[str], list[str], set[str]]:
         if self._image_understanding_service is None:
-            return [], set()
+            return [], [], set()
 
         if not page_images:
-            return [], set()
+            return [], [], set()
 
-        notes: list[str] = []
+        ocr_notes: list[str] = []
+        vision_notes: list[str] = []
         providers_used: set[str] = set()
         page_prefers_cjk = self._contains_substantial_cjk(page_text_snapshot)
 
@@ -184,13 +193,17 @@ class PdfDocumentLoader(IDocumentLoader):
             if self._is_duplicate_image_note(
                 note_text,
                 page_text_snapshot,
-                notes,
+                [*ocr_notes, *vision_notes],
             ):
                 continue
 
-            notes.append(f"Image {image_index}: {note_text}")
+            provider_name = str(result.provider or "").strip().lower()
+            if "ocr" in provider_name:
+                ocr_notes.append(note_text)
+            else:
+                vision_notes.append(note_text)
 
-        return notes, providers_used
+        return ocr_notes, vision_notes, providers_used
 
     @staticmethod
     def _fingerprint_image_bytes(image_bytes: bytes) -> str:
@@ -291,6 +304,8 @@ class PdfDocumentLoader(IDocumentLoader):
 
         for existing in existing_notes:
             _, _, existing_note = existing.partition(":")
+            if not existing_note:
+                existing_note = existing
             normalized_existing = re.sub(r"\s+", " ", existing_note).strip().lower()
             if compact_note == normalized_existing:
                 return True
@@ -317,6 +332,35 @@ class PdfDocumentLoader(IDocumentLoader):
             return ""
 
         return max(candidates, key=cls._score_extracted_text)
+
+    @staticmethod
+    def _build_page_document_content(
+        *,
+        file_name: str,
+        page_number: int,
+        text: str,
+        ocr_image_notes: list[str],
+        vision_image_notes: list[str],
+    ) -> str:
+        lines = [
+            f"File: {file_name}",
+            f"Page: {page_number}",
+        ]
+
+        normalized_text = str(text or "").strip()
+        if normalized_text:
+            lines.append("Text:")
+            lines.append(normalized_text)
+
+        if ocr_image_notes:
+            lines.append("OCR From Images:")
+            lines.extend(f"- {line}" for line in ocr_image_notes[:8])
+
+        if vision_image_notes:
+            lines.append("Vision Description:")
+            lines.extend(f"- {line}" for line in vision_image_notes[:8])
+
+        return "\n".join(lines).strip()
 
     @staticmethod
     def _normalize_extracted_text(text: str) -> str:

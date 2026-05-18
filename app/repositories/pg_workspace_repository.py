@@ -199,6 +199,22 @@ class PgWorkspaceRepository(IWorkspaceRepository):
             conn.close()
         return [self._row_to_document(row) for row in rows]
 
+    def list_all_documents(self) -> list[StoredDocument]:
+        conn = connect(self._config)
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"""
+                    SELECT {_DOCUMENT_SELECT_COLUMNS}
+                    FROM documents
+                    ORDER BY username ASC, chat_id ASC, created_at ASC, document_id ASC
+                    """
+                )
+                rows = cur.fetchall()
+        finally:
+            conn.close()
+        return [self._row_to_document(row) for row in rows]
+
     def add_message(self, username: str, chat_id: str, role: str, content: str) -> ChatMessage:
         message_id = uuid.uuid4().hex
         created_at = self._now_iso()

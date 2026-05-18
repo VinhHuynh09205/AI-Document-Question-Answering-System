@@ -116,6 +116,128 @@ def test_image_understanding_falls_back_to_local_ocr(monkeypatch) -> None:
     assert "invoice" in result.text
 
 
+def test_image_understanding_skips_low_value_gemini_and_uses_local_ocr(monkeypatch) -> None:
+    settings = Settings(
+        google_api_key="dummy-key",
+        enable_image_understanding=True,
+        enable_gemini_image_understanding=True,
+        enable_local_vision_fallback=False,
+        enable_local_ocr_fallback=True,
+        image_understanding_min_bytes=1,
+    )
+    service = ImageUnderstandingService(settings=settings)
+
+    monkeypatch.setattr(service, "_normalize_image", lambda _: (b"image-bytes", "image/png"))
+    _patch_signal_stats(monkeypatch, service)
+    monkeypatch.setattr(service, "_analyze_with_gemini", lambda **_: "Image page 1")
+    monkeypatch.setattr(
+        service,
+        "_analyze_with_local_ocr",
+        lambda _image_bytes, **_kwargs: "OCR extracted order number 88421 and customer name.",
+    )
+
+    result = service.analyze_image(
+        b"ignored",
+        source="sample.pdf",
+        hint="pdf page 1 image 1",
+    )
+
+    assert result.provider == "local_ocr"
+    assert "88421" in result.text
+
+
+def test_image_understanding_preserves_full_text_for_standalone_images(monkeypatch) -> None:
+    settings = Settings(
+        google_api_key="",
+        enable_image_understanding=True,
+        enable_gemini_image_understanding=False,
+        enable_local_vision_fallback=False,
+        enable_local_ocr_fallback=True,
+        image_understanding_min_bytes=1,
+        image_analysis_max_lines=3,
+    )
+    service = ImageUnderstandingService(settings=settings)
+
+    monkeypatch.setattr(service, "_normalize_image", lambda _: (b"image-bytes", "image/png"))
+    _patch_signal_stats(monkeypatch, service)
+    monkeypatch.setattr(
+        service,
+        "_analyze_with_local_ocr",
+        lambda _image_bytes, **_kwargs: (
+            "Monthly Sales Summary\n"
+            "Week 1: 18\n"
+            "Week 2: 20\n"
+            "Week 3: 18.7\n"
+            "Week 4: 22\n"
+            "Week 4 has the highest revenue\n"
+        ),
+    )
+
+    limited = service.analyze_image(
+        b"ignored",
+        source="embedded-image.png",
+        hint="pdf page 1 image 1",
+    )
+    full = service.analyze_image(
+        b"ignored",
+        source="standalone-image.png",
+        hint="standalone image upload",
+        preserve_full_text=True,
+    )
+
+    assert len(limited.text.splitlines()) == 3
+    assert len(full.text.splitlines()) == 6
+    assert "Week 4 has the highest revenue" in full.text
+
+
+def test_image_understanding_enriches_gemini_with_local_ocr_for_numeric_reports(monkeypatch) -> None:
+    settings = Settings(
+        google_api_key="dummy-key",
+        enable_image_understanding=True,
+        enable_gemini_image_understanding=True,
+        enable_local_vision_fallback=True,
+        enable_local_ocr_fallback=True,
+        image_understanding_min_bytes=1,
+        image_analysis_max_lines=20,
+    )
+    service = ImageUnderstandingService(settings=settings)
+
+    monkeypatch.setattr(service, "_normalize_image", lambda _: (b"image-bytes", "image/png"))
+    _patch_signal_stats(monkeypatch, service)
+    monkeypatch.setattr(
+        service,
+        "_analyze_with_gemini",
+        lambda **_: (
+            "BAO CAO DOANH THU\n"
+            "Doanh thu theo tuan\n"
+            "Tuan 1\n"
+            "Tuan 2\n"
+            "Kenh Online tang 18%"
+        ),
+    )
+    monkeypatch.setattr(
+        service,
+        "_analyze_with_local_ocr",
+        lambda _image_bytes: (
+            "Doanh thu theo tuan\n"
+            "30\n"
+            "25\n"
+            "22\n"
+            "Tuan 4 dat doanh thu cao nhat."
+        ),
+    )
+
+    result = service.analyze_image(
+        b"ignored",
+        source="sales.jpeg",
+        hint="monthly report image",
+    )
+
+    assert result.provider == "gemini+local_ocr"
+    assert "22" in result.text
+    assert "Tuan 4 dat doanh thu cao nhat." in result.text
+
+
 def test_local_ocr_uses_variants_and_relaxed_threshold(monkeypatch) -> None:
     settings = Settings(
         google_api_key="",
@@ -399,3 +521,77 @@ def test_local_ocr_respects_variant_limit(monkeypatch) -> None:
 
     assert fake_ocr_engine.calls == 1
     assert "Important line" in text
+
+
+def test_local_ocr_keeps_relaxed_numeric_lines_when_primary_text_exists(monkeypatch) -> None:
+    settings = Settings(
+        google_api_key="",
+        enable_image_understanding=True,
+        enable_local_ocr_fallback=True,
+        image_ocr_min_confidence=0.7,
+        ocr_max_variants_per_image=1,
+        ocr_max_seconds_per_image=15.0,
+        image_analysis_max_lines=10,
+    )
+    service = ImageUnderstandingService(settings=settings)
+
+    class FakeRapidOCR:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def __call__(self, _image_array):
+            self.calls += 1
+            return [
+                ([0, 0, 1, 1], "Monthly Sales Summary", 0.91),
+                ([0, 0, 1, 1], "Doanh thu theo tuan", 0.86),
+                ([0, 0, 1, 1], "Tuan 4 dat doanh thu cao nhat.", 0.82),
+                ([0, 0, 1, 1], "22", 0.58),
+            ], None
+
+    fake_ocr_engine = FakeRapidOCR()
+    fake_module = types.SimpleNamespace(RapidOCR=lambda: fake_ocr_engine)
+    monkeypatch.setitem(sys.modules, "rapidocr_onnxruntime", fake_module)
+    monkeypatch.setattr(service, "_build_ocr_image_variants", lambda *_: ["v1"])
+
+    image = Image.new("RGB", (320, 160), color="white")
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format="PNG")
+
+    text = service._analyze_with_local_ocr(image_bytes.getvalue())
+
+    assert fake_ocr_engine.calls == 1
+    assert "Tuan 4 dat doanh thu cao nhat." in text
+    assert "22" in text
+
+
+def test_numeric_enrichment_triggers_for_week_labels_without_chart_values() -> None:
+    settings = Settings()
+    service = ImageUnderstandingService(settings=settings)
+
+    provider_text = (
+        "BAO CAO DOANH THU THANG 05/2026\n"
+        "Doanh thu theo tuan (trieu dong)\n"
+        "Tuan 1\n"
+        "Tuan 2\n"
+        "Tuan 3\n"
+        "Tuan 4\n"
+        "Kenh Online tang 18%\n"
+    )
+
+    assert service._needs_numeric_enrichment(provider_text) is True
+
+
+def test_numeric_enrichment_skips_when_week_values_are_present() -> None:
+    settings = Settings()
+    service = ImageUnderstandingService(settings=settings)
+
+    provider_text = (
+        "Doanh thu theo tuan (trieu dong)\n"
+        "Tuan 1: 15\n"
+        "Tuan 2: 18\n"
+        "Tuan 3: 20\n"
+        "Tuan 4: 22\n"
+        "Tong doanh thu: 78.7\n"
+    )
+
+    assert service._needs_numeric_enrichment(provider_text) is False

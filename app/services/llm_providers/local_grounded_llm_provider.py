@@ -16,6 +16,15 @@ _UNSUPPORTED_TRANSFORM_PATTERNS = re.compile(
     r"viết\s*lại|viet\s*lai|học\s*thuật|hoc\s*thuat|academic\s*style",
     re.IGNORECASE,
 )
+_STRUCTURAL_LINE_RE = re.compile(
+    r"^(?:file|slide|layout|reading\s*order|slide\s*blocks|blocks|sheet|row|rows|columns|headers|range|table)\s*:",
+    re.IGNORECASE,
+)
+_TITLE_LINE_RE = re.compile(r"^title\s*:\s*(.+)$", re.IGNORECASE)
+_BLOCK_PREFIX_RE = re.compile(
+    r"^(?:-\s*)?\[(?:\d+)\]\s+[a-z_]+/[a-z_]+(?:\s*@\s*[^:]+)?\s*:\s*(.+)$",
+    re.IGNORECASE,
+)
 
 
 class LocalGroundedLLMProvider(ILLMProvider):
@@ -29,12 +38,13 @@ class LocalGroundedLLMProvider(ILLMProvider):
         if _UNSUPPORTED_TRANSFORM_PATTERNS.search(question or ""):
             return FALLBACK_ANSWER
 
-        if _SUMMARY_PATTERNS.search(question):
+        is_summary_request = bool(_SUMMARY_PATTERNS.search(question or ""))
+        if is_summary_request:
             return self._build_full_summary(context_docs)
 
         question_tokens = self._tokenize(question)
         if not question_tokens:
-            return self._build_full_summary(context_docs)
+            return FALLBACK_ANSWER
 
         ranked_sentences = self._rank_sentences(context_docs, question_tokens)
         best_sentences = [
@@ -42,7 +52,7 @@ class LocalGroundedLLMProvider(ILLMProvider):
         ][:5]
 
         if not best_sentences:
-            return self._build_full_summary(context_docs)
+            return FALLBACK_ANSWER
 
         answer = " ".join(best_sentences).strip()
         if not answer:
@@ -126,7 +136,22 @@ class LocalGroundedLLMProvider(ILLMProvider):
 
     @staticmethod
     def _normalize_segment(text: str) -> str:
-        normalized = re.sub(r"\s+", " ", str(text or "").replace("\u00A0", " ")).strip(" -•\t")
+        raw_text = str(text or "").replace("\u00A0", " ").strip()
+        if not raw_text:
+            return ""
+
+        title_match = _TITLE_LINE_RE.match(raw_text)
+        if title_match:
+            raw_text = title_match.group(1).strip()
+
+        block_match = _BLOCK_PREFIX_RE.match(raw_text)
+        if block_match:
+            raw_text = block_match.group(1).strip()
+
+        if _STRUCTURAL_LINE_RE.match(raw_text):
+            return ""
+
+        normalized = re.sub(r"\s+", " ", raw_text).strip(" -•\t")
         if not normalized:
             return ""
         if LocalGroundedLLMProvider._looks_like_compacted_text(normalized):
