@@ -1,0 +1,4551 @@
+{
+  "summary": {
+    "focused": {
+      "Total": 65,
+      "Full Correct": 53,
+      "Partial": 10,
+      "Fail": 2,
+      "Answer Accuracy": "53/65 = 81.54%",
+      "Retrieval Correctness": "65/65 = 100.00%",
+      "Citation Correctness": "65/65 = 100.00%",
+      "Hallucination": 2,
+      "Mean Latency": "2990.63 ms"
+    },
+    "extra": {
+      "Total": 40,
+      "Full Correct": 28,
+      "Partial": 12,
+      "Fail": 0,
+      "Answer Accuracy": "28/40 = 70.00%",
+      "Retrieval Correctness": "40/40 = 100.00%",
+      "Citation Correctness": "40/40 = 100.00%",
+      "Hallucination": 0,
+      "Mean Latency": "2379.14 ms"
+    },
+    "all": {
+      "Total": 105,
+      "Full Correct": 81,
+      "Partial": 22,
+      "Fail": 2,
+      "Answer Accuracy": "81/105 = 77.14%",
+      "Retrieval Correctness": "105/105 = 100.00%",
+      "Citation Correctness": "105/105 = 100.00%",
+      "Hallucination": 2,
+      "Mean Latency": "2757.68 ms"
+    },
+    "baseline_scores": {
+      "0.0": 46,
+      "1.0": 17,
+      "0.5": 2
+    },
+    "failed_count": 24
+  },
+  "results": [
+    {
+      "case": {
+        "id": "NEG-001",
+        "group": "Negative/Hallucination",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Trong file \"AI Document Question Answering System.pptx\" có thông tin về blockchain không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "blockchain"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-001",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"AI Document Question Answering System.pptx\" có thông tin về blockchain không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 6888.48
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-002",
+        "group": "Negative/Hallucination",
+        "files": [
+          "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "31188a44759d4f04aa5a3b8ba5f8c715"
+        ],
+        "question": "Trong file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" có thông tin về mat khau admin không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "mat khau admin"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-002",
+        "File": "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" có thông tin về mat khau admin không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 391.95
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-005",
+        "group": "Negative/Hallucination",
+        "files": [
+          "bao_cao_quan_ly_rac_thai_nhua.pdf"
+        ],
+        "file_type": "PDF",
+        "selected_document_ids": [
+          "d83b77d2a90140a8b70259e465bcf096"
+        ],
+        "question": "Trong file \"bao_cao_quan_ly_rac_thai_nhua.pdf\" có thông tin về gia co phieu Apple không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "gia co phieu Apple"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-005",
+        "File": "bao_cao_quan_ly_rac_thai_nhua.pdf",
+        "Loai file": "PDF",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"bao_cao_quan_ly_rac_thai_nhua.pdf\" có thông tin về gia co phieu Apple không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 362.99
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-010",
+        "group": "Negative/Hallucination",
+        "files": [
+          "infographic_mau_an_toan_mang.png"
+        ],
+        "file_type": "PNG",
+        "selected_document_ids": [
+          "0f5d0a6c52c540daa4fe04aa3c94b3e8"
+        ],
+        "question": "Trong file \"infographic_mau_an_toan_mang.png\" có thông tin về hop dong lao dong không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "hop dong lao dong"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-010",
+        "File": "infographic_mau_an_toan_mang.png",
+        "Loai file": "PNG",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"infographic_mau_an_toan_mang.png\" có thông tin về hop dong lao dong không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 329.8
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-015",
+        "group": "Negative/Hallucination",
+        "files": [
+          "ke_hoach_mau_du_lich_da_lat.md"
+        ],
+        "file_type": "MD",
+        "selected_document_ids": [
+          "2e91cd1ac6aa4a7badaaebdb4ac5963d"
+        ],
+        "question": "Trong file \"ke_hoach_mau_du_lich_da_lat.md\" có thông tin về so dien thoai ca nhan không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "so dien thoai ca nhan"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-015",
+        "File": "ke_hoach_mau_du_lich_da_lat.md",
+        "Loai file": "MD",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"ke_hoach_mau_du_lich_da_lat.md\" có thông tin về so dien thoai ca nhan không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Số điện thoại trong tài liệu: 250000300000.",
+        "Nguon/Citation": "ke_hoach_mau_du_lich_da_lat.md (Kế hoạch mẫu: Du lịch Đà Lạt 3 ngày 2 đêm > 8. Rủi ro và phương án xử lý) | ke_hoach_mau_du_lich_da_lat.md (Kế hoạch mẫu: Du lịch Đà Lạt 3 ngày 2 đêm) | ke_hoach_mau_du_lich_da_lat.md (Kế hoạch mẫu: Du lịch Đà Lạt 3 ngày 2 đêm > 9. Kết luận)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Sai",
+        "Diem": 0.0,
+        "Hallucination": "Có",
+        "Muc do loi": "Critical",
+        "Ghi chu": "Có dấu hiệu suy đoán hoặc trả lời ngoài tài liệu.",
+        "De xuat fix": "Siết missing-evidence gate và prompt fallback cho câu hỏi không có thông tin.",
+        "Latency ms": 464.46
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-019",
+        "group": "Negative/Hallucination",
+        "files": [
+          "noi_dung_mau_thanh_pho_xanh.pdf"
+        ],
+        "file_type": "PDF",
+        "selected_document_ids": [
+          "d69f659db18a4de5a632bf9c38cf5c77"
+        ],
+        "question": "Trong file \"noi_dung_mau_thanh_pho_xanh.pdf\" có thông tin về luong nhan vien không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "luong nhan vien"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-019",
+        "File": "noi_dung_mau_thanh_pho_xanh.pdf",
+        "Loai file": "PDF",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"noi_dung_mau_thanh_pho_xanh.pdf\" có thông tin về luong nhan vien không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "bản, bảng và bố cục cơ bản trong một file PDF. Tài liệu PDF mẫu này có nội dung ngẫu nhiên, dùng để kiểm tra khả năng hiển thị văn.",
+        "Nguon/Citation": "noi_dung_mau_thanh_pho_xanh.pdf (trang 1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Sai",
+        "Diem": 0.0,
+        "Hallucination": "Có",
+        "Muc do loi": "Critical",
+        "Ghi chu": "Có dấu hiệu suy đoán hoặc trả lời ngoài tài liệu.",
+        "De xuat fix": "Siết missing-evidence gate và prompt fallback cho câu hỏi không có thông tin.",
+        "Latency ms": 993.88
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-020",
+        "group": "Negative/Hallucination",
+        "files": [
+          "pdf_01_nang_luong_mat_troi.pdf"
+        ],
+        "file_type": "PDF",
+        "selected_document_ids": [
+          "75130c551bfc40fd9695c0eaaf57e1fb"
+        ],
+        "question": "Trong file \"pdf_01_nang_luong_mat_troi.pdf\" có thông tin về thong tin bao hiem không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "thong tin bao hiem"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-020",
+        "File": "pdf_01_nang_luong_mat_troi.pdf",
+        "Loai file": "PDF",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"pdf_01_nang_luong_mat_troi.pdf\" có thông tin về thong tin bao hiem không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 493.55
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-003",
+        "group": "Negative/Hallucination",
+        "files": [
+          "bao_cao_an_toan_du_lieu_ca_nhan.docx"
+        ],
+        "file_type": "DOCX",
+        "selected_document_ids": [
+          "bd6515780ea64b18ad5e826dbf8f050d"
+        ],
+        "question": "Trong file \"bao_cao_an_toan_du_lieu_ca_nhan.docx\" có thông tin về CCCD cua sinh vien không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "CCCD cua sinh vien"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-003",
+        "File": "bao_cao_an_toan_du_lieu_ca_nhan.docx",
+        "Loai file": "DOCX",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"bao_cao_an_toan_du_lieu_ca_nhan.docx\" có thông tin về CCCD cua sinh vien không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 664.45
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-004",
+        "group": "Negative/Hallucination",
+        "files": [
+          "bao_cao_mau_chuyen_doi_so_giao_duc.pdf"
+        ],
+        "file_type": "PDF",
+        "selected_document_ids": [
+          "d8c1ec5733634bfaa938e24338911bc4"
+        ],
+        "question": "Trong file \"bao_cao_mau_chuyen_doi_so_giao_duc.pdf\" có thông tin về benh vien không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "benh vien"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-004",
+        "File": "bao_cao_mau_chuyen_doi_so_giao_duc.pdf",
+        "Loai file": "PDF",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"bao_cao_mau_chuyen_doi_so_giao_duc.pdf\" có thông tin về benh vien không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Chuyển đổi số trong giáo dục không chỉ là việc đưa máy tính hoặc phần mềm vào lớp học. Một nguyên tắc quan trọng là không để công nghệ làm phức tạp quy trình hiện có. kết quả nào và có dễ sử dụng không. thông báo, quản lý tài liệu và theo dõi tiến độ có thể được tự động hóa một phần. cơ sai lệch thông tin giảm xuống.",
+        "Nguon/Citation": "bao_cao_mau_chuyen_doi_so_giao_duc.pdf (trang 1) | bao_cao_mau_chuyen_doi_so_giao_duc.pdf (trang 4) | bao_cao_mau_chuyen_doi_so_giao_duc.pdf (trang 2)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 131107.98
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-006",
+        "group": "Negative/Hallucination",
+        "files": [
+          "content_summary.md"
+        ],
+        "file_type": "MD",
+        "selected_document_ids": [
+          "2bfe3a172ffd4d7ba6637613d8b86870"
+        ],
+        "question": "Trong file \"content_summary.md\" có thông tin về dia chi nha rieng không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "dia chi nha rieng"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-006",
+        "File": "content_summary.md",
+        "Loai file": "MD",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"content_summary.md\" có thông tin về dia chi nha rieng không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Địa chỉ trong tài liệu: Để đảm bảo mô hình không chỉ phản hồi đúng mà còn chuyên nghiệp và chặt chẽ, hệ thống áp dụng chiến lược thiết kế câu lệnh kết hợp giữa hai phương pháp tối ưu:.",
+        "Nguon/Citation": "content_summary.md (- CHƯƠNG 1: TỔNG QUAN ĐỀ TÀI) | content_summary.md (- LỜI NÓI ĐẦU) | content_summary.md (- LỜI CẢM ƠN) | content_summary.md (- BÁO CÁO THỰC TẬP TỐT NGHIỆP) | content_summary.md (- TÓM TẮT)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 344.7
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-007",
+        "group": "Negative/Hallucination",
+        "files": [
+          "docx_01_thu_vien_so.docx"
+        ],
+        "file_type": "DOCX",
+        "selected_document_ids": [
+          "d6e2c17dafdc44668a1f0b74e039c1c5"
+        ],
+        "question": "Trong file \"docx_01_thu_vien_so.docx\" có thông tin về so tai khoan ngan hang không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "so tai khoan ngan hang"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-007",
+        "File": "docx_01_thu_vien_so.docx",
+        "Loai file": "DOCX",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"docx_01_thu_vien_so.docx\" có thông tin về so tai khoan ngan hang không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 310.83
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-008",
+        "group": "Negative/Hallucination",
+        "files": [
+          "docx_02_ca_phe_sach.docx"
+        ],
+        "file_type": "DOCX",
+        "selected_document_ids": [
+          "65f08fa3d81a415fa95c6116b113091f"
+        ],
+        "question": "Trong file \"docx_02_ca_phe_sach.docx\" có thông tin về ma OTP không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "ma OTP"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-008",
+        "File": "docx_02_ca_phe_sach.docx",
+        "Loai file": "DOCX",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"docx_02_ca_phe_sach.docx\" có thông tin về ma OTP không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 274.99
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-009",
+        "group": "Negative/Hallucination",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\" có thông tin về du lieu y te benh nhan không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "du lieu y te benh nhan"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-009",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\" có thông tin về du lieu y te benh nhan không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 681.5
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-011",
+        "group": "Negative/Hallucination",
+        "files": [
+          "jpeg_01_ke_hoach_du_lich.jpeg"
+        ],
+        "file_type": "JPEG",
+        "selected_document_ids": [
+          "a3d2e364ed904e2f917d8dff01476ec8"
+        ],
+        "question": "Trong file \"jpeg_01_ke_hoach_du_lich.jpeg\" có thông tin về bitcoin không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "bitcoin"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-011",
+        "File": "jpeg_01_ke_hoach_du_lich.jpeg",
+        "Loai file": "JPEG",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"jpeg_01_ke_hoach_du_lich.jpeg\" có thông tin về bitcoin không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 284.01
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-012",
+        "group": "Negative/Hallucination",
+        "files": [
+          "jpeg_02_bang_an_toan_bep.jpeg"
+        ],
+        "file_type": "JPEG",
+        "selected_document_ids": [
+          "f574111fdf88408d820061db2c349ff0"
+        ],
+        "question": "Trong file \"jpeg_02_bang_an_toan_bep.jpeg\" có thông tin về ma nguon bi mat không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "ma nguon bi mat"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-012",
+        "File": "jpeg_02_bang_an_toan_bep.jpeg",
+        "Loai file": "JPEG",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"jpeg_02_bang_an_toan_bep.jpeg\" có thông tin về ma nguon bi mat không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 841.52
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-013",
+        "group": "Negative/Hallucination",
+        "files": [
+          "jpg_01_infographic_giac_ngu.jpg"
+        ],
+        "file_type": "JPG",
+        "selected_document_ids": [
+          "3fe4f13d93b64d66a7ddd9690692c48b"
+        ],
+        "question": "Trong file \"jpg_01_infographic_giac_ngu.jpg\" có thông tin về lich bay quoc te không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "lich bay quoc te"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-013",
+        "File": "jpg_01_infographic_giac_ngu.jpg",
+        "Loai file": "JPG",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"jpg_01_infographic_giac_ngu.jpg\" có thông tin về lich bay quoc te không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 295.08
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-014",
+        "group": "Negative/Hallucination",
+        "files": [
+          "jpg_02_so_do_lop_hoc.jpg"
+        ],
+        "file_type": "JPG",
+        "selected_document_ids": [
+          "a06109a9959c4d9c946e168e43d0550f"
+        ],
+        "question": "Trong file \"jpg_02_so_do_lop_hoc.jpg\" có thông tin về diem thi IELTS không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "diem thi IELTS"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-014",
+        "File": "jpg_02_so_do_lop_hoc.jpg",
+        "Loai file": "JPG",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"jpg_02_so_do_lop_hoc.jpg\" có thông tin về diem thi IELTS không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 269.59
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-016",
+        "group": "Negative/Hallucination",
+        "files": [
+          "md_01_workshop_thuyet_trinh.md"
+        ],
+        "file_type": "MD",
+        "selected_document_ids": [
+          "f4800a20b8f747069ed9fecfbfa12820"
+        ],
+        "question": "Trong file \"md_01_workshop_thuyet_trinh.md\" có thông tin về the tin dung không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "the tin dung"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-016",
+        "File": "md_01_workshop_thuyet_trinh.md",
+        "Loai file": "MD",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"md_01_workshop_thuyet_trinh.md\" có thông tin về the tin dung không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Không, tài liệu không đề cập đến \"the tin dung\".",
+        "Nguon/Citation": "md_01_workshop_thuyet_trinh.md (Kế hoạch workshop kỹ năng thuyết trình > Mục tiêu) | md_01_workshop_thuyet_trinh.md (Kế hoạch workshop kỹ năng thuyết trình > Ghi chú) | md_01_workshop_thuyet_trinh.md (Kế hoạch workshop kỹ năng thuyết trình > Lịch trình)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 662.24
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-017",
+        "group": "Negative/Hallucination",
+        "files": [
+          "md_02_app_chi_tieu.md"
+        ],
+        "file_type": "MD",
+        "selected_document_ids": [
+          "68cce76f6a164b429fec95035fb2fb11"
+        ],
+        "question": "Trong file \"md_02_app_chi_tieu.md\" có thông tin về API key không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "API key"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-017",
+        "File": "md_02_app_chi_tieu.md",
+        "Loai file": "MD",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"md_02_app_chi_tieu.md\" có thông tin về API key không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 396.16
+      }
+    },
+    {
+      "case": {
+        "id": "NEG-018",
+        "group": "Negative/Hallucination",
+        "files": [
+          "nhat_ky_mau_vuon_rau_do_thi.txt"
+        ],
+        "file_type": "TXT",
+        "selected_document_ids": [
+          "0f4d07514dff431c82c3d0632a619b15"
+        ],
+        "question": "Trong file \"nhat_ky_mau_vuon_rau_do_thi.txt\" có thông tin về du lieu GPS không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "du lieu GPS"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "NEG-018",
+        "File": "nhat_ky_mau_vuon_rau_do_thi.txt",
+        "Loai file": "TXT",
+        "Nhom": "Negative/Hallucination",
+        "Cau hoi": "Trong file \"nhat_ky_mau_vuon_rau_do_thi.txt\" có thông tin về du lieu GPS không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Mục đích là tạo một file văn bản thuần có độ dài tương đối để kiểm thử khả năng đọc file.txt, tách đoạn, trả lời câu hỏi theo ngữ cảnh và tóm tắt nội dung dài. Tài liệu TXT này có nội dung khác với PDF, Markdown, PNG, JPG, JPEG và PPTX. Dự án vườn rau đô thị trên sân thượng bắt đầu từ nhu cầu tận dụng khoảng không gian trống trong nhà phố. Ý tưởng chính không phải là tự cung cấp toàn bộ thực phẩm cho gia đình, mà là tạo ra một mô hình sống xanh, giảm lãng phí và giúp mọi người hiểu hơn về quá trình tạo ra thức ăn. Không gian sân thượng ban đầu có diện tích khoảng ba mươi mét vuông.",
+        "Nguon/Citation": "nhat_ky_mau_vuon_rau_do_thi.txt (NHẬT KÝ MẪU: DỰ ÁN VƯỜN RAU ĐÔ THỊ TRÊN SÂN THƯỢNG) | nhat_ky_mau_vuon_rau_do_thi.txt | nhat_ky_mau_vuon_rau_do_thi.txt (2. MỤC TIÊU CỦA DỰ ÁN)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 18277.0
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-002",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 3 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-01 00:00:00; Khu vực: Ký túc xá; Hoạt động: Đổi rác lấy cây; Người phụ trách: An; Số người tham gia: 32",
+        "expected_terms": [
+          "2026-05-01 00:00:00",
+          "Ký túc xá",
+          "Đổi rác lấy cây",
+          "An"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-002",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-01 00:00:00; Khu vực: Ký túc xá; Hoạt động: Đổi rác lấy cây; Người phụ trách: An; Số người tham gia: 32",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 3 có: Ngày: 2026-05-01 00:00:00; Khu vực: Ký túc xá; Hoạt động: Đổi rác lấy cây; Người phụ trách: An; Số người tham gia: 32; Rác tái chế (kg): 4.1; Chi phí (VND): 450000; Mức hài lòng: 4.6; Ghi chú: Hiệu quả cao; Chi phí/người: 14062.5.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 944.85
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-003",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 4 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-02 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 87",
+        "expected_terms": [
+          "2026-05-02 00:00:00",
+          "Căn tin",
+          "Thu gom rác tái chế",
+          "Minh"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-003",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 4 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-02 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 87",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 4 có: Ngày: 2026-05-02 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 87; Rác tái chế (kg): 12.9; Chi phí (VND): 300000; Mức hài lòng: 3.7; Ghi chú: Nên tổ chức lại; Chi phí/người: 3448.2758620689656.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 1425.78
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-004",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 5 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-03 00:00:00; Khu vực: Thư viện; Hoạt động: Workshop sống xanh; Người phụ trách: Huy; Số người tham gia: 95",
+        "expected_terms": [
+          "2026-05-03 00:00:00",
+          "Thư viện",
+          "Workshop sống xanh",
+          "Huy"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-004",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 5 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-03 00:00:00; Khu vực: Thư viện; Hoạt động: Workshop sống xanh; Người phụ trách: Huy; Số người tham gia: 95",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 5 có: Ngày: 2026-05-03 00:00:00; Khu vực: Thư viện; Hoạt động: Workshop sống xanh; Người phụ trách: Huy; Số người tham gia: 95; Rác tái chế (kg): 12.2; Chi phí (VND): 450000; Mức hài lòng: 4.1; Ghi chú: Sinh viên tham gia tích cực; Chi phí/người: 4736.8421052631575.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 1465.69
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-005",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 6 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-04 00:00:00; Khu vực: Thư viện; Hoạt động: Dọn vệ sinh khu vực; Người phụ trách: Trang; Số người tham gia: 18",
+        "expected_terms": [
+          "2026-05-04 00:00:00",
+          "Thư viện",
+          "Dọn vệ sinh khu vực",
+          "Trang"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-005",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 6 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-04 00:00:00; Khu vực: Thư viện; Hoạt động: Dọn vệ sinh khu vực; Người phụ trách: Trang; Số người tham gia: 18",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 6 có: Ngày: 2026-05-04 00:00:00; Khu vực: Thư viện; Hoạt động: Dọn vệ sinh khu vực; Người phụ trách: Trang; Số người tham gia: 18; Rác tái chế (kg): 6.7; Chi phí (VND): 500000; Mức hài lòng: 3.6; Ghi chú: Sinh viên tham gia tích cực; Chi phí/người: 27777.777777777777.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 1182.99
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-006",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 7 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-05 00:00:00; Khu vực: Khoa CNTT; Hoạt động: Tuyên truyền phân loại rác; Người phụ trách: Trang; Số người tham gia: 31",
+        "expected_terms": [
+          "2026-05-05 00:00:00",
+          "Khoa CNTT",
+          "Tuyên truyền phân loại rác",
+          "Trang"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-006",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 7 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-05 00:00:00; Khu vực: Khoa CNTT; Hoạt động: Tuyên truyền phân loại rác; Người phụ trách: Trang; Số người tham gia: 31",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 7 có: Ngày: 2026-05-05 00:00:00; Khu vực: Khoa CNTT; Hoạt động: Tuyên truyền phân loại rác; Người phụ trách: Trang; Số người tham gia: 31; Rác tái chế (kg): 4.7; Chi phí (VND): 800000; Mức hài lòng: 3.8; Ghi chú: Hoàn thành tốt; Chi phí/người: 25806.451612903227.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan, A1:H16)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 869.48
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-007",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 8 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-06 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Linh; Số người tham gia: 76",
+        "expected_terms": [
+          "2026-05-06 00:00:00",
+          "Căn tin",
+          "Thu gom rác tái chế",
+          "Linh"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-007",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 8 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-06 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Linh; Số người tham gia: 76",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 8 có: Ngày: 2026-05-06 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Linh; Số người tham gia: 76; Rác tái chế (kg): 22.6; Chi phí (VND): 500000; Mức hài lòng: 4.7; Ghi chú: Nên tổ chức lại; Chi phí/người: 6578.9473684210525.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan, A1:H16)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 670.28
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-008",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 9 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-07 00:00:00; Khu vực: Phòng học A; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 64",
+        "expected_terms": [
+          "2026-05-07 00:00:00",
+          "Phòng học A",
+          "Thu gom rác tái chế",
+          "Minh"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-008",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 9 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-07 00:00:00; Khu vực: Phòng học A; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 64",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 9 có: Ngày: 2026-05-07 00:00:00; Khu vực: Phòng học A; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 64; Rác tái chế (kg): 19.9; Chi phí (VND): 1000000; Mức hài lòng: 3.8; Ghi chú: Sinh viên tham gia tích cực; Chi phí/người: 15625.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan, A1:H16)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 786.99
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-009",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 10 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-08 00:00:00; Khu vực: Khoa CNTT; Hoạt động: Dọn vệ sinh khu vực; Người phụ trách: Trang; Số người tham gia: 28",
+        "expected_terms": [
+          "2026-05-08 00:00:00",
+          "Khoa CNTT",
+          "Dọn vệ sinh khu vực",
+          "Trang"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-009",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 10 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-08 00:00:00; Khu vực: Khoa CNTT; Hoạt động: Dọn vệ sinh khu vực; Người phụ trách: Trang; Số người tham gia: 28",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 10 có: Ngày: 2026-05-08 00:00:00; Khu vực: Khoa CNTT; Hoạt động: Dọn vệ sinh khu vực; Người phụ trách: Trang; Số người tham gia: 28; Rác tái chế (kg): 11.3; Chi phí (VND): 650000; Mức hài lòng: 4.4; Ghi chú: Sinh viên tham gia tích cực; Chi phí/người: 23214.285714285714.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 910.71
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-010",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 11 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-09 00:00:00; Khu vực: Thư viện; Hoạt động: Tuyên truyền phân loại rác; Người phụ trách: Phúc; Số người tham gia: 38",
+        "expected_terms": [
+          "2026-05-09 00:00:00",
+          "Thư viện",
+          "Tuyên truyền phân loại rác",
+          "Phúc"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-010",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 11 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-09 00:00:00; Khu vực: Thư viện; Hoạt động: Tuyên truyền phân loại rác; Người phụ trách: Phúc; Số người tham gia: 38",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 11 có: Ngày: 2026-05-09 00:00:00; Khu vực: Thư viện; Hoạt động: Tuyên truyền phân loại rác; Người phụ trách: Phúc; Số người tham gia: 38; Rác tái chế (kg): 9.2; Chi phí (VND): 1000000; Mức hài lòng: 4.4; Ghi chú: Nên tổ chức lại; Chi phí/người: 26315.78947368421.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan, A1:H16)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 788.89
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-011",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 12 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-10 00:00:00; Khu vực: Thư viện; Hoạt động: Đổi rác lấy cây; Người phụ trách: Huy; Số người tham gia: 39",
+        "expected_terms": [
+          "2026-05-10 00:00:00",
+          "Thư viện",
+          "Đổi rác lấy cây",
+          "Huy"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-011",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 12 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-10 00:00:00; Khu vực: Thư viện; Hoạt động: Đổi rác lấy cây; Người phụ trách: Huy; Số người tham gia: 39",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 12 có: Ngày: 2026-05-10 00:00:00; Khu vực: Thư viện; Hoạt động: Đổi rác lấy cây; Người phụ trách: Huy; Số người tham gia: 39; Rác tái chế (kg): 11.6; Chi phí (VND): 650000; Mức hài lòng: 3.8; Ghi chú: Hiệu quả cao; Chi phí/người: 16666.666666666668.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan, A1:H16)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 563.31
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-012",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 13 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-11 00:00:00; Khu vực: Ký túc xá; Hoạt động: Thu gom rác tái chế; Người phụ trách: An; Số người tham gia: 89",
+        "expected_terms": [
+          "2026-05-11 00:00:00",
+          "Ký túc xá",
+          "Thu gom rác tái chế",
+          "An"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-012",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 13 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-11 00:00:00; Khu vực: Ký túc xá; Hoạt động: Thu gom rác tái chế; Người phụ trách: An; Số người tham gia: 89",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 13 có: Ngày: 2026-05-11 00:00:00; Khu vực: Ký túc xá; Hoạt động: Thu gom rác tái chế; Người phụ trách: An; Số người tham gia: 89; Rác tái chế (kg): 17.1; Chi phí (VND): 1200000; Mức hài lòng: 3.5; Ghi chú: Sinh viên tham gia tích cực; Chi phí/người: 13483.14606741573.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan, A1:H16)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 626.67
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-013",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 14 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-12 00:00:00; Khu vực: Thư viện; Hoạt động: Workshop sống xanh; Người phụ trách: Phúc; Số người tham gia: 69",
+        "expected_terms": [
+          "2026-05-12 00:00:00",
+          "Thư viện",
+          "Workshop sống xanh",
+          "Phúc"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-013",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 14 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-12 00:00:00; Khu vực: Thư viện; Hoạt động: Workshop sống xanh; Người phụ trách: Phúc; Số người tham gia: 69",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 14 có: Ngày: 2026-05-12 00:00:00; Khu vực: Thư viện; Hoạt động: Workshop sống xanh; Người phụ trách: Phúc; Số người tham gia: 69; Rác tái chế (kg): 14.4; Chi phí (VND): 500000; Mức hài lòng: 3.7; Ghi chú: Thiếu vật tư; Chi phí/người: 7246.376811594203.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan, A1:H16)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 696.92
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-016",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 4 có thông tin gì?",
+        "expected_answer": "No.: 2.0; 受験番号: KE2; 氏名: 優希　カイ; 性別: A; 学科名: 経営学科",
+        "expected_terms": [
+          "2.0",
+          "KE2",
+          "優希　カイ",
+          "A"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-016",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 4 có thông tin gì?",
+        "Dap an chuan": "No.: 2.0; 受験番号: KE2; 氏名: 優希　カイ; 性別: A; 学科名: 経営学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 4 có: No.: 2.0; 受験番号: KE2; 氏名: 優希 カイ; 性別: A; 学科名: 経営学科; 日本語: 9.0; 数学: 7.0; 文学: 6.0; 総計: 22; 結果: ROT.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet4)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 527.42
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-017",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 5 có thông tin gì?",
+        "expected_answer": "No.: 3.0; 受験番号: NH2; 氏名: 勝弘　系; 性別: A; 学科名: 日本語学科",
+        "expected_terms": [
+          "3.0",
+          "NH2",
+          "勝弘　系",
+          "A"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-017",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 5 có thông tin gì?",
+        "Dap an chuan": "No.: 3.0; 受験番号: NH2; 氏名: 勝弘　系; 性別: A; 学科名: 日本語学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 5 có: No.: 3.0; 受験番号: NH2; 氏名: 勝弘 系; 性別: A; 学科名: 日本語学科; 日本語: 8.0; 数学: 5.0; 文学: 7.0; 総計: 28; 結果: D.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet4)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 419.56
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-018",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 6 có thông tin gì?",
+        "expected_answer": "No.: 4.0; 受験番号: KI1; 氏名: 山下　恵子; 性別: U; 学科名: 教育学科",
+        "expected_terms": [
+          "4.0",
+          "KI1",
+          "山下　恵子",
+          "U"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-018",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 6 có thông tin gì?",
+        "Dap an chuan": "No.: 4.0; 受験番号: KI1; 氏名: 山下　恵子; 性別: U; 学科名: 教育学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 6 có: No.: 4.0; 受験番号: KI1; 氏名: 山下 恵子; 性別: U; 学科名: 教育学科; 日本語: 9.0; 数学: 10.0; 文学: 8.5; 総計: 36.5; 結果: D.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet4)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 410.88
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-019",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 7 có thông tin gì?",
+        "expected_answer": "No.: 5.0; 受験番号: NH1; 氏名: 山川　静香; 性別: U; 学科名: 日本語学科",
+        "expected_terms": [
+          "5.0",
+          "NH1",
+          "山川　静香",
+          "U"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-019",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 7 có thông tin gì?",
+        "Dap an chuan": "No.: 5.0; 受験番号: NH1; 氏名: 山川　静香; 性別: U; 学科名: 日本語学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 7 có: No.: 5.0; 受験番号: NH1; 氏名: 山川 静香; 性別: U; 学科名: 日本語学科; 日本語: 10.0; 数学: 7.0; 文学: 5.0; 総計: 32; 結果: D.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 439.68
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-020",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 8 có thông tin gì?",
+        "expected_answer": "No.: 6.0; 受験番号: NH1; 氏名: 山田　浩; 性別: U; 学科名: 日本語学科",
+        "expected_terms": [
+          "6.0",
+          "NH1",
+          "山田　浩",
+          "U"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-020",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 8 có thông tin gì?",
+        "Dap an chuan": "No.: 6.0; 受験番号: NH1; 氏名: 山田　浩; 性別: U; 学科名: 日本語学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 8 có: No.: 6.0; 受験番号: NH1; 氏名: 山田 浩; 性別: U; 学科名: 日本語学科; 日本語: 5.0; 数学: 6.0; 文学: 8.0; 総計: 24; 結果: ROT.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 822.13
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-021",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 9 có thông tin gì?",
+        "expected_answer": "No.: 7.0; 受験番号: KE2; 氏名: 志村　愛; 性別: A; 学科名: 経営学科",
+        "expected_terms": [
+          "7.0",
+          "KE2",
+          "志村　愛",
+          "A"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-021",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 9 có thông tin gì?",
+        "Dap an chuan": "No.: 7.0; 受験番号: KE2; 氏名: 志村　愛; 性別: A; 学科名: 経営学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 9 có: No.: 7.0; 受験番号: KE2; 氏名: 志村 愛; 性別: A; 学科名: 経営学科; 日本語: 7.0; 数学: 7.0; 文学: 8.0; 総計: 22; 結果: ROT.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 761.87
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-022",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 10 có thông tin gì?",
+        "expected_answer": "No.: 8.0; 受験番号: NH1; 氏名: 木村　信; 性別: U; 学科名: 日本語学科",
+        "expected_terms": [
+          "8.0",
+          "NH1",
+          "木村　信",
+          "U"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-022",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 10 có thông tin gì?",
+        "Dap an chuan": "No.: 8.0; 受験番号: NH1; 氏名: 木村　信; 性別: U; 学科名: 日本語学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 10 có: No.: 8.0; 受験番号: NH1; 氏名: 木村 信; 性別: U; 学科名: 日本語学科; 日本語: 4.5; 数学: 7.0; 文学: 7.0; 総計: 23; 結果: ROT.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 687.19
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-023",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 11 có thông tin gì?",
+        "expected_answer": "No.: 9.0; 受験番号: KE1; 氏名: 木村　杏奈; 性別: U; 学科名: 経営学科",
+        "expected_terms": [
+          "9.0",
+          "KE1",
+          "木村　杏奈",
+          "U"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-023",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 11 có thông tin gì?",
+        "Dap an chuan": "No.: 9.0; 受験番号: KE1; 氏名: 木村　杏奈; 性別: U; 学科名: 経営学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 11 có: No.: 9.0; 受験番号: KE1; 氏名: 木村 杏奈; 性別: U; 学科名: 経営学科; 日本語: 6.5; 数学: 9.0; 文学: 7.0; 総計: 22.5; 結果: ROT.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 444.32
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-024",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 12 có thông tin gì?",
+        "expected_answer": "No.: 10.0; 受験番号: KI2; 氏名: 立山　高貴; 性別: A; 学科名: 教育学科",
+        "expected_terms": [
+          "10.0",
+          "KI2",
+          "立山　高貴",
+          "A"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-024",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 12 có thông tin gì?",
+        "Dap an chuan": "No.: 10.0; 受験番号: KI2; 氏名: 立山　高貴; 性別: A; 学科名: 教育学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 12 có: No.: 10.0; 受験番号: KI2; 氏名: 立山 高貴; 性別: A; 学科名: 教育学科; 日本語: 5.0; 数学: 7.0; 文学: 8.5; 総計: 25.5; 結果: D.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 950.93
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-025",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 13 có thông tin gì?",
+        "expected_answer": "学科名: 平均点; 日本語: ?; 数学: ?; 文学: ?; 総計: ?",
+        "expected_terms": [
+          "平均点",
+          "?",
+          "?",
+          "?"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-025",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 13 có thông tin gì?",
+        "Dap an chuan": "学科名: 平均点; 日本語: ?; 数学: ?; 文学: ?; 総計: ?",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 13 có: 学科名: 平均点; 日本語:?; 数学:?; 文学:?; 総計:?; column_12: 合格者数; column_18: （10点）.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 427.47
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-026",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 14 có thông tin gì?",
+        "expected_answer": "学科名: 最高点; 日本語: ?; 数学: ?; 文学: ?; 総計: ?",
+        "expected_terms": [
+          "最高点",
+          "?",
+          "?",
+          "?"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-026",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 14 có thông tin gì?",
+        "Dap an chuan": "学科名: 最高点; 日本語: ?; 数学: ?; 文学: ?; 総計: ?",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 14 có: 学科名: 最高点; 日本語:?; 数学:?; 文学:?; 総計:?; column_12: 合格率; column_18: （5点）.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet2, A1:Z1000)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 408.81
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-028",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 2 có thông tin gì?",
+        "expected_answer": "Tháng: 01/2026; Sản phẩm A: 120; Sản phẩm B: 90; Dịch vụ: 45; Tổng: 255",
+        "expected_terms": [
+          "01/2026",
+          "120",
+          "90",
+          "45"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-028",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 2 có thông tin gì?",
+        "Dap an chuan": "Tháng: 01/2026; Sản phẩm A: 120; Sản phẩm B: 90; Dịch vụ: 45; Tổng: 255",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 2 có: Tháng: 01/2026; Sản phẩm A: 120; Sản phẩm B: 90; Dịch vụ: 45; Tổng: 255; Ghi chú: Sau Tết nhu cầu ổn định.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 420.7
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-029",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 3 có thông tin gì?",
+        "expected_answer": "Tháng: 02/2026; Sản phẩm A: 135; Sản phẩm B: 88; Dịch vụ: 52; Tổng: 275",
+        "expected_terms": [
+          "02/2026",
+          "135",
+          "88",
+          "52"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-029",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "Tháng: 02/2026; Sản phẩm A: 135; Sản phẩm B: 88; Dịch vụ: 52; Tổng: 275",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 3 có: Tháng: 02/2026; Sản phẩm A: 135; Sản phẩm B: 88; Dịch vụ: 52; Tổng: 275; Ghi chú: Tăng nhờ chương trình combo.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 792.97
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-030",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 4 có thông tin gì?",
+        "expected_answer": "Tháng: 03/2026; Sản phẩm A: 128; Sản phẩm B: 105; Dịch vụ: 58; Tổng: 291",
+        "expected_terms": [
+          "03/2026",
+          "128",
+          "105",
+          "58"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-030",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 4 có thông tin gì?",
+        "Dap an chuan": "Tháng: 03/2026; Sản phẩm A: 128; Sản phẩm B: 105; Dịch vụ: 58; Tổng: 291",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 4 có: Tháng: 03/2026; Sản phẩm A: 128; Sản phẩm B: 105; Dịch vụ: 58; Tổng: 291; Ghi chú: Bắt đầu quảng cáo online.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 435.7
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-031",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 5 có thông tin gì?",
+        "expected_answer": "Tháng: 04/2026; Sản phẩm A: 150; Sản phẩm B: 112; Dịch vụ: 64; Tổng: 326",
+        "expected_terms": [
+          "04/2026",
+          "150",
+          "112",
+          "64"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-031",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 5 có thông tin gì?",
+        "Dap an chuan": "Tháng: 04/2026; Sản phẩm A: 150; Sản phẩm B: 112; Dịch vụ: 64; Tổng: 326",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 5 có: Tháng: 04/2026; Sản phẩm A: 150; Sản phẩm B: 112; Dịch vụ: 64; Tổng: 326; Ghi chú: Khách hàng doanh nghiệp tăng.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 654.15
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-032",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 6 có thông tin gì?",
+        "expected_answer": "Tháng: 05/2026; Sản phẩm A: 162; Sản phẩm B: 120; Dịch vụ: 71; Tổng: 353",
+        "expected_terms": [
+          "05/2026",
+          "162",
+          "120",
+          "71"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-032",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 6 có thông tin gì?",
+        "Dap an chuan": "Tháng: 05/2026; Sản phẩm A: 162; Sản phẩm B: 120; Dịch vụ: 71; Tổng: 353",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 6 có: Tháng: 05/2026; Sản phẩm A: 162; Sản phẩm B: 120; Dịch vụ: 71; Tổng: 353; Ghi chú: Cần bổ sung nhân sự tư vấn.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 1070.7
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-033",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 7 có thông tin gì?",
+        "expected_answer": "Tháng: 06/2026; Sản phẩm A: 158; Sản phẩm B: 130; Dịch vụ: 75; Tổng: 363",
+        "expected_terms": [
+          "06/2026",
+          "158",
+          "130",
+          "75"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-033",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 7 có thông tin gì?",
+        "Dap an chuan": "Tháng: 06/2026; Sản phẩm A: 158; Sản phẩm B: 130; Dịch vụ: 75; Tổng: 363",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 7 có: Tháng: 06/2026; Sản phẩm A: 158; Sản phẩm B: 130; Dịch vụ: 75; Tổng: 363; Ghi chú: Duy trì chăm sóc khách cũ.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 739.84
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-035",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 3 có thông tin gì?",
+        "expected_answer": "Chỉ số: Đơn hàng đúng hạn; Mục tiêu: 95%; Thực tế: 97%; Đánh giá: Đạt",
+        "expected_terms": [
+          "Đơn hàng đúng hạn",
+          "95%",
+          "97%",
+          "Đạt"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-035",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "Chỉ số: Đơn hàng đúng hạn; Mục tiêu: 95%; Thực tế: 97%; Đánh giá: Đạt",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 3 có: Tháng: 02/2026; Sản phẩm A: 135; Sản phẩm B: 88; Dịch vụ: 52; Tổng: 275; Ghi chú: Tăng nhờ chương trình combo.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI, A1:D6) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 515.1
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-036",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 4 có thông tin gì?",
+        "expected_answer": "Chỉ số: Chi phí quảng cáo; Mục tiêu: 25 triệu; Thực tế: 23 triệu; Đánh giá: Đạt",
+        "expected_terms": [
+          "Chi phí quảng cáo",
+          "25 triệu",
+          "23 triệu",
+          "Đạt"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-036",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 4 có thông tin gì?",
+        "Dap an chuan": "Chỉ số: Chi phí quảng cáo; Mục tiêu: 25 triệu; Thực tế: 23 triệu; Đánh giá: Đạt",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 4 có: Tháng: 03/2026; Sản phẩm A: 128; Sản phẩm B: 105; Dịch vụ: 58; Tổng: 291; Ghi chú: Bắt đầu quảng cáo online.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI, A1:D6) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 491.02
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-037",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 5 có thông tin gì?",
+        "expected_answer": "Chỉ số: Tỷ lệ khách quay lại; Mục tiêu: 35%; Thực tế: 32%; Đánh giá: Theo dõi thêm",
+        "expected_terms": [
+          "Tỷ lệ khách quay lại",
+          "35%",
+          "32%",
+          "Theo dõi thêm"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-037",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 5 có thông tin gì?",
+        "Dap an chuan": "Chỉ số: Tỷ lệ khách quay lại; Mục tiêu: 35%; Thực tế: 32%; Đánh giá: Theo dõi thêm",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 5 có: Tháng: 04/2026; Sản phẩm A: 150; Sản phẩm B: 112; Dịch vụ: 64; Tổng: 326; Ghi chú: Khách hàng doanh nghiệp tăng.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI, A1:D6) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 499.01
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-038",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 6 có thông tin gì?",
+        "expected_answer": "Chỉ số: Số lỗi vận hành; Mục tiêu: <= 5; Thực tế: 4; Đánh giá: Đạt",
+        "expected_terms": [
+          "Số lỗi vận hành",
+          "<= 5",
+          "4",
+          "Đạt"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-038",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 6 có thông tin gì?",
+        "Dap an chuan": "Chỉ số: Số lỗi vận hành; Mục tiêu: <= 5; Thực tế: 4; Đánh giá: Đạt",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 6 có: Tháng: 05/2026; Sản phẩm A: 162; Sản phẩm B: 120; Dịch vụ: 71; Tổng: 353; Ghi chú: Cần bổ sung nhân sự tư vấn.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI, A1:D6) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 635.38
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-040",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_02_ke_hoach_hoc_tap.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "414a5e80f98749a09caaf751a9d07ede"
+        ],
+        "question": "Trong file \"xlsx_02_ke_hoach_hoc_tap.xlsx\", ở sheet \"Ke hoach hoc tap\", dòng 2 có thông tin gì?",
+        "expected_answer": "Tuần: 1; Môn học: Cloud Computing; Mục tiêu: Ôn NIST, IaaS/PaaS/SaaS; Giờ dự kiến: 8; Giờ thực tế: 7",
+        "expected_terms": [
+          "1",
+          "Cloud Computing",
+          "Ôn NIST, IaaS/PaaS/SaaS",
+          "8"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-040",
+        "File": "xlsx_02_ke_hoach_hoc_tap.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_02_ke_hoach_hoc_tap.xlsx\", ở sheet \"Ke hoach hoc tap\", dòng 2 có thông tin gì?",
+        "Dap an chuan": "Tuần: 1; Môn học: Cloud Computing; Mục tiêu: Ôn NIST, IaaS/PaaS/SaaS; Giờ dự kiến: 8; Giờ thực tế: 7",
+        "Cau tra loi he thong": "Ở sheet 'Ke hoach hoc tap', dòng 2 có: Tuần: 1; Môn học: Cloud Computing; Mục tiêu: Ôn NIST, IaaS/PaaS/SaaS; Giờ dự kiến: 8; Giờ thực tế: 7; Tỷ lệ hoàn thành: 0.875.",
+        "Nguon/Citation": "xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap, A1:F7) | xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 295.12
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-015",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 3 có thông tin gì?",
+        "expected_answer": "No.: 1.0; 受験番号: KI2; 氏名: のび太　徳田; 性別: A; 学科名: 教育学科",
+        "expected_terms": [
+          "1.0",
+          "KI2",
+          "のび太　徳田",
+          "A"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-015",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "No.: 1.0; 受験番号: KI2; 氏名: のび太　徳田; 性別: A; 学科名: 教育学科",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 3 có: No.: 1.0; 受験番号: KI2; 氏名: のび太 徳田; 性別: A; 学科名: 教育学科; 日本語: 9.0; 数学: 8.5; 文学: 7.5; 総計: 34; 結果: D.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet4)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 433.08
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-034",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 2 có thông tin gì?",
+        "expected_answer": "Chỉ số: Tỷ lệ phản hồi khách hàng; Mục tiêu: 90%; Thực tế: 86%; Đánh giá: Cần cải thiện",
+        "expected_terms": [
+          "Tỷ lệ phản hồi khách hàng",
+          "90%",
+          "86%",
+          "Cần cải thiện"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-034",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"KPI\", dòng 2 có thông tin gì?",
+        "Dap an chuan": "Chỉ số: Tỷ lệ phản hồi khách hàng; Mục tiêu: 90%; Thực tế: 86%; Đánh giá: Cần cải thiện",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 2 có: Tháng: 01/2026; Sản phẩm A: 120; Sản phẩm B: 90; Dịch vụ: 45; Tổng: 255; Ghi chú: Sau Tết nhu cầu ổn định.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI, A1:D6) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 442.3
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-001",
+        "group": "Table/Numeric",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Workbook \"file_excel_mau_song_xanh.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "2 sheet: Du_lieu_chien_dich, Tong_quan",
+        "expected_terms": [
+          "2",
+          "Du_lieu_chien_dich",
+          "Tong_quan"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-001",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Workbook \"file_excel_mau_song_xanh.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "2 sheet: Du_lieu_chien_dich, Tong_quan",
+        "Cau tra loi he thong": "Tài liệu có 2 sheet: Du_lieu_chien_dich, Tong_quan.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 558.53
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-014",
+        "group": "Table/Numeric",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Workbook \"Test xlsx.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "3 sheet: Sheet4, Sheet2, Sheet1",
+        "expected_terms": [
+          "3",
+          "Sheet4",
+          "Sheet2",
+          "Sheet1"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-014",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Workbook \"Test xlsx.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "3 sheet: Sheet4, Sheet2, Sheet1",
+        "Cau tra loi he thong": "Tài liệu có 3 sheet: Sheet4, Sheet2, Sheet1.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4) | Test xlsx.xlsx (sheet Sheet2) | Test xlsx.xlsx (sheet Sheet1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 412.99
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-027",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Workbook \"xlsx_01_bao_cao_doanh_thu.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "2 sheet: Doanh thu, KPI",
+        "expected_terms": [
+          "2",
+          "Doanh thu",
+          "KPI"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-027",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Workbook \"xlsx_01_bao_cao_doanh_thu.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "2 sheet: Doanh thu, KPI",
+        "Cau tra loi he thong": "Tài liệu có 2 sheet: Doanh thu, KPI.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 628.53
+      }
+    },
+    {
+      "case": {
+        "id": "TAB-039",
+        "group": "Table/Numeric",
+        "files": [
+          "xlsx_02_ke_hoach_hoc_tap.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "414a5e80f98749a09caaf751a9d07ede"
+        ],
+        "question": "Workbook \"xlsx_02_ke_hoach_hoc_tap.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "2 sheet: Ke hoach hoc tap, Tai nguyen",
+        "expected_terms": [
+          "2",
+          "Ke hoach hoc tap",
+          "Tai nguyen"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "TAB-039",
+        "File": "xlsx_02_ke_hoach_hoc_tap.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Table/Numeric",
+        "Cau hoi": "Workbook \"xlsx_02_ke_hoach_hoc_tap.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "2 sheet: Ke hoach hoc tap, Tai nguyen",
+        "Cau tra loi he thong": "Tài liệu có 2 sheet: Ke hoach hoc tap, Tai nguyen.",
+        "Nguon/Citation": "xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Tai nguyen) | xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 484.02
+      }
+    },
+    {
+      "case": {
+        "id": "SLD-001",
+        "group": "Slide/Presentation",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Slide 1 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 1; Title: Slide 1; [4] textbox/text_box @ x=3043085,y=1287313,w=3922424,h=575310: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH",
+        "expected_terms": [
+          "3043085",
+          "1287313",
+          "3922424",
+          "textbox",
+          "box",
+          "question"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "SLD-001",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Slide/Presentation",
+        "Cau hoi": "Slide 1 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 1; Title: Slide 1; [4] textbox/text_box @ x=3043085,y=1287313,w=3922424,h=575310: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH",
+        "Cau tra loi he thong": "Slide 1 nói về: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH; ĐỀ TÀI: AI Document Question Answering System; Giảng viên hướng dẫn: Nguyễn Văn Huy; Sinh viên thực hiện: Huỳnh Ngọc Quang Vinh.",
+        "Nguon/Citation": "AI Document Question Answering System.pptx (slide 1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 1609.23
+      }
+    },
+    {
+      "case": {
+        "id": "SLD-002",
+        "group": "Slide/Presentation",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Slide 2 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 2; Title: Slide 2; [3] textbox/text_box @ x=3789681,y=300037,w=2326649,h=685800: Nội dung",
+        "expected_terms": [
+          "3789681",
+          "300037",
+          "2326649",
+          "box",
+          "ket",
+          "be2b1880a276438a8593ea91e333fa8b"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "SLD-002",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Slide/Presentation",
+        "Cau hoi": "Slide 2 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 2; Title: Slide 2; [3] textbox/text_box @ x=3789681,y=300037,w=2326649,h=685800: Nội dung",
+        "Cau tra loi he thong": "Slide 2 nói về: Nội dung; Giới thiệu đề tài; Vấn đề thực tế; Giải pháp đề xuất; Kiến trúc tổng thể hệ thống; Chức năng chính.",
+        "Nguon/Citation": "AI Document Question Answering System.pptx (slide 2)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 440.2
+      }
+    },
+    {
+      "case": {
+        "id": "SLD-003",
+        "group": "Slide/Presentation",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Slide 3 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 3; Title: Slide 3; [3] textbox/text_box @ x=212475,y=206829,w=6692068,h=685800: 1. Giới thiệu đề tài",
+        "expected_terms": [
+          "212475",
+          "206829",
+          "6692068",
+          "question",
+          "answering",
+          "system"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "SLD-003",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Slide/Presentation",
+        "Cau hoi": "Slide 3 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 3; Title: Slide 3; [3] textbox/text_box @ x=212475,y=206829,w=6692068,h=685800: 1. Giới thiệu đề tài",
+        "Cau tra loi he thong": "Slide 3 nói về: 1. Giới thiệu đề tài; AI Document Question Answering System; Hệ thống hỏi đáp tài liệu AI; Hỗ trợ upload nhiều định dạng; Quản lý tài liệu theo workspace; Hỏi đáp bằng ngôn ngữ tự nhiên.",
+        "Nguon/Citation": "AI Document Question Answering System.pptx (slide 3)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 275.88
+      }
+    },
+    {
+      "case": {
+        "id": "SLD-004",
+        "group": "Slide/Presentation",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Slide 4 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 4; Title: Slide 4; [3] bullet/text_box @ x=0,y=312325,w=5982191,h=685800: Vấn đề thực tế",
+        "expected_terms": [
+          "312325",
+          "5982191",
+          "685800",
+          "bullet",
+          "box",
+          "kho"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "SLD-004",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Slide/Presentation",
+        "Cau hoi": "Slide 4 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 4; Title: Slide 4; [3] bullet/text_box @ x=0,y=312325,w=5982191,h=685800: Vấn đề thực tế",
+        "Cau tra loi he thong": "Slide 4 nói về: Vấn đề thực tế; Khó khăn hiện nay; Tài liệu dài, khó tra cứu; Đọc thủ công tốn thời gian; AI thường dễ hallucination; Không hiểu dữ liệu nội bộ.",
+        "Nguon/Citation": "AI Document Question Answering System.pptx (slide 4)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 440.45
+      }
+    },
+    {
+      "case": {
+        "id": "SLD-005",
+        "group": "Slide/Presentation",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Slide 5 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 5; Title: Slide 5; [3] bullet/text_box @ x=-209902,y=193481,w=5982191,h=685800: Giải pháp đề xuất",
+        "expected_terms": [
+          "209902",
+          "193481",
+          "5982191",
+          "bullet",
+          "box",
+          "giai"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "SLD-005",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Slide/Presentation",
+        "Cau hoi": "Slide 5 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 5; Title: Slide 5; [3] bullet/text_box @ x=-209902,y=193481,w=5982191,h=685800: Giải pháp đề xuất",
+        "Cau tra loi he thong": "Slide 5 nói về: Giải pháp đề xuất; Giải pháp AIChatBox sử dụng RAG; Áp dụng kỹ thuật RAG hiện đại; Truy hồi dữ liệu trước trả lời; Embedding và semantic retrieval; Giảm hallucination của AI model.",
+        "Nguon/Citation": "AI Document Question Answering System.pptx (slide 5)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 548.11
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-001",
+        "group": "Postfix Extra",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 3 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-01 00:00:00; Khu vực: Ký túc xá; Hoạt động: Đổi rác lấy cây; Người phụ trách: An; Số người tham gia: 32; Rác tái chế (kg): 4.1",
+        "expected_terms": [
+          "2026-05-01 00:00:00",
+          "Ký túc xá",
+          "Đổi rác lấy cây",
+          "An",
+          "32",
+          "4.1"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-001",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-01 00:00:00; Khu vực: Ký túc xá; Hoạt động: Đổi rác lấy cây; Người phụ trách: An; Số người tham gia: 32; Rác tái chế (kg): 4.1",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 3 có: Ngày: 2026-05-01 00:00:00; Khu vực: Ký túc xá; Hoạt động: Đổi rác lấy cây; Người phụ trách: An; Số người tham gia: 32; Rác tái chế (kg): 4.1; Chi phí (VND): 450000; Mức hài lòng: 4.6; Ghi chú: Hiệu quả cao; Chi phí/người: 14062.5.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.78
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-002",
+        "group": "Postfix Extra",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 4 có thông tin gì?",
+        "expected_answer": "Ngày: 2026-05-02 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 87; Rác tái chế (kg): 12.9",
+        "expected_terms": [
+          "2026-05-02 00:00:00",
+          "Căn tin",
+          "Thu gom rác tái chế",
+          "Minh",
+          "87",
+          "12.9"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-002",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"file_excel_mau_song_xanh.xlsx\", ở sheet \"Du_lieu_chien_dich\", dòng 4 có thông tin gì?",
+        "Dap an chuan": "Ngày: 2026-05-02 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 87; Rác tái chế (kg): 12.9",
+        "Cau tra loi he thong": "Ở sheet 'Du_lieu_chien_dich', dòng 4 có: Ngày: 2026-05-02 00:00:00; Khu vực: Căn tin; Hoạt động: Thu gom rác tái chế; Người phụ trách: Minh; Số người tham gia: 87; Rác tái chế (kg): 12.9; Chi phí (VND): 300000; Mức hài lòng: 3.7; Ghi chú: Nên tổ chức lại; Chi phí/người: 3448.2758620689656.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich, A1:L32) | file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.69
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-003",
+        "group": "Postfix Extra",
+        "files": [
+          "file_excel_mau_song_xanh.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "1886a582957c48dc8428e88c53c3d3e8"
+        ],
+        "question": "Workbook \"file_excel_mau_song_xanh.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "2 sheet: Du_lieu_chien_dich, Tong_quan",
+        "expected_terms": [
+          "2",
+          "Du_lieu_chien_dich",
+          "Tong_quan"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-003",
+        "File": "file_excel_mau_song_xanh.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Workbook \"file_excel_mau_song_xanh.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "2 sheet: Du_lieu_chien_dich, Tong_quan",
+        "Cau tra loi he thong": "Tài liệu có 2 sheet: Du_lieu_chien_dich, Tong_quan.",
+        "Nguon/Citation": "file_excel_mau_song_xanh.xlsx (sheet Du_lieu_chien_dich) | file_excel_mau_song_xanh.xlsx (sheet Tong_quan)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.59
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-004",
+        "group": "Postfix Extra",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 3 có thông tin gì?",
+        "expected_answer": "No.: 1.0; 受験番号: KI2; 氏名: のび太　徳田; 性別: A; 学科名: 教育学科; 日本語: 9.0",
+        "expected_terms": [
+          "1.0",
+          "KI2",
+          "のび太　徳田",
+          "A",
+          "教育学科",
+          "9.0"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-004",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "No.: 1.0; 受験番号: KI2; 氏名: のび太　徳田; 性別: A; 学科名: 教育学科; 日本語: 9.0",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 3 có: No.: 1.0; 受験番号: KI2; 氏名: のび太 徳田; 性別: A; 学科名: 教育学科; 日本語: 9.0; 数学: 8.5; 文学: 7.5; 総計: 34; 結果: D.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet4)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.55
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-005",
+        "group": "Postfix Extra",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 4 có thông tin gì?",
+        "expected_answer": "No.: 2.0; 受験番号: KE2; 氏名: 優希　カイ; 性別: A; 学科名: 経営学科; 日本語: 9.0",
+        "expected_terms": [
+          "2.0",
+          "KE2",
+          "優希　カイ",
+          "A",
+          "経営学科",
+          "9.0"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-005",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"Test xlsx.xlsx\", ở sheet \"Sheet4\", dòng 4 có thông tin gì?",
+        "Dap an chuan": "No.: 2.0; 受験番号: KE2; 氏名: 優希　カイ; 性別: A; 学科名: 経営学科; 日本語: 9.0",
+        "Cau tra loi he thong": "Ở sheet 'Sheet4', dòng 4 có: No.: 2.0; 受験番号: KE2; 氏名: 優希 カイ; 性別: A; 学科名: 経営学科; 日本語: 9.0; 数学: 7.0; 文学: 6.0; 総計: 22; 結果: ROT.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4, A1:Z1000) | Test xlsx.xlsx (sheet Sheet4)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.54
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-006",
+        "group": "Postfix Extra",
+        "files": [
+          "Test xlsx.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "08d5d3a8faef46ebad17f2afebd674c2"
+        ],
+        "question": "Workbook \"Test xlsx.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "3 sheet: Sheet4, Sheet2, Sheet1",
+        "expected_terms": [
+          "3",
+          "Sheet4",
+          "Sheet2",
+          "Sheet1"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-006",
+        "File": "Test xlsx.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Workbook \"Test xlsx.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "3 sheet: Sheet4, Sheet2, Sheet1",
+        "Cau tra loi he thong": "Tài liệu có 3 sheet: Sheet4, Sheet2, Sheet1.",
+        "Nguon/Citation": "Test xlsx.xlsx (sheet Sheet4) | Test xlsx.xlsx (sheet Sheet2) | Test xlsx.xlsx (sheet Sheet1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.5
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-007",
+        "group": "Postfix Extra",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 2 có thông tin gì?",
+        "expected_answer": "Tháng: 01/2026; Sản phẩm A: 120; Sản phẩm B: 90; Dịch vụ: 45; Tổng: 255; Ghi chú: Sau Tết nhu cầu ổn định",
+        "expected_terms": [
+          "01/2026",
+          "120",
+          "90",
+          "45",
+          "255",
+          "Sau Tết nhu cầu ổn định"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-007",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 2 có thông tin gì?",
+        "Dap an chuan": "Tháng: 01/2026; Sản phẩm A: 120; Sản phẩm B: 90; Dịch vụ: 45; Tổng: 255; Ghi chú: Sau Tết nhu cầu ổn định",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 2 có: Tháng: 01/2026; Sản phẩm A: 120; Sản phẩm B: 90; Dịch vụ: 45; Tổng: 255; Ghi chú: Sau Tết nhu cầu ổn định.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.49
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-008",
+        "group": "Postfix Extra",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 3 có thông tin gì?",
+        "expected_answer": "Tháng: 02/2026; Sản phẩm A: 135; Sản phẩm B: 88; Dịch vụ: 52; Tổng: 275; Ghi chú: Tăng nhờ chương trình combo",
+        "expected_terms": [
+          "02/2026",
+          "135",
+          "88",
+          "52",
+          "275",
+          "Tăng nhờ chương trình combo"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-008",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"xlsx_01_bao_cao_doanh_thu.xlsx\", ở sheet \"Doanh thu\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "Tháng: 02/2026; Sản phẩm A: 135; Sản phẩm B: 88; Dịch vụ: 52; Tổng: 275; Ghi chú: Tăng nhờ chương trình combo",
+        "Cau tra loi he thong": "Ở sheet 'Doanh thu', dòng 3 có: Tháng: 02/2026; Sản phẩm A: 135; Sản phẩm B: 88; Dịch vụ: 52; Tổng: 275; Ghi chú: Tăng nhờ chương trình combo.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.42
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-009",
+        "group": "Postfix Extra",
+        "files": [
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "Workbook \"xlsx_01_bao_cao_doanh_thu.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "2 sheet: Doanh thu, KPI",
+        "expected_terms": [
+          "2",
+          "Doanh thu",
+          "KPI"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-009",
+        "File": "xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Workbook \"xlsx_01_bao_cao_doanh_thu.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "2 sheet: Doanh thu, KPI",
+        "Cau tra loi he thong": "Tài liệu có 2 sheet: Doanh thu, KPI.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.46
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-010",
+        "group": "Postfix Extra",
+        "files": [
+          "xlsx_02_ke_hoach_hoc_tap.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "414a5e80f98749a09caaf751a9d07ede"
+        ],
+        "question": "Trong file \"xlsx_02_ke_hoach_hoc_tap.xlsx\", ở sheet \"Ke hoach hoc tap\", dòng 2 có thông tin gì?",
+        "expected_answer": "Tuần: 1; Môn học: Cloud Computing; Mục tiêu: Ôn NIST, IaaS/PaaS/SaaS; Giờ dự kiến: 8; Giờ thực tế: 7; Tỷ lệ hoàn thành: 0.875",
+        "expected_terms": [
+          "1",
+          "Cloud Computing",
+          "Ôn NIST, IaaS/PaaS/SaaS",
+          "8",
+          "7",
+          "0.875"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-010",
+        "File": "xlsx_02_ke_hoach_hoc_tap.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"xlsx_02_ke_hoach_hoc_tap.xlsx\", ở sheet \"Ke hoach hoc tap\", dòng 2 có thông tin gì?",
+        "Dap an chuan": "Tuần: 1; Môn học: Cloud Computing; Mục tiêu: Ôn NIST, IaaS/PaaS/SaaS; Giờ dự kiến: 8; Giờ thực tế: 7; Tỷ lệ hoàn thành: 0.875",
+        "Cau tra loi he thong": "Ở sheet 'Ke hoach hoc tap', dòng 2 có: Tuần: 1; Môn học: Cloud Computing; Mục tiêu: Ôn NIST, IaaS/PaaS/SaaS; Giờ dự kiến: 8; Giờ thực tế: 7; Tỷ lệ hoàn thành: 0.875.",
+        "Nguon/Citation": "xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap, A1:F7) | xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.52
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-011",
+        "group": "Postfix Extra",
+        "files": [
+          "xlsx_02_ke_hoach_hoc_tap.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "414a5e80f98749a09caaf751a9d07ede"
+        ],
+        "question": "Trong file \"xlsx_02_ke_hoach_hoc_tap.xlsx\", ở sheet \"Ke hoach hoc tap\", dòng 3 có thông tin gì?",
+        "expected_answer": "Tuần: 2; Môn học: Computer Vision; Mục tiêu: Ôn embedding, segmentation; Giờ dự kiến: 7; Giờ thực tế: 8; Tỷ lệ hoàn thành: 1.1428571428571428",
+        "expected_terms": [
+          "2",
+          "Computer Vision",
+          "Ôn embedding, segmentation",
+          "7",
+          "8",
+          "1.1428571428571428"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-011",
+        "File": "xlsx_02_ke_hoach_hoc_tap.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"xlsx_02_ke_hoach_hoc_tap.xlsx\", ở sheet \"Ke hoach hoc tap\", dòng 3 có thông tin gì?",
+        "Dap an chuan": "Tuần: 2; Môn học: Computer Vision; Mục tiêu: Ôn embedding, segmentation; Giờ dự kiến: 7; Giờ thực tế: 8; Tỷ lệ hoàn thành: 1.1428571428571428",
+        "Cau tra loi he thong": "Ở sheet 'Ke hoach hoc tap', dòng 3 có: Tuần: 2; Môn học: Computer Vision; Mục tiêu: Ôn embedding, segmentation; Giờ dự kiến: 7; Giờ thực tế: 8; Tỷ lệ hoàn thành: 1.1428571428571428.",
+        "Nguon/Citation": "xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap, A1:F7) | xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 476.07
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-012",
+        "group": "Postfix Extra",
+        "files": [
+          "xlsx_02_ke_hoach_hoc_tap.xlsx"
+        ],
+        "file_type": "XLSX",
+        "selected_document_ids": [
+          "414a5e80f98749a09caaf751a9d07ede"
+        ],
+        "question": "Workbook \"xlsx_02_ke_hoach_hoc_tap.xlsx\" có bao nhiêu sheet và tên gì?",
+        "expected_answer": "2 sheet: Ke hoach hoc tap, Tai nguyen",
+        "expected_terms": [
+          "2",
+          "Ke hoach hoc tap",
+          "Tai nguyen"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-012",
+        "File": "xlsx_02_ke_hoach_hoc_tap.xlsx",
+        "Loai file": "XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Workbook \"xlsx_02_ke_hoach_hoc_tap.xlsx\" có bao nhiêu sheet và tên gì?",
+        "Dap an chuan": "2 sheet: Ke hoach hoc tap, Tai nguyen",
+        "Cau tra loi he thong": "Tài liệu có 2 sheet: Ke hoach hoc tap, Tai nguyen.",
+        "Nguon/Citation": "xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Tai nguyen) | xlsx_02_ke_hoach_hoc_tap.xlsx (sheet Ke hoach hoc tap)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 0.56
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-013",
+        "group": "Postfix Extra",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Slide 1 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 1; Title: Slide 1; [4] textbox/text_box @ x=3043085,y=1287313,w=3922424,h=575310: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH",
+        "expected_terms": [
+          "3043085",
+          "1287313",
+          "3922424",
+          "textbox",
+          "box",
+          "question"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-013",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 1 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 1; Title: Slide 1; [4] textbox/text_box @ x=3043085,y=1287313,w=3922424,h=575310: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH",
+        "Cau tra loi he thong": "Slide 1 nói về: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH; ĐỀ TÀI: AI Document Question Answering System; Giảng viên hướng dẫn: Nguyễn Văn Huy; Sinh viên thực hiện: Huỳnh Ngọc Quang Vinh.",
+        "Nguon/Citation": "AI Document Question Answering System.pptx (slide 1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 0.46
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-014",
+        "group": "Postfix Extra",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Slide 2 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 2; Title: Slide 2; [3] textbox/text_box @ x=3789681,y=300037,w=2326649,h=685800: Nội dung",
+        "expected_terms": [
+          "3789681",
+          "300037",
+          "2326649",
+          "box",
+          "ket",
+          "be2b1880a276438a8593ea91e333fa8b"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-014",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 2 của file \"AI Document Question Answering System.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 2; Title: Slide 2; [3] textbox/text_box @ x=3789681,y=300037,w=2326649,h=685800: Nội dung",
+        "Cau tra loi he thong": "Slide 2 nói về: Nội dung; Giới thiệu đề tài; Vấn đề thực tế; Giải pháp đề xuất; Kiến trúc tổng thể hệ thống; Chức năng chính.",
+        "Nguon/Citation": "AI Document Question Answering System.pptx (slide 2)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 0.47
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-015",
+        "group": "Postfix Extra",
+        "files": [
+          "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "31188a44759d4f04aa5a3b8ba5f8c715"
+        ],
+        "question": "Slide 1 của file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 1; Title: Slide 1; [1] textbox/auto_shape @ x=685800,y=640080,w=3840480,h=256032: BÀI TRÌNH CHIẾU MẪU",
+        "expected_terms": [
+          "685800",
+          "640080",
+          "3840480",
+          "textbox",
+          "auto",
+          "shape"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-015",
+        "File": "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 1 của file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 1; Title: Slide 1; [1] textbox/auto_shape @ x=685800,y=640080,w=3840480,h=256032: BÀI TRÌNH CHIẾU MẪU",
+        "Cau tra loi he thong": "Slide 1 nói về: BÀI TRÌNH CHIẾU MẪU; Thư viện thông minh; cho trường học hiện đại; LIBRARY; Một bộ slide có nội dung dài vừa phải, chủ đề riêng biệt so với PDF, Markdown và hình ảnh. Dùng để kiểm thử khả năng đọc PPTX, tách nội dung theo slide, nhận diện tiêu đề và xử lý đoạn văn; Dữ liệu sách.",
+        "Nguon/Citation": "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx (slide 1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 373.62
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-016",
+        "group": "Postfix Extra",
+        "files": [
+          "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "31188a44759d4f04aa5a3b8ba5f8c715"
+        ],
+        "question": "Slide 2 của file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 2; Title: Slide 2; [2] textbox/auto_shape @ x=502920,y=548640,w=7132320,h=502920: Vấn đề thường gặp trong thư viện truyền thống",
+        "expected_terms": [
+          "502920",
+          "548640",
+          "7132320",
+          "thu",
+          "vien",
+          "643d007593ac455c9db844c12fa1b311"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-016",
+        "File": "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 2 của file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 2; Title: Slide 2; [2] textbox/auto_shape @ x=502920,y=548640,w=7132320,h=502920: Vấn đề thường gặp trong thư viện truyền thống",
+        "Cau tra loi he thong": "Slide 2 nói về: Vấn đề thường gặp trong thư viện truyền thống; Dữ liệu sách được ghi chép rời rạc, khó thống kê số lượng sách còn lại và tình trạng mượn trả; Học sinh mất nhiều thời gian tìm tài liệu phù hợp với môn học, cấp lớp hoặc chủ đề nghiên cứu; Thủ thư phải xử lý nhiều thao tác lặp lại như nhập phiếu mượn, nhắc hạn trả và lập báo cáo cuối tháng; Nhà trường thiếu dữ liệu để biết nhóm sách nào được quan tâm, nhóm nào ít sử dụng và cần cập nhật; Tác động.",
+        "Nguon/Citation": "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx (slide 2)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 357.85
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-017",
+        "group": "Postfix Extra",
+        "files": [
+          "pptx_01_du_lich_can_tho.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0386537e260b472ea872129d3e671e50"
+        ],
+        "question": "Slide 1 của file \"pptx_01_du_lich_can_tho.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 1; Title: Slide 1; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Lịch trình Cần Thơ cuối tuần",
+        "expected_terms": [
+          "502920",
+          "228600",
+          "7772400",
+          "textbox",
+          "auto",
+          "shape"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-017",
+        "File": "pptx_01_du_lich_can_tho.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 1 của file \"pptx_01_du_lich_can_tho.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 1; Title: Slide 1; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Lịch trình Cần Thơ cuối tuần",
+        "Cau tra loi he thong": "Slide 1 nói về: Lịch trình Cần Thơ cuối tuần; Gợi ý 2 ngày 1 đêm cho nhóm bạn nhỏ; Mục tiêu chuyến đi; Đi nhẹ, ăn ngon, chụp ảnh đẹp và không dồn lịch quá dày. Kế hoạch ưu tiên trải nghiệm địa phương, di chuyển ngắn và có thời gian nghỉ; 2 ngày; 1 đêm.",
+        "Nguon/Citation": "pptx_01_du_lich_can_tho.pptx (slide 1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 343.1
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-018",
+        "group": "Postfix Extra",
+        "files": [
+          "pptx_01_du_lich_can_tho.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0386537e260b472ea872129d3e671e50"
+        ],
+        "question": "Slide 2 của file \"pptx_01_du_lich_can_tho.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 2; Title: Slide 2; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Ngày 1: Khám phá nhịp sống sông nước",
+        "expected_terms": [
+          "502920",
+          "228600",
+          "7772400",
+          "textbox",
+          "auto",
+          "shape"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-018",
+        "File": "pptx_01_du_lich_can_tho.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 2 của file \"pptx_01_du_lich_can_tho.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 2; Title: Slide 2; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Ngày 1: Khám phá nhịp sống sông nước",
+        "Cau tra loi he thong": "Slide 2 nói về: Ngày 1: Khám phá nhịp sống sông nước; Buổi sáng đi chợ, chiều cà phê, tối ăn ven sông; Buổi sáng; Buổi chiều; Đến bến Ninh Kiều trước 8h; Ăn sáng nhẹ với bún hoặc hủ tiếu.",
+        "Nguon/Citation": "pptx_01_du_lich_can_tho.pptx (slide 2)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 272.11
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-019",
+        "group": "Postfix Extra",
+        "files": [
+          "pptx_02_trong_cay_truong_hoc.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "3aaf2fe772b14f6aa281dc6cac29603e"
+        ],
+        "question": "Slide 1 của file \"pptx_02_trong_cay_truong_hoc.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 1; Title: Slide 1; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Chiến dịch trồng cây trường học",
+        "expected_terms": [
+          "502920",
+          "228600",
+          "7772400",
+          "textbox",
+          "auto",
+          "shape"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-019",
+        "File": "pptx_02_trong_cay_truong_hoc.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 1 của file \"pptx_02_trong_cay_truong_hoc.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 1; Title: Slide 1; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Chiến dịch trồng cây trường học",
+        "Cau tra loi he thong": "Slide 1 nói về: Chiến dịch trồng cây trường học; Kế hoạch 4 tuần cho khuôn viên xanh hơn; Ý tưởng chính; Chiến dịch kết hợp giáo dục môi trường, hoạt động nhóm và theo dõi cây sau khi trồng. Mục tiêu không chỉ là trồng nhiều cây mà còn duy trì cây sống tốt; Xanh hơn; mỗi tuần.",
+        "Nguon/Citation": "pptx_02_trong_cay_truong_hoc.pptx (slide 1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 312.52
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-020",
+        "group": "Postfix Extra",
+        "files": [
+          "pptx_02_trong_cay_truong_hoc.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "3aaf2fe772b14f6aa281dc6cac29603e"
+        ],
+        "question": "Slide 2 của file \"pptx_02_trong_cay_truong_hoc.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 2; Title: Slide 2; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Tuần 1: Khảo sát và chọn cây",
+        "expected_terms": [
+          "502920",
+          "228600",
+          "7772400",
+          "cay",
+          "textbox",
+          "auto"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-020",
+        "File": "pptx_02_trong_cay_truong_hoc.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 2 của file \"pptx_02_trong_cay_truong_hoc.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 2; Title: Slide 2; [2] textbox/auto_shape @ x=502920,y=228600,w=7772400,h=411480: Tuần 1: Khảo sát và chọn cây",
+        "Cau tra loi he thong": "Slide 2 nói về: Tuần 1: Khảo sát và chọn cây; Chọn đúng vị trí giúp cây sống lâu hơn; Khảo sát; Chọn cây; Đo khu vực nắng nhiều; Kiểm tra nguồn nước tưới.",
+        "Nguon/Citation": "pptx_02_trong_cay_truong_hoc.pptx (slide 2)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 330.43
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-021",
+        "group": "Postfix Extra",
+        "files": [
+          "Test pptx.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "8545bf76f9804b6ebd389e2518bd5a14"
+        ],
+        "question": "Slide 1 của file \"Test pptx.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 1; Title: オフィス業務; [2] textbox/placeholder @ x=4139952,y=3427413,w=3600698,h=2162175: 担当講師",
+        "expected_terms": [
+          "4139952",
+          "3427413",
+          "3600698",
+          "pptx",
+          "d32b1d09aca846efac62768b9c03fbc5",
+          "test"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-021",
+        "File": "Test pptx.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 1 của file \"Test pptx.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 1; Title: オフィス業務; [2] textbox/placeholder @ x=4139952,y=3427413,w=3600698,h=2162175: 担当講師",
+        "Cau tra loi he thong": "Slide 1 nói về: オフィス業務; 担当講師; 正忠 武.",
+        "Nguon/Citation": "Test pptx.pptx (slide 1, オフィス業務)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 273.9
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-022",
+        "group": "Postfix Extra",
+        "files": [
+          "Test pptx.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "8545bf76f9804b6ebd389e2518bd5a14"
+        ],
+        "question": "Slide 2 của file \"Test pptx.pptx\" nói về nội dung gì?",
+        "expected_answer": "Slide: 2; Title: 主な授業内容; [2] textbox/placeholder @ x=323528,y=1412776,w=8459788,h=5112022: 仕事をする意味",
+        "expected_terms": [
+          "323528",
+          "1412776",
+          "8459788",
+          "pptx",
+          "d32b1d09aca846efac62768b9c03fbc5",
+          "test"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-022",
+        "File": "Test pptx.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Slide 2 của file \"Test pptx.pptx\" nói về nội dung gì?",
+        "Dap an chuan": "Slide: 2; Title: 主な授業内容; [2] textbox/placeholder @ x=323528,y=1412776,w=8459788,h=5112022: 仕事をする意味",
+        "Cau tra loi he thong": "Slide 2 nói về: 主な授業内容; 仕事をする意味; 職場での１日; あいさつのルールと自己紹介の仕方; 仕事の基本 ～ほう・れん・そう～; 電話の受け方・かけ方.",
+        "Nguon/Citation": "Test pptx.pptx (slide 2, 主な授業内容)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 287.63
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-023",
+        "group": "Postfix Extra",
+        "files": [
+          "infographic_mau_an_toan_mang.png"
+        ],
+        "file_type": "PNG",
+        "selected_document_ids": [
+          "0f5d0a6c52c540daa4fe04aa3c94b3e8"
+        ],
+        "question": "Trong ảnh \"infographic_mau_an_toan_mang.png\", nội dung chữ chính là gì?",
+        "expected_answer": "6f8d63eb72674dc2af6c4651b49853ad_infographic_mau_an_toan_mang.png",
+        "expected_terms": [
+          "infographic",
+          "toan",
+          "mang",
+          "png",
+          "6f8d63eb72674dc2af6c4651b49853ad",
+          "type"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-023",
+        "File": "infographic_mau_an_toan_mang.png",
+        "Loai file": "PNG",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong ảnh \"infographic_mau_an_toan_mang.png\", nội dung chữ chính là gì?",
+        "Dap an chuan": "6f8d63eb72674dc2af6c4651b49853ad_infographic_mau_an_toan_mang.png",
+        "Cau tra loi he thong": "Nội dung chữ chính trong ảnh \"infographic_mau_an_toan_mang.png\" là hướng dẫn về an toàn mạng cho sinh viên, bao gồm các nội dung sau: - Mật khẩu mạnh - Xác thực hai lớp - Cảnh giác liên kết lạ - Sao lưu dữ liệu - Cập nhật thiết bị Đây là nội dung chính được thể hiện trong ảnh infographic.",
+        "Nguon/Citation": "infographic_mau_an_toan_mang.png (6f8d63eb72674dc2af6c4651b49853ad_infographic_mau_an_toan_mang.png)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 11527.29
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-024",
+        "group": "Postfix Extra",
+        "files": [
+          "jpeg_01_ke_hoach_du_lich.jpeg"
+        ],
+        "file_type": "JPEG",
+        "selected_document_ids": [
+          "a3d2e364ed904e2f917d8dff01476ec8"
+        ],
+        "question": "Trong ảnh \"jpeg_01_ke_hoach_du_lich.jpeg\", nội dung chữ chính là gì?",
+        "expected_answer": "af1543170da2459e8e35a33eab1b7c94_jpeg_01_ke_hoach_du_lich.jpeg",
+        "expected_terms": [
+          "lich",
+          "ngay",
+          "jpeg",
+          "hoach",
+          "af1543170da2459e8e35a33eab1b7c94",
+          "01"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-024",
+        "File": "jpeg_01_ke_hoach_du_lich.jpeg",
+        "Loai file": "JPEG",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong ảnh \"jpeg_01_ke_hoach_du_lich.jpeg\", nội dung chữ chính là gì?",
+        "Dap an chuan": "af1543170da2459e8e35a33eab1b7c94_jpeg_01_ke_hoach_du_lich.jpeg",
+        "Cau tra loi he thong": "Nội dung chữ chính trong ảnh \"jpeg_01_ke_hoach_du_lich.jpeg\" là kế hoạch du lịch 2 ngày cho nhóm ban.",
+        "Nguon/Citation": "jpeg_01_ke_hoach_du_lich.jpeg (af1543170da2459e8e35a33eab1b7c94_jpeg_01_ke_hoach_du_lich.jpeg)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 10205.62
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-025",
+        "group": "Postfix Extra",
+        "files": [
+          "jpeg_02_bang_an_toan_bep.jpeg"
+        ],
+        "file_type": "JPEG",
+        "selected_document_ids": [
+          "f574111fdf88408d820061db2c349ff0"
+        ],
+        "question": "Trong ảnh \"jpeg_02_bang_an_toan_bep.jpeg\", nội dung chữ chính là gì?",
+        "expected_answer": "16a69c2060254036ad8ebc0c3ae0f81a_jpeg_02_bang_an_toan_bep.jpeg",
+        "expected_terms": [
+          "bep",
+          "jpeg",
+          "bang",
+          "toan",
+          "16a69c2060254036ad8ebc0c3ae0f81a",
+          "02"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-025",
+        "File": "jpeg_02_bang_an_toan_bep.jpeg",
+        "Loai file": "JPEG",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong ảnh \"jpeg_02_bang_an_toan_bep.jpeg\", nội dung chữ chính là gì?",
+        "Dap an chuan": "16a69c2060254036ad8ebc0c3ae0f81a_jpeg_02_bang_an_toan_bep.jpeg",
+        "Cau tra loi he thong": "Nội dung chữ chính trong ảnh \"jpeg_02_bang_an_toan_bep.jpeg\" là: - \"Bang nhac an toan bep\" - \"Danh cho bep nho trong ky tuc xa\" - \"Tat bep ngay sau khi nau xong.\" - \"Khong de khan giay gan nguon\" - \"1 2 nhiet.\" - \"Rura dao va cat vao khay rieng.\" - \"Kiem tra 6 dien truoc khi rai 3 4 phong.\" - \"Anh kiem thur: c6 tieu de, khoi noi dung va chur tieng Viet ro rang.\" - \"Danh cho bep nho trong ky tuc xá\" - \"Tát bép ngay sau khi nau xong.\" - \"Rura dao va cat vao khay riéng.\" - \"Anh kiem thur: c6 tiéu de, kh6i noi dung va chur tieng Viet ro rang.\".",
+        "Nguon/Citation": "jpeg_02_bang_an_toan_bep.jpeg (16a69c2060254036ad8ebc0c3ae0f81a_jpeg_02_bang_an_toan_bep.jpeg)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 12401.37
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-026",
+        "group": "Postfix Extra",
+        "files": [
+          "jpg_01_infographic_giac_ngu.jpg"
+        ],
+        "file_type": "JPG",
+        "selected_document_ids": [
+          "3fe4f13d93b64d66a7ddd9690692c48b"
+        ],
+        "question": "Trong ảnh \"jpg_01_infographic_giac_ngu.jpg\", nội dung chữ chính là gì?",
+        "expected_answer": "8012c82141b74b7eb38bb4f20aa27ea9_jpg_01_infographic_giac_ngu.jpg",
+        "expected_terms": [
+          "30",
+          "jpg",
+          "ngu",
+          "8012c82141b74b7eb38bb4f20aa27ea9",
+          "01",
+          "infographic"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-026",
+        "File": "jpg_01_infographic_giac_ngu.jpg",
+        "Loai file": "JPG",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong ảnh \"jpg_01_infographic_giac_ngu.jpg\", nội dung chữ chính là gì?",
+        "Dap an chuan": "8012c82141b74b7eb38bb4f20aa27ea9_jpg_01_infographic_giac_ngu.jpg",
+        "Cau tra loi he thong": "Nội dung chữ chính trong ảnh \"jpg_01_infographic_giac_ngu.jpg\" là một danh sách các bước để tạo thói quen ngủ lanh manh, bao gồm: - Tạo một checklist nhỏ cho buổi tối - Tắt màn hình ít nhất 30 phút - Giữ phòng tối, yên tĩnh và ánh sáng dịu - Không uống cà phê sau cuộc - Ghi nhanh việc cần làm ngay - Buổi chiều, mai để bộ não lo - Ăn kiêm thấu: chọn tiêu đề, khoá nội dung và chú thích tiếng Việt rõ ràng.",
+        "Nguon/Citation": "jpg_01_infographic_giac_ngu.jpg (8012c82141b74b7eb38bb4f20aa27ea9_jpg_01_infographic_giac_ngu.jpg)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 13444.37
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-027",
+        "group": "Postfix Extra",
+        "files": [
+          "jpg_02_so_do_lop_hoc.jpg"
+        ],
+        "file_type": "JPG",
+        "selected_document_ids": [
+          "a06109a9959c4d9c946e168e43d0550f"
+        ],
+        "question": "Trong ảnh \"jpg_02_so_do_lop_hoc.jpg\", nội dung chữ chính là gì?",
+        "expected_answer": "5393830183424ded8252273adae05f6d_jpg_02_so_do_lop_hoc.jpg",
+        "expected_terms": [
+          "jpg",
+          "lop",
+          "hoc",
+          "hoat",
+          "5393830183424ded8252273adae05f6d",
+          "02"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-027",
+        "File": "jpg_02_so_do_lop_hoc.jpg",
+        "Loai file": "JPG",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong ảnh \"jpg_02_so_do_lop_hoc.jpg\", nội dung chữ chính là gì?",
+        "Dap an chuan": "5393830183424ded8252273adae05f6d_jpg_02_so_do_lop_hoc.jpg",
+        "Cau tra loi he thong": "Nội dung chữ chính trong ảnh \"jpg_02_so_do_lop_hoc.jpg\" là: - So d6 lop hoc linh hoat - Ggi y b6 tri cho hoat dong nhom - Ban trung tam danh cho thao - G6c yen tinh cho doc tai lieu cá - 2 luan nhanh. - nhan. - 3 Bang trang dung ghi cau hoi - Khu trinh bay dät gan may chung. - chieu. - Anh kiem thur: c6 tieu de, khoi noi dung va chur tieng Viet ro rang. - Gqi y bo tri cho hoat dong nhom - G6c yén tinh cho doc tai liéu cá - Khu trinh bay dat gan may - Anh kiem thur: c6 tiéu de, kh6i noi dung va chur tieng Viet ro rang.",
+        "Nguon/Citation": "jpg_02_so_do_lop_hoc.jpg (5393830183424ded8252273adae05f6d_jpg_02_so_do_lop_hoc.jpg)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 11633.82
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-028",
+        "group": "Postfix Extra",
+        "files": [
+          "png_01_ban_do_y_tuong.png"
+        ],
+        "file_type": "PNG",
+        "selected_document_ids": [
+          "e6f4df18d90e4c468d8f3f387ca9fe20"
+        ],
+        "question": "Trong ảnh \"png_01_ban_do_y_tuong.png\", nội dung chữ chính là gì?",
+        "expected_answer": "da2dab99728f47558f2b62326de763f8_png_01_ban_do_y_tuong.png",
+        "expected_terms": [
+          "png",
+          "ban",
+          "tuong",
+          "hoc",
+          "chia",
+          "da2dab99728f47558f2b62326de763f8"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-028",
+        "File": "png_01_ban_do_y_tuong.png",
+        "Loai file": "PNG",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong ảnh \"png_01_ban_do_y_tuong.png\", nội dung chữ chính là gì?",
+        "Dap an chuan": "da2dab99728f47558f2b62326de763f8_png_01_ban_do_y_tuong.png",
+        "Cau tra loi he thong": "Nội dung chữ chính trong ảnh \"png_01_ban_do_y_tuong.png\" là: - Ban do y tuong - g hoc nhom - Tap trung - chia viéc - phan hoi - Xac dinh muc tiéu buoi hoc va - Chia vai tro: nguoi tom tat, - 1 - 2 - tai lieu can doc truoc. - nguoi ghi chu, nguoi phan bién. - Dung bang chung de gom cau - Ket thuc bang 3 viec can lam - 3 - 4 - hoi chua hieu. - cho buoi tiep theo. - Anh kiem thur: c6 tiéu de, khoi noi dung va chur tieng Viet ro rang. - Ban do y tuong hoc nhom - Tap trung - chia viec - phan hoi - Xac dinh muc tieu bu6i hoc va - Chia vai tro: nguoi tom tat - Anh kiem thur: c6 tiéu de, khoi noi dung va chu tieng Viet ro rang.",
+        "Nguon/Citation": "png_01_ban_do_y_tuong.png (da2dab99728f47558f2b62326de763f8_png_01_ban_do_y_tuong.png)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 13546.29
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-029",
+        "group": "Postfix Extra",
+        "files": [
+          "AI Document Question Answering System.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "0884bd41c942461db98327fce7f2af62"
+        ],
+        "question": "Trong file \"AI Document Question Answering System.pptx\" có thông tin về blockchain không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "blockchain"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "EXT-029",
+        "File": "AI Document Question Answering System.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"AI Document Question Answering System.pptx\" có thông tin về blockchain không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 517.84
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-030",
+        "group": "Postfix Extra",
+        "files": [
+          "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx"
+        ],
+        "file_type": "PPTX",
+        "selected_document_ids": [
+          "31188a44759d4f04aa5a3b8ba5f8c715"
+        ],
+        "question": "Trong file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" có thông tin về mat khau admin không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "mat khau admin"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "EXT-030",
+        "File": "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx",
+        "Loai file": "PPTX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"bai_trinh_chieu_mau_thu_vien_thong_minh.pptx\" có thông tin về mat khau admin không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 402.21
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-031",
+        "group": "Postfix Extra",
+        "files": [
+          "bao_cao_quan_ly_rac_thai_nhua.pdf"
+        ],
+        "file_type": "PDF",
+        "selected_document_ids": [
+          "d83b77d2a90140a8b70259e465bcf096"
+        ],
+        "question": "Trong file \"bao_cao_quan_ly_rac_thai_nhua.pdf\" có thông tin về gia co phieu Apple không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "gia co phieu Apple"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "EXT-031",
+        "File": "bao_cao_quan_ly_rac_thai_nhua.pdf",
+        "Loai file": "PDF",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"bao_cao_quan_ly_rac_thai_nhua.pdf\" có thông tin về gia co phieu Apple không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 299.97
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-032",
+        "group": "Postfix Extra",
+        "files": [
+          "ke_hoach_mau_du_lich_da_lat.md"
+        ],
+        "file_type": "MD",
+        "selected_document_ids": [
+          "2e91cd1ac6aa4a7badaaebdb4ac5963d"
+        ],
+        "question": "Trong file \"ke_hoach_mau_du_lich_da_lat.md\" có thông tin về so tai khoan ngan hang không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "so tai khoan ngan hang"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "EXT-032",
+        "File": "ke_hoach_mau_du_lich_da_lat.md",
+        "Loai file": "MD",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"ke_hoach_mau_du_lich_da_lat.md\" có thông tin về so tai khoan ngan hang không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 297.68
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-033",
+        "group": "Postfix Extra",
+        "files": [
+          "infographic_mau_an_toan_mang.png"
+        ],
+        "file_type": "PNG",
+        "selected_document_ids": [
+          "0f5d0a6c52c540daa4fe04aa3c94b3e8"
+        ],
+        "question": "Trong file \"infographic_mau_an_toan_mang.png\" có thông tin về hop dong lao dong không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "hop dong lao dong"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "EXT-033",
+        "File": "infographic_mau_an_toan_mang.png",
+        "Loai file": "PNG",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"infographic_mau_an_toan_mang.png\" có thông tin về hop dong lao dong không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 278.61
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-034",
+        "group": "Postfix Extra",
+        "files": [
+          "pdf_01_nang_luong_mat_troi.pdf"
+        ],
+        "file_type": "PDF",
+        "selected_document_ids": [
+          "75130c551bfc40fd9695c0eaaf57e1fb"
+        ],
+        "question": "Trong file \"pdf_01_nang_luong_mat_troi.pdf\" có thông tin về thong tin bao hiem không?",
+        "expected_answer": "Không tìm thấy thông tin trong tài liệu.",
+        "expected_terms": [
+          "không",
+          "không tìm thấy",
+          "không có thông tin"
+        ],
+        "forbidden_terms": [
+          "thong tin bao hiem"
+        ],
+        "kind": "negative"
+      },
+      "row": {
+        "ID": "EXT-034",
+        "File": "pdf_01_nang_luong_mat_troi.pdf",
+        "Loai file": "PDF",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Trong file \"pdf_01_nang_luong_mat_troi.pdf\" có thông tin về thong tin bao hiem không?",
+        "Dap an chuan": "Không tìm thấy thông tin trong tài liệu.",
+        "Cau tra loi he thong": "Tôi không tìm thấy đủ thông tin trong tài liệu để trả lời chính xác.",
+        "Nguon/Citation": "",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 298.06
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-035",
+        "group": "Postfix Extra",
+        "files": [
+          "bao_cao_mau_chuyen_doi_so_giao_duc.pdf",
+          "docx_01_thu_vien_so.docx"
+        ],
+        "file_type": "DOCX+PDF",
+        "selected_document_ids": [
+          "d8c1ec5733634bfaa938e24338911bc4",
+          "d6e2c17dafdc44668a1f0b74e039c1c5"
+        ],
+        "question": "So sánh nội dung của \"bao_cao_mau_chuyen_doi_so_giao_duc.pdf\" và \"docx_01_thu_vien_so.docx\".",
+        "expected_answer": "Cần nhắc đến cả hai file: Page: 1 > File: 622ffb96990a4b598a0a7d08c5044369_bao_cao_mau_chuyen_doi_so_giao_duc.pdf; Tóm tắt nhanh",
+        "expected_terms": [
+          "bao",
+          "cao",
+          "chuyen",
+          "muc",
+          "tieu",
+          "quy"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-035",
+        "File": "bao_cao_mau_chuyen_doi_so_giao_duc.pdf, docx_01_thu_vien_so.docx",
+        "Loai file": "DOCX+PDF",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "So sánh nội dung của \"bao_cao_mau_chuyen_doi_so_giao_duc.pdf\" và \"docx_01_thu_vien_so.docx\".",
+        "Dap an chuan": "Cần nhắc đến cả hai file: Page: 1 > File: 622ffb96990a4b598a0a7d08c5044369_bao_cao_mau_chuyen_doi_so_giao_duc.pdf; Tóm tắt nhanh",
+        "Cau tra loi he thong": "Các tài liệu khác nhau ở phạm vi nội dung chính. bao_cao_mau_chuyen_doi_so_giao_duc.pdf: paragraph; Mục tiêu thứ ba là tăng tính minh bạch trong phối hợp giữa nhà trường và phụ huynh. Khi; docx_01_thu_vien_so.docx: Kết luận; Tài liệu này được tạo để phục vụ kiểm thử đọc hiểu tài liệu, trích xuất bảng, nhận diện tiêu đề và kiểm tra khả năng trả lời theo ngữ cảnh của AI chatbot.",
+        "Nguon/Citation": "bao_cao_mau_chuyen_doi_so_giao_duc.pdf (trang 2) | bao_cao_mau_chuyen_doi_so_giao_duc.pdf (trang 1) | bao_cao_mau_chuyen_doi_so_giao_duc.pdf (trang 4) | bao_cao_mau_chuyen_doi_so_giao_duc.pdf (trang 3) | docx_01_thu_vien_so.docx (trang 1, Mục tiêu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 887.27
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-036",
+        "group": "Postfix Extra",
+        "files": [
+          "pdf_01_nang_luong_mat_troi.pdf",
+          "poster_mau_nang_luong_tai_tao.jpg"
+        ],
+        "file_type": "JPG+PDF",
+        "selected_document_ids": [
+          "75130c551bfc40fd9695c0eaaf57e1fb",
+          "a0ecdae1f5c544118777cd9a981df206"
+        ],
+        "question": "So sánh nội dung của \"pdf_01_nang_luong_mat_troi.pdf\" và \"poster_mau_nang_luong_tai_tao.jpg\".",
+        "expected_answer": "Cần nhắc đến cả hai file: Page: 1 > File: e8441761a52e48118928dd7bdd361d66_pdf_01_nang_luong_mat_troi.pdf; 542799e0036a49f8a9f537634345ae76_poster_mau_nang_luong_tai_tao.jpg",
+        "expected_terms": [
+          "dien",
+          "mat",
+          "troi",
+          "poster",
+          "tao",
+          "luong"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-036",
+        "File": "pdf_01_nang_luong_mat_troi.pdf, poster_mau_nang_luong_tai_tao.jpg",
+        "Loai file": "JPG+PDF",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "So sánh nội dung của \"pdf_01_nang_luong_mat_troi.pdf\" và \"poster_mau_nang_luong_tai_tao.jpg\".",
+        "Dap an chuan": "Cần nhắc đến cả hai file: Page: 1 > File: e8441761a52e48118928dd7bdd361d66_pdf_01_nang_luong_mat_troi.pdf; 542799e0036a49f8a9f537634345ae76_poster_mau_nang_luong_tai_tao.jpg",
+        "Cau tra loi he thong": "Các tài liệu khác nhau ở phạm vi nội dung chính. poster_mau_nang_luong_tai_tao.jpg: g luong tai tao trong doi sd; Noi dung khac voi PNG va PDF, trinh bay theo dang poster JPG; pdf_01_nang_luong_mat_troi.pdf: Page: 1; Báo cáo ngắn về điện mặt trời hộ gia đình.",
+        "Nguon/Citation": "poster_mau_nang_luong_tai_tao.jpg (542799e0036a49f8a9f537634345ae76_poster_mau_nang_luong_tai_tao.jpg) | pdf_01_nang_luong_mat_troi.pdf (trang 1)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 545.96
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-037",
+        "group": "Postfix Extra",
+        "files": [
+          "md_02_app_chi_tieu.md",
+          "xlsx_01_bao_cao_doanh_thu.xlsx"
+        ],
+        "file_type": "MD+XLSX",
+        "selected_document_ids": [
+          "68cce76f6a164b429fec95035fb2fb11",
+          "524b536a64b94e2b9c6f1123fbff63f0"
+        ],
+        "question": "So sánh nội dung của \"md_02_app_chi_tieu.md\" và \"xlsx_01_bao_cao_doanh_thu.xlsx\".",
+        "expected_answer": "Cần nhắc đến cả hai file: Bối cảnh; Doanh thu",
+        "expected_terms": [
+          "tuong",
+          "ung",
+          "quan",
+          "doanh",
+          "thu",
+          "used"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-037",
+        "File": "md_02_app_chi_tieu.md, xlsx_01_bao_cao_doanh_thu.xlsx",
+        "Loai file": "MD+XLSX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "So sánh nội dung của \"md_02_app_chi_tieu.md\" và \"xlsx_01_bao_cao_doanh_thu.xlsx\".",
+        "Dap an chuan": "Cần nhắc đến cả hai file: Bối cảnh; Doanh thu",
+        "Cau tra loi he thong": "Các tài liệu khác nhau ở phạm vi nội dung chính. xlsx_01_bao_cao_doanh_thu.xlsx: Doanh thu:used_range_1; Sheet: Doanh thu; md_02_app_chi_tieu.md: Dữ liệu mẫu; | Danh mục | Ngân sách tháng | Ghi chú |.",
+        "Nguon/Citation": "xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet KPI, A1:D6) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu, A1:F7) | xlsx_01_bao_cao_doanh_thu.xlsx (sheet Doanh thu) | md_02_app_chi_tieu.md (Hồ sơ ý tưởng ứng dụng quản lý chi tiêu sinh viên > Tính năng đề xuất)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Đúng",
+        "Diem": 1.0,
+        "Hallucination": "Không",
+        "Muc do loi": "None",
+        "Ghi chu": "Đạt kỳ vọng theo bộ từ khóa chuẩn.",
+        "De xuat fix": "Không cần fix.",
+        "Latency ms": 566.11
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-038",
+        "group": "Postfix Extra",
+        "files": [
+          "Test pdf.pdf"
+        ],
+        "file_type": "PDF",
+        "selected_document_ids": [
+          "3bf9580f09894688a1e5269189b00d6e"
+        ],
+        "question": "Tóm tắt ngắn nội dung chính của \"Test pdf.pdf\" trong 3 ý.",
+        "expected_answer": "Page: 1 > File: c4220cd9dc7b4b1292798be9a6c655a0_Test pdf.pdf",
+        "expected_terms": [
+          "1950",
+          "1960",
+          "1970",
+          "pdf",
+          "nam",
+          "c4220cd9dc7b4b1292798be9a6c655a0"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-038",
+        "File": "Test pdf.pdf",
+        "Loai file": "PDF",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Tóm tắt ngắn nội dung chính của \"Test pdf.pdf\" trong 3 ý.",
+        "Dap an chuan": "Page: 1 > File: c4220cd9dc7b4b1292798be9a6c655a0_Test pdf.pdf",
+        "Cau tra loi he thong": "2. - Xe tự lái: Nhận biết biển báo giao thông, vạch kẻ đường, người đi bộ, xe cộ - khác để đưa ra quyết định lái xe an toàn. - Các cảm biến và camera trên xe sẽ - thu thập dữ liệu hình ảnh, sau đó các thuật toán thị giác máy tính sẽ xử lý dữ - liệu này để hiểu và phản ứng với môi trường xung quanh. - 6. - Robot công nghiệp: Nhận biết và lắp ráp các bộ phận, kiểm soát ### Bảng tổng hợp | Chủ đề | Điểm chính | |---|---| | Xe tự lái | Nhận biết biển báo giao thông, vạch kẻ đường, ngườ | | khác để đưa ra quyết định lái xe an toàn | Nội dung chính trong tài liệu | | Các cảm biến và camera trên xe sẽ | Nội dung chính trong tài liệu | | thu thập dữ liệu hình ảnh, sau đó các thuật toán thị giác máy | Nội dung chính trong tài liệu | | liệu này để hiểu và phản ứng với môi trường xung quanh | Nội dung chính trong tài liệu | | Robot công nghiệp | Nhận biết và lắp ráp các bộ phận, kiểm soát | | 2. Xe tự lái | Nhận biết biển báo giao thông, vạch kẻ đường, n | | khác để đưa ra quyết định lái xe an toàn. Các cảm biến và cam | Nội dung chính trong tài liệu | ### Sơ đồ tổng quan ```mermaid flowchart TB classDef terminal fill:#0f766e,stroke:#115e59,color:#ffffff,stroke-width:2.4px classDef branch fil",
+        "Nguon/Citation": "Test pdf.pdf (trang 4) | Test pdf.pdf (trang 2) | Test pdf.pdf (trang 6) | Test pdf.pdf (trang 3) | Test pdf.pdf (trang 8)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Có sinh sơ đồ/mermaid khi câu hỏi không yêu cầu rõ.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 2532.11
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-039",
+        "group": "Postfix Extra",
+        "files": [
+          "Test docx.docx"
+        ],
+        "file_type": "DOCX",
+        "selected_document_ids": [
+          "052d0de3785c43df9def783aff93a450"
+        ],
+        "question": "Tóm tắt ngắn nội dung chính của \"Test docx.docx\" trong 3 ý.",
+        "expected_answer": "BÁO CÁO THỰC TẬP TỐT NGHIỆP",
+        "expected_terms": [
+          "vien",
+          "thuc",
+          "van",
+          "cong",
+          "nghe",
+          "giang"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-039",
+        "File": "Test docx.docx",
+        "Loai file": "DOCX",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Tóm tắt ngắn nội dung chính của \"Test docx.docx\" trong 3 ý.",
+        "Dap an chuan": "BÁO CÁO THỰC TẬP TỐT NGHIỆP",
+        "Cau tra loi he thong": "Nội dung kỹ thuật (xanh nhạt) | noi_dung_dieu, do_dai_ky_tu, chunk_id - Hệ thống hiện vận hành với quy mô 9.408 đoạn văn bản (chunks). - Mỗi đoạn văn bản sau khi trải qua quy trình phân mảnh 4 tầng sẽ được mô hình DEk21 chuyển đổi thành một vector mật (dense vector) có kích thước 768 chiều. - Điểm cốt lõi trong thiết kế của Qdrant là hệ thống Payload Metadata chi tiết đi kèm mỗi vector, bao gồm các trường: chunk_id, ten_van_ban, so_hieu, dieu_so, dieu_ten, chuong_so, chuong_ten, trang_thai, noi_dung_chunk, full_dieu_text và context_text. - Việc lưu trữ đầy đủ các trường thông tin này cho phép hệ thống không chỉ truy xuất nội dung khớp nhất mà còn có khả năng cung cấp toàn văn điều luật và ngữ cảnh xung quanh, phục vụ cho việc trích dẫn nguồn tin một cách minh bạch và chính xác tuyệt đối ngay trong câu trả lời. - Schema chunks: { - \"id\": \"<md5 12 ký tự>\", - \"text\": \"<context_text — chuỗi prefix + nội dung, là input embedding>\", ### Bảng tổng hợp | Chủ đề | Điểm chính | |---|---| | Hệ thống hiện vận hành với quy mô 9.408 đoạn văn bản chunks | Nội dung chính trong tài liệu | | Mỗi đoạn văn bản sau khi trải qua quy trình phân mảnh 4 tầng | Nội dung chính trong tài liệu | | Điểm cốt lõi",
+        "Nguon/Citation": "Test docx.docx (trang 25, 3.6. Thiết kế cơ sở dữ liệu vector > 3.6.1. Cấu trúc Schema và Quản lý Payload) | Test docx.docx (trang 15, 2.6. Tổng quan luật CNTT Việt Nam) | Test docx.docx (trang 24) | Test docx.docx (trang 34, 4.6. Đóng gói và triển khai hệ thống) | Test docx.docx (trang 15, 2.7. Các hệ thống liên quan và khoảng trống nghiên cứu)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Có sinh sơ đồ/mermaid khi câu hỏi không yêu cầu rõ.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 2830.62
+      }
+    },
+    {
+      "case": {
+        "id": "EXT-040",
+        "group": "Postfix Extra",
+        "files": [
+          "content_summary.md"
+        ],
+        "file_type": "MD",
+        "selected_document_ids": [
+          "2bfe3a172ffd4d7ba6637613d8b86870"
+        ],
+        "question": "Tóm tắt ngắn nội dung chính của \"content_summary.md\" trong 3 ý.",
+        "expected_answer": "Test JPG.jpg (JPG)",
+        "expected_terms": [
+          "084205002647",
+          "test",
+          "jpg",
+          "png",
+          "docx",
+          "loi"
+        ],
+        "forbidden_terms": [],
+        "kind": "positive"
+      },
+      "row": {
+        "ID": "EXT-040",
+        "File": "content_summary.md",
+        "Loai file": "MD",
+        "Nhom": "Postfix Extra",
+        "Cau hoi": "Tóm tắt ngắn nội dung chính của \"content_summary.md\" trong 3 ý.",
+        "Dap an chuan": "Test JPG.jpg (JPG)",
+        "Cau tra loi he thong": "Dưới đây là tóm tắt ngắn nội dung chính của \"content_summary.md\" trong 3 ý: - Hệ thống sử dụng kiến trúc Hybrid (GraphRAG) kết hợp giữa sức mạnh tìm kiếm ngữ nghĩa của Qdrant và tư duy mạng lưới của Neo4j để đạt được hiệu suất cao. - Hệ thống áp dụng chiến lược thiết kế câu lệnh kết hợp giữa hai phương pháp tối ưu để đảm bảo mô hình phản hồi đúng và chuyên nghiệp. - Hệ thống sử dụng Graph Traversal để tự động thực hiện bước nhảy từ nút Luật qua quan hệ để truy xuất chính xác các chế tài nằm ở văn bản khác. ### Bảng tổng hợp | Chủ đề | Điểm chính | |---|---| | Hệ thống sử dụng kiến trúc Hybrid GraphRAG kết hợp giữa sức m | Nội dung chính trong tài liệu | | Hệ thống áp dụng chiến lược thiết kế câu lệnh kết hợp giữa ha | Nội dung chính trong tài liệu | | Hệ thống sử dụng Graph Traversal để tự động thực hiện bước nh | Nội dung chính trong tài liệu | | 3.3.1. Độ chính xác và Khả năng kiểm soát ảo giác Accuracy & | Nội dung chính trong tài liệu | | chuong_so | 1, chuong_ten: Quy định chung | | TEXT INDEX entity_name_idx FOR n | Entity ON n.name | | 3.7.4. Tổng hợp và Phản hồi có Căn cứ | Nội dung chính trong tài liệu | | Em xin chân thành cảm ơn | Nội dung chính trong tài liệu | ### Sơ đ",
+        "Nguon/Citation": "content_summary.md (- CHƯƠNG 1: TỔNG QUAN ĐỀ TÀI) | content_summary.md (- BÁO CÁO THỰC TẬP TỐT NGHIỆP) | content_summary.md (- Chương 1: > Page 8) | content_summary.md (- LỜI CẢM ƠN) | content_summary.md (- LỜI NÓI ĐẦU)",
+        "Retrieval": "Đúng",
+        "Citation": "Đúng",
+        "Answer": "Một phần",
+        "Diem": 0.5,
+        "Hallucination": "Không",
+        "Muc do loi": "Medium",
+        "Ghi chu": "Có sinh sơ đồ/mermaid khi câu hỏi không yêu cầu rõ.",
+        "De xuat fix": "Tinh chỉnh citation selection và reranking để nguồn trả về sát hơn.",
+        "Latency ms": 9915.97
+      }
+    }
+  ]
+}

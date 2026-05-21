@@ -134,6 +134,20 @@ _QUICK_SUMMARY_REQUEST_RE = re.compile(
     r"noi\s*dung\s*chinh|nội\s*dung\s*chính|y\s*chinh|ý\s*chính|main\s*points?)",
     re.IGNORECASE,
 )
+_DIRECT_DOCUMENT_INFO_REQUEST_RE = re.compile(
+    r"(?:"
+    r"tai\s*lieu.+(?:noi\s*ve|noi\s*gi|chu\s*de|noi\s*dung\s*chinh)|"
+    r"file.+(?:noi\s*ve|noi\s*gi|chu\s*de|noi\s*dung\s*chinh)|"
+    r"neu.{0,24}thong\s*tin.{0,24}cu\s*the|"
+    r"thong\s*tin.{0,24}cu\s*the.{0,24}xuat\s*hien|"
+    r"(?:chi\s*tiet|y|muc).{0,40}lien\s*quan|"
+    r"noi\s*dung\s*chu\s*chinh|"
+    r"tu\s*khoa\s*noi\s*bat|"
+    r"trich\s*xuat.{0,24}(?:cac\s*)?nhan|"
+    r"y\s*chinh\s*nhin\s*thay"
+    r")",
+    re.IGNORECASE,
+)
 _DETAIL_VISUAL_HINT_RE = re.compile(
     r"(chi\s*tiet|chi\s*tiết|detail|phan\s*tich|phân\s*tích|danh\s*gia|đánh\s*giá|"
     r"giai\s*thich|giải\s*thích|tieu\s*chi|tiêu\s*chí)",
@@ -172,6 +186,22 @@ _VISUAL_NOISE_TOKEN_RE = re.compile(
     r"\b(?:file|page|slide|row|sheet|type|columns|rows)\s*:)",
     re.IGNORECASE,
 )
+_TECHNICAL_VISUAL_LABEL_RE = re.compile(
+    r"^(?:"
+    r"sheet\s*index|hidden\s*sheet|table\s*(?:type|kind|name|id)?|"
+    r"layout|reading\s*order|placeholder|shape|text\s*box|"
+    r"range(?:\s*address)?|chunk\s*row\s*range|headers?|header\s*(?:columns?|units?)|"
+    r"structured\s*rows?|detected\s*tables?\s*ranges?|tables?\s*ranges?|"
+    r"rows?\s*(?:with\s*data|count)?|row\s*preview|workbook\s*summary|sheet\s*count|"
+    r"used\s*range(?:\s*\d+)?|used_range_\d+|blocks?|z\d+\s*rows\s*\d+"
+    r")\b",
+    re.IGNORECASE,
+)
+_TECHNICAL_VISUAL_VALUE_RE = re.compile(
+    r"^(?:none|null|true|false|unknown|\d+(?:[.:]\d+)?(?:\s*,\s*\d+(?:[.:]\d+)?)*|"
+    r"[a-z]{1,4}\d{1,6}\s*rows\s*\d+|used\s*range\s*\d*)$",
+    re.IGNORECASE,
+)
 _MEANINGFUL_TEXT_RE = re.compile(r"[A-Za-z\u00C0-\u024F\u3040-\u30FF\u4E00-\u9FFF]")
 _FLOWCHART_DECISION_HINT_RE = re.compile(
     r"(if|else|neu|nếu|yes|no|pass|fail|dieu\s*kien|điều\s*kiện|quyet\s*dinh|quyết\s*định)",
@@ -191,13 +221,38 @@ _SPREADSHEET_ROW_IDENTIFIER_RE = re.compile(
     r"(?:\b(?:no|stt|id)\s*[.:#-]?\s*|(?:thi\s*sinh|hoc\s*vien|student)\s*(?:so|stt|id|no)?\s*[.:#-]?\s*)(\d{1,4})\b",
     re.IGNORECASE,
 )
+_SPREADSHEET_EXPLICIT_ROW_NUMBER_RE = re.compile(
+    r"\b(?:dong|row)\s*(\d{1,6})\b",
+    re.IGNORECASE,
+)
 _SPREADSHEET_SHEET_HINT_RE = re.compile(r"\b(sheet\s*[a-z0-9_]+)\b", re.IGNORECASE)
+_GENERIC_SPREADSHEET_SHEET_HINT_TOKENS = {
+    "bao",
+    "co",
+    "count",
+    "danh",
+    "gi",
+    "list",
+    "may",
+    "nao",
+    "nhieu",
+    "sach",
+    "ten",
+    "va",
+}
 _SPREADSHEET_SHEET_COUNT_HINT_RE = re.compile(
     r"(?:\b(?:co\s*)?(?:bao\s*nhieu|may|so\s*luong)\s+sheet(?:s)?\b|"
     r"\bsheet(?:s)?\s+(?:co\s*)?(?:bao\s*nhieu|may|so\s*luong)\b|"
     r"\bhow\s*many\s+sheet(?:s)?\b|\bnumber\s+of\s+sheet(?:s)?\b)",
     re.IGNORECASE,
 )
+_SPREADSHEET_SHEET_LIST_HINT_RE = re.compile(
+    r"(?:\b(?:co\s*)?(?:nhung|cac|danh\s*sach|ten|liet\s*ke)\s+sheet(?:s)?\b|"
+    r"\bsheet(?:s)?\s+(?:nao|gi|ten|list|danh\s*sach|co\s*nhung)\b|"
+    r"\bworkbook\b.*\bsheet(?:s)?\b)",
+    re.IGNORECASE,
+)
+_SPREADSHEET_REVENUE_HINT_RE = re.compile(r"\b(doanh\s*thu|revenue|sales)\b", re.IGNORECASE)
 _SPREADSHEET_TOTAL_SCORE_HINT_RE = re.compile(
     r"\b(tong\s*diem|total\s*score|final\s*score|score|diem)\b",
     re.IGNORECASE,
@@ -264,6 +319,10 @@ _SPREADSHEET_RESULT_FOLDED_LABELS = (
     "fail",
 )
 _SLIDE_NUMBER_HINT_RE = re.compile(r"\bslide\s*(\d{1,3})\b", re.IGNORECASE)
+_SLIDE_CONTENT_QUESTION_RE = re.compile(
+    r"\b(noi\s*dung|noi\s*ve|noi\s*gi|chu\s*de|tieu\s*de|title|main\s*point|summary|tom\s*tat)\b",
+    re.IGNORECASE,
+)
 _PPTX_OBJECT_HINT_RE = re.compile(
     r"\b(table|bang|bảng|chart|bieu\s*do|biểu\s*đồ|image|anh|ảnh|figure|hinh|hình)\b",
     re.IGNORECASE,
@@ -295,6 +354,10 @@ _PHONE_QUESTION_HINT_RE = re.compile(
     re.IGNORECASE,
 )
 _PHONE_EXTRACT_RE = re.compile(r"(?<!\w)(?:\+?\d[\d .()-]{7,}\d)(?!\w)")
+_PHONE_LABELED_EVIDENCE_RE = re.compile(
+    r"\b(?:so\s*dien\s*thoai|dien\s*thoai|sdt|phone|hotline)\b.{0,80}(?<!\w)(?:\+?\d[\d .()-]{7,}\d)(?!\w)",
+    re.IGNORECASE,
+)
 _ADDRESS_QUESTION_HINT_RE = re.compile(
     r"\b(dia\s*chi|địa\s*chỉ|address|nha\s*rieng|nhà\s*riêng|noi\s*o|nơi\s*ở|residence)\b",
     re.IGNORECASE,
@@ -353,6 +416,10 @@ _NOT_FOUND_ANSWER_HINT_RE = re.compile(
     r"\b(khong\s*tim\s*thay|khong\s*co\s*thong\s*tin|khong\s*co\s*du\s*lieu|"
     r"khong\s*co\s*noi\s*dung|not\s*found|no\s*information|cannot\s*find|"
     r"insufficient\s*context|outside\s*context)\b",
+    re.IGNORECASE,
+)
+_PRESENCE_CHECK_TARGET_RE = re.compile(
+    r"\b(?:co\s+(?:thong\s*tin\s+)?ve|co\s+noi\s+ve|nhac\s+(?:den|toi)|de\s*cap\s+(?:den|toi))\s+(.{2,100}?)(?:\s+khong\b|$)",
     re.IGNORECASE,
 )
 _EXPANSION_WITH_ACRONYM_RE = re.compile(
@@ -837,6 +904,10 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             context_docs=context_docs,
             metadata_filter=route.metadata_filter,
         )
+        skip_visual_enrichment = bool(
+            structured_answer
+            and self._is_multi_source_comparison_question(raw_question, route.metadata_filter)
+        )
         grounded_gate_answer = self._try_build_missing_evidence_fallback(raw_question, context_docs)
 
         if grounded_gate_answer:
@@ -851,9 +922,9 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         answer = self._sanitize_unverified_acronym_expansions(answer, relevant_docs)
         answer = self._normalize_mermaid_answer(answer)
 
-        if is_mindmap_request and answer and not self._is_fallback_answer(answer):
+        if is_mindmap_request and answer and not self._is_fallback_answer(answer) and not skip_visual_enrichment:
             answer = self._ensure_mindmap_answer(answer, relevant_docs, normalized_question)
-        elif answer and not self._is_fallback_answer(answer):
+        elif answer and not self._is_fallback_answer(answer) and not skip_visual_enrichment:
             answer = self._ensure_visual_answer(answer, relevant_docs, normalized_question)
 
         answer = self._polish_answer_for_user(raw_question, answer, relevant_docs)
@@ -866,7 +937,31 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             logger.info("qa_answer_fallback_triggered")
             return AnswerResult(answer=FALLBACK_ANSWER, sources=[], context_found=False)
 
-        citation_docs = self._select_citation_docs(raw_question, answer, relevant_docs, context_docs)
+        citation_relevant_docs = relevant_docs
+        citation_context_docs = context_docs
+        forced_citation_docs: list[Document] = []
+        if structured_answer and not grounded_gate_answer:
+            if self._is_multi_source_comparison_question(raw_question, route.metadata_filter):
+                comparison_scope_docs = self._load_scoped_context_docs(route.metadata_filter)
+                comparison_citation_docs = self._select_required_scope_citation_docs(
+                    [*context_docs, *comparison_scope_docs],
+                    route.metadata_filter,
+                )
+                if comparison_citation_docs:
+                    forced_citation_docs = comparison_citation_docs
+            elif self._is_spreadsheet_sheet_question(self._fold_text(raw_question)):
+                spreadsheet_citation_docs = self._spreadsheet_docs_for_answer(context_docs, route.metadata_filter)
+                spreadsheet_citation_docs = self._select_spreadsheet_sheet_citation_docs(spreadsheet_citation_docs)
+                if spreadsheet_citation_docs:
+                    citation_relevant_docs = spreadsheet_citation_docs
+                    citation_context_docs = spreadsheet_citation_docs
+
+        citation_docs = forced_citation_docs or self._select_citation_docs(
+            raw_question,
+            answer,
+            citation_relevant_docs,
+            citation_context_docs,
+        )
         logger.info("qa_answer_generated sources=%s", len(citation_docs))
         result = AnswerResult(
             answer=answer,
@@ -922,6 +1017,10 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             context_docs=context_docs,
             metadata_filter=route.metadata_filter,
         )
+        skip_visual_enrichment = bool(
+            structured_answer
+            and self._is_multi_source_comparison_question(raw_question, route.metadata_filter)
+        )
         grounded_gate_answer = self._try_build_missing_evidence_fallback(raw_question, context_docs)
 
         if grounded_gate_answer:
@@ -939,7 +1038,9 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             yield FALLBACK_ANSWER
             return
 
-        if is_mindmap_request:
+        if skip_visual_enrichment:
+            answer = self._sanitize_non_visual_answer(answer)
+        elif is_mindmap_request:
             answer = self._ensure_mindmap_answer(answer, relevant_docs, normalized_question)
         else:
             answer = self._ensure_visual_answer(answer, relevant_docs, normalized_question)
@@ -968,8 +1069,16 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         explicit_diagram_request = self._is_explicit_diagram_request(question_text)
         explicit_visual_request = explicit_table_request or explicit_diagram_request
         broad_ambiguous_question = self._is_broad_ambiguous_question(question_text)
+        folded_question = self._fold_text(question_text)
 
         if _VISUAL_ENRICHMENT_EXCLUDED_RE.search(question_text):
+            return self._sanitize_non_visual_answer(cleaned_answer)
+
+        if (
+            not explicit_visual_request
+            and _QUICK_SUMMARY_REQUEST_RE.search(question_text)
+            and re.search(r"\b(?:ngan|ngan\s*gon|tom\s*tat\s*ngan|\d+\s*y|y\s*chinh|bullet|dau\s*dong)\b", folded_question)
+        ):
             return self._sanitize_non_visual_answer(cleaned_answer)
 
         if self._is_specific_question(question_text) and not explicit_visual_request:
@@ -1375,39 +1484,37 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         broad_ambiguous_question = self._is_broad_ambiguous_question(question_text)
         quick_summary_requested = bool(_QUICK_SUMMARY_REQUEST_RE.search(question_text))
         structured_entries = branch_count >= 2 and (average_children >= 1 or branch_count >= 4)
+        comparison_question = bool(
+            re.search(r"(so\s*sanh|so\s*sánh|compare|đối\s*chiếu|doi\s*chieu)", question_text, re.IGNORECASE)
+        )
+        sequential_entries = self._looks_like_sequential_entries(entries)
 
         wants_table = explicit_table_request
-        if not wants_table and broad_ambiguous_question:
-            wants_table = bool(re.search(r"(so\s*sanh|so\s*sánh|compare|đối\s*chiếu|doi\s*chieu)", question_text, re.IGNORECASE))
+        if not wants_table and broad_ambiguous_question and structured_entries and (comparison_question or not sequential_entries):
+            wants_table = True
 
         wants_mindmap = explicit_mindmap_request
-        if not wants_mindmap and not explicit_diagram_request and broad_ambiguous_question:
-            wants_mindmap = bool(_MINDMAP_OVERVIEW_HINT_RE.search(question_text))
 
         wants_flowchart = explicit_diagram_request and not explicit_mindmap_request
         if explicit_diagram_request and explicit_flow_request:
             wants_flowchart = True
         if not explicit_diagram_request and broad_ambiguous_question:
-            wants_flowchart = self._looks_like_sequential_entries(entries)
+            wants_flowchart = sequential_entries
 
         table_variant: str | None = None
         if structured_entries and wants_table:
-            if re.search(r"(so\s*sanh|so\s*sánh|compare|đối\s*chiếu|doi\s*chieu)", question_text, re.IGNORECASE):
+            if comparison_question:
                 table_variant = "matrix"
             else:
                 table_variant = "overview"
 
         mermaid_variant: str | None = None
-        if wants_mindmap or (
-            not explicit_diagram_request
-            and broad_ambiguous_question
-            and branch_count >= 4
-            and average_children >= 1.25
-            and not wants_table
-        ):
+        if wants_mindmap:
             mermaid_variant = "mindmap"
         elif wants_flowchart and not self._is_too_simple_for_flowchart(entries):
             mermaid_variant = "flowchart"
+        elif broad_ambiguous_question and structured_entries and branch_count >= 3 and table_variant != "matrix":
+            mermaid_variant = "overview_flowchart"
 
         if mermaid_variant == "mindmap" and branch_count < 3:
             mermaid_variant = None
@@ -1594,6 +1701,16 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             flowchart_block = self._build_flowchart_diagram_block(entries, root_label)
             if flowchart_block:
                 return f"### Sơ đồ quy trình\n{flowchart_block}"
+
+        if mermaid_variant == "overview_flowchart":
+            entries = self._build_visual_entries(branches, max_entries=6, max_children=2)
+            if len(entries) < 3:
+                return ""
+
+            root_label = self._derive_visual_root(normalized_question, context_docs)
+            flowchart_block = self._build_flowchart_diagram_block(entries, root_label, direction="TB")
+            if flowchart_block:
+                return f"### Sơ đồ tổng quan\n{flowchart_block}"
 
         return ""
 
@@ -1798,7 +1915,13 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             if mindmap_block:
                 return mindmap_block
 
-        return self._build_flowchart_diagram_block(entries, root_label)
+        direction = (
+            "LR"
+            if _FLOWCHART_DIAGRAM_HINT_RE.search(str(normalized_question or "").lower())
+            or self._looks_like_sequential_entries(entries)
+            else "TB"
+        )
+        return self._build_flowchart_diagram_block(entries, root_label, direction=direction)
 
     def _build_supplementary_mindmap_block(
         self,
@@ -1833,16 +1956,11 @@ class QuestionAnsweringService(IQuestionAnsweringService):
     ) -> str:
         question_text = str(normalized_question or "").lower()
 
-        if _MINDMAP_REQUEST_RE.search(question_text) or _MINDMAP_OVERVIEW_HINT_RE.search(question_text):
+        if _MINDMAP_REQUEST_RE.search(question_text):
             return "mindmap"
 
         if _FLOWCHART_DIAGRAM_HINT_RE.search(question_text) or self._looks_like_sequential_entries(entries):
             return "flowchart"
-
-        total_children = sum(len(child_labels) for _, child_labels in entries)
-        average_children = total_children / len(entries) if entries else 0.0
-        if len(entries) >= 4 and average_children >= 1.25:
-            return "mindmap"
 
         return "flowchart"
 
@@ -1873,6 +1991,8 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         self,
         entries: list[tuple[str, list[str]]],
         root_label: str,
+        *,
+        direction: str = "LR",
     ) -> str:
         normalized_entries: list[tuple[str, list[str]]] = []
         for branch_label, child_labels in entries:
@@ -1891,9 +2011,10 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         branch_ids: list[str] = []
         detail_ids: list[str] = []
         decision_ids: list[str] = []
+        safe_direction = "TB" if str(direction or "").upper() == "TB" else "LR"
         lines = [
             "```mermaid",
-            "flowchart LR",
+            f"flowchart {safe_direction}",
             "  classDef terminal fill:#0f766e,stroke:#115e59,color:#ffffff,stroke-width:2.4px",
             "  classDef branch fill:#ecfeff,stroke:#14b8a6,color:#0f172a,stroke-width:1.8px",
             "  classDef detail fill:#ffffff,stroke:#94a3b8,color:#0f172a,stroke-width:1.3px",
@@ -2147,7 +2268,7 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             return text
 
         blocks = re.split(r"\n\s*\n", text, maxsplit=1)
-        if not blocks:
+        if not blocks or len(blocks) < 2:
             return text
 
         first_block = blocks[0].strip()
@@ -2246,6 +2367,73 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         context_docs: list[Document],
         metadata_filter: dict[str, str | list[str]] | None,
     ) -> str:
+        folded_question = self._fold_text(raw_question)
+
+        spreadsheet_row_number_answer = self._try_build_spreadsheet_explicit_row_number_answer(
+            raw_question,
+            context_docs,
+            metadata_filter,
+        )
+        if spreadsheet_row_number_answer:
+            logger.info("qa_structured_spreadsheet_explicit_row_number_hit")
+            return spreadsheet_row_number_answer
+
+        spreadsheet_sheet_focus_answer = self._try_build_spreadsheet_sheet_focus_answer(
+            raw_question,
+            context_docs,
+            metadata_filter,
+        )
+        if spreadsheet_sheet_focus_answer:
+            logger.info("qa_structured_spreadsheet_sheet_focus_hit")
+            return spreadsheet_sheet_focus_answer
+
+        if self._is_spreadsheet_sheet_question(folded_question):
+            spreadsheet_answer_docs = self._spreadsheet_docs_for_answer(context_docs, metadata_filter)
+            sheet_count_answer = self._try_build_spreadsheet_sheet_count_answer(raw_question, spreadsheet_answer_docs)
+            if sheet_count_answer:
+                logger.info("qa_structured_spreadsheet_sheet_count_hit")
+                return sheet_count_answer
+
+        slide_location_answer = self._try_build_slide_location_answer(
+            raw_question,
+            context_docs,
+            metadata_filter,
+        )
+        if slide_location_answer:
+            logger.info("qa_structured_slide_location_hit")
+            return slide_location_answer
+
+        if self._is_document_overview_question(folded_question):
+            spreadsheet_answer_docs = self._spreadsheet_docs_for_answer(context_docs, metadata_filter)
+            if not self._is_spreadsheet_context(spreadsheet_answer_docs):
+                spreadsheet_answer_docs = []
+        else:
+            spreadsheet_answer_docs = []
+
+        if spreadsheet_answer_docs:
+            spreadsheet_overview = self._build_spreadsheet_overview_answer(spreadsheet_answer_docs)
+            if spreadsheet_overview:
+                logger.info("qa_structured_spreadsheet_overview_hit")
+                return spreadsheet_overview
+
+        direct_document_answer = self._try_build_direct_document_info_answer(
+            raw_question,
+            context_docs,
+            metadata_filter,
+        )
+        if direct_document_answer:
+            logger.info("qa_structured_direct_document_info_hit")
+            return direct_document_answer
+
+        comparison_answer = self._try_build_multi_source_comparison_answer(
+            raw_question,
+            context_docs,
+            metadata_filter,
+        )
+        if comparison_answer:
+            logger.info("qa_structured_multi_source_comparison_hit")
+            return comparison_answer
+
         document_answer = self._try_build_document_fact_answer(raw_question, context_docs, metadata_filter)
         if document_answer:
             logger.info("qa_structured_document_fact_answer_hit")
@@ -2299,12 +2487,205 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             logger.info("qa_missing_evidence_gate reason=%s", rule_name)
             return FALLBACK_ANSWER
 
+        if _PHONE_QUESTION_HINT_RE.search(folded_question) and not _PHONE_LABELED_EVIDENCE_RE.search(folded_context):
+            logger.info("qa_missing_evidence_gate reason=missing_labeled_phone_evidence")
+            return FALLBACK_ANSWER
+
+        if (
+            _SPREADSHEET_REVENUE_HINT_RE.search(folded_question)
+            and self._is_spreadsheet_context(context_docs)
+            and not _SPREADSHEET_REVENUE_HINT_RE.search(folded_context)
+        ):
+            logger.info("qa_missing_evidence_gate reason=spreadsheet_missing_revenue")
+            return FALLBACK_ANSWER
+
+        missing_presence_target = self._find_missing_presence_check_target(folded_question, folded_context)
+        if missing_presence_target:
+            logger.info(
+                "qa_missing_evidence_gate reason=missing_presence_target target=%s",
+                missing_presence_target,
+            )
+            return FALLBACK_ANSWER
+
         missing_term = self._find_missing_explicit_codelike_term(folded_question, folded_context)
         if missing_term:
             logger.info("qa_missing_evidence_gate reason=missing_explicit_term term=%s", missing_term)
             return FALLBACK_ANSWER
 
         return ""
+
+    def _try_build_direct_document_info_answer(
+        self,
+        question: str,
+        context_docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None,
+    ) -> str:
+        if not context_docs:
+            return ""
+
+        folded_question = self._fold_text(question)
+        if not folded_question:
+            return ""
+
+        if self._is_multi_source_comparison_question(question, metadata_filter):
+            return ""
+        if _PRESENCE_CHECK_TARGET_RE.search(folded_question):
+            return ""
+        if not (
+            self._is_document_overview_question(folded_question)
+            or _DIRECT_DOCUMENT_INFO_REQUEST_RE.search(folded_question)
+            or (
+                _IMAGE_QUESTION_HINT_RE.search(folded_question)
+                and re.search(r"\b(noi\s*dung|chu\s*chinh|tu\s*khoa|nhan|y\s*chinh|trich\s*xuat)\b", folded_question)
+            )
+        ):
+            return ""
+
+        scoped_docs = self._load_scoped_context_docs(metadata_filter) if metadata_filter else []
+        search_docs = scoped_docs or context_docs
+        if not search_docs:
+            return ""
+
+        if self._is_spreadsheet_context(search_docs):
+            spreadsheet_overview = self._build_spreadsheet_overview_answer(search_docs)
+            if spreadsheet_overview:
+                return spreadsheet_overview
+
+        is_image_scope = self._is_image_document_scope(search_docs)
+        if is_image_scope or _IMAGE_QUESTION_HINT_RE.search(folded_question):
+            image_answer = self._build_image_document_info_answer(question, search_docs)
+            if image_answer:
+                return image_answer
+
+        snippets = self._extract_document_info_snippets(search_docs, max_items=5)
+        if not snippets:
+            return ""
+
+        document_name = self._display_name_for_source(
+            str(search_docs[0].metadata.get("source") or ""),
+            search_docs[0],
+        )
+
+        asks_specific_fact = bool(
+            re.search(
+                r"\b(neu\s+mot\s+thong\s+tin\s+cu\s+the|nêu\s+một\s+thông\s+tin\s+cụ\s+thể|"
+                r"thong\s+tin\s+cu\s+the|thông\s+tin\s+cụ\s+thể)\b",
+                folded_question,
+            )
+        )
+        if asks_specific_fact:
+            return f'Một thông tin cụ thể trong "{document_name}" là: {snippets[0]}.'
+
+        if len(snippets) == 1:
+            return f'Tài liệu "{document_name}" nói về: {snippets[0]}.'
+
+        bullet_lines = "\n".join(f"- {snippet}" for snippet in snippets[:5])
+        return f'Tài liệu "{document_name}" có các ý chính:\n{bullet_lines}'
+
+    @classmethod
+    def _is_image_document_scope(cls, docs: list[Document]) -> bool:
+        checked = 0
+        image_docs = 0
+        for doc in docs[:12]:
+            checked += 1
+            metadata = doc.metadata
+            extension = str(metadata.get("extension") or metadata.get("document_type") or "").lower().lstrip(".")
+            content_type = str(metadata.get("content_type") or "").lower()
+            if (
+                extension in {"png", "jpg", "jpeg"}
+                or content_type == "image_document"
+                or metadata.get("ocr_applied")
+                or metadata.get("image_analysis_applied")
+            ):
+                image_docs += 1
+        return checked > 0 and image_docs == checked
+
+    def _build_image_document_info_answer(self, question: str, docs: list[Document]) -> str:
+        snippets = self._extract_document_info_snippets(docs, max_items=6)
+        if not snippets:
+            return ""
+
+        document_name = self._display_name_for_source(str(docs[0].metadata.get("source") or ""), docs[0])
+        folded_question = self._fold_text(question)
+        if re.search(r"\b(tu\s*khoa|nhan|label|trich\s*xuat|y\s*chinh)\b", folded_question):
+            return f'Các nội dung chính đọc được trong ảnh "{document_name}": ' + "; ".join(snippets[:6]) + "."
+
+        if len(snippets) == 1:
+            return f'Ảnh "{document_name}" nói về: {snippets[0]}.'
+
+        return f'Ảnh "{document_name}" có nội dung chính: ' + "; ".join(snippets[:6]) + "."
+
+    @classmethod
+    def _extract_document_info_snippets(cls, docs: list[Document], *, max_items: int = 5) -> list[str]:
+        snippets: list[str] = []
+        seen: set[str] = set()
+
+        def add(raw_value: object) -> None:
+            if len(snippets) >= max_items:
+                return
+            line = cls._clean_document_info_line(str(raw_value or ""))
+            if not line:
+                return
+            folded_line = cls._fold_text(line)
+            if not folded_line or folded_line in seen:
+                return
+            seen.add(folded_line)
+            snippets.append(line)
+
+        for doc in docs:
+            for key in ("section_title", "title", "structure_path"):
+                value = str(doc.metadata.get(key) or "").strip()
+                if ">" in value:
+                    for part in value.split(">"):
+                        add(part)
+                else:
+                    add(value)
+                if len(snippets) >= max_items:
+                    return snippets
+
+        for doc in docs:
+            for raw_line in str(doc.page_content or "").replace("\r", "\n").splitlines():
+                for part in re.split(r"\s+\|\s+", raw_line):
+                    add(part)
+                    if len(snippets) >= max_items:
+                        return snippets
+
+        return snippets
+
+    @classmethod
+    def _clean_document_info_line(cls, value: str) -> str:
+        line = re.sub(r"\s+", " ", str(value or "")).strip(" -•\t:：")
+        line = re.sub(
+            r"^\[\d+\]\s*(?:textbox|text_box|shape|placeholder|picture|image)\b.*?:\s*",
+            "",
+            line,
+            flags=re.IGNORECASE,
+        ).strip(" -•\t:：")
+        if not line:
+            return ""
+
+        folded_line = cls._fold_text(line)
+        if not folded_line or len(folded_line) < 4:
+            return ""
+        if folded_line in {"overview", "tong quan", "text", "type image", "image", "ocr text", "vision description"}:
+            return ""
+        if re.match(r"^(file|source|type|page|slide|sheet|row|rows|headers?|structured rows|chunk|range|table)\b", folded_line):
+            return ""
+        if re.fullmatch(r"(?:title\s*)?slide\s*\d{1,4}|blocks?\s*\d{1,4}(?:\s*\d{1,4})?", folded_line):
+            return ""
+        if re.search(r"\.(pdf|docx|pptx|xlsx|xls|txt|md|png|jpg|jpeg)\b", folded_line):
+            return ""
+        if re.fullmatch(r"[0-9a-f]{16,}", folded_line):
+            return ""
+        if _TECHNICAL_VISUAL_LABEL_RE.search(folded_line) or _TECHNICAL_VISUAL_VALUE_RE.search(folded_line):
+            return ""
+        if _VISUAL_NOISE_TOKEN_RE.search(line):
+            return ""
+        if re.search(r"\banh\s+kiem\s+thu\b|\bnoi\s+dung\s+minh\s+hoa\s+dai\s+hon\b", folded_line):
+            return ""
+        if len(line) > 180:
+            line = f"{line[:177].rstrip()}..."
+        return line
 
     def _try_build_document_fact_answer(
         self,
@@ -2326,6 +2707,13 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             page_numbers = self._extract_context_page_numbers(search_docs)
             if page_numbers:
                 return f"Tài liệu có {max(page_numbers)} trang."
+
+        question_outline = self._extract_numbered_question_outline(search_docs)
+        if question_outline and self._is_document_question_count_question(folded_question):
+            return self._build_numbered_question_count_answer(question_outline)
+
+        if question_outline and self._is_document_overview_question(folded_question):
+            return self._build_numbered_question_overview_answer(search_docs, question_outline)
 
         if self._is_last_page_question(folded_question):
             last_page = self._select_last_page_doc(search_docs)
@@ -2385,6 +2773,31 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         )
 
     @staticmethod
+    def _is_document_question_count_question(folded_question: str) -> bool:
+        return bool(
+            re.search(r"\b(?:bao\s*nhieu|may|so\s*luong|tong\s*so|count|number\s*of)\b", folded_question)
+            and re.search(r"\b(?:cau\s*hoi|cau)\b", folded_question)
+        )
+
+    @staticmethod
+    def _is_document_overview_question(folded_question: str) -> bool:
+        if re.search(
+            r"\b(?:tai\s*lieu|file|document|toan\s*bo\s*tai\s*lieu|noi\s*dung\s*chinh)\b",
+            folded_question,
+        ) and re.search(
+            r"\b(?:noi\s*ve|noi\s*gi|ve\s*van\s*de\s*gi|chu\s*de|noi\s*dung\s*chinh|tom\s*tat|tong\s*quan)\b",
+            folded_question,
+        ):
+            return True
+
+        return bool(
+            re.fullmatch(
+                r"(?:tom\s*tat|tong\s*quan|overview|summary)(?:\s+(?:tai\s*lieu|file|document))?",
+                folded_question,
+            )
+        )
+
+    @staticmethod
     def _is_last_page_question(folded_question: str) -> bool:
         return bool(
             re.search(r"\btrang\s*cuoi\b", folded_question)
@@ -2404,6 +2817,119 @@ class QuestionAnsweringService(IQuestionAnsweringService):
                 if value > 0:
                     page_numbers.add(value)
         return sorted(page_numbers)
+
+    @classmethod
+    def _extract_numbered_question_outline(cls, context_docs: list[Document]) -> list[tuple[int, str, Document]]:
+        outline_by_number: dict[int, tuple[str, Document]] = {}
+        heading_pattern = re.compile(
+            r"\bCâu\s*(\d{1,3})\s*[:：]\s*(.+?)(?=(?:\bCâu\s*\d{1,3}\s*[:：])|$)",
+            re.IGNORECASE | re.DOTALL,
+        )
+
+        for doc in context_docs:
+            raw_text = str(doc.page_content or "")
+            if not raw_text.strip():
+                continue
+
+            normalized_text = re.sub(r"[ \t]+", " ", raw_text.replace("\r", "\n"))
+            for match in heading_pattern.finditer(normalized_text):
+                try:
+                    question_number = int(match.group(1))
+                except ValueError:
+                    continue
+                if question_number <= 0 or question_number in outline_by_number:
+                    continue
+
+                title = cls._clean_numbered_question_title(match.group(2))
+                if not title:
+                    continue
+                outline_by_number[question_number] = (title, doc)
+
+        return [
+            (question_number, title, doc)
+            for question_number, (title, doc) in sorted(outline_by_number.items())
+        ]
+
+    @classmethod
+    def _clean_numbered_question_title(cls, raw_title: str) -> str:
+        lines = [
+            re.sub(r"\s+", " ", line).strip(" .:-–—\t")
+            for line in str(raw_title or "").splitlines()
+            if re.sub(r"\s+", " ", line).strip(" .:-–—\t")
+        ]
+        body_start_re = re.compile(
+            r"^(theo\s+dinh\s+nghia|doi\s+voi\s+doanh\s+nghiep|cloud\s*ran\s+hay|"
+            r"nfv\s+viet\s+tat|cloud\s+dong\s+vai\s+tro|trong\s+kien\s+truc|"
+            r"cac\s+thiet\s+bi|tuy\s+nhien)\b",
+            re.IGNORECASE,
+        )
+        filtered_lines: list[str] = []
+        for line in lines:
+            folded_line = cls._fold_text(line)
+            if folded_line.startswith(("file ", "page ", "text ")):
+                continue
+            if filtered_lines and body_start_re.search(folded_line):
+                break
+            filtered_lines.append(line)
+            if len(filtered_lines) >= 2:
+                break
+
+        title = " ".join(filtered_lines)
+        title = re.sub(r"\s+", " ", title).strip(" .:-–—")
+        if len(title) > 150:
+            title = title[:150].rsplit(" ", 1)[0].strip(" .:-–—")
+        return title
+
+    @staticmethod
+    def _build_numbered_question_count_answer(outline: list[tuple[int, str, Document]]) -> str:
+        total = len(outline)
+        if total == 0:
+            return ""
+
+        question_list = ", ".join(f"Câu {number}" for number, _, _ in outline[:10])
+        if total > 10:
+            question_list += ", ..."
+        return f"Tài liệu có {total} câu hỏi chính ({question_list})."
+
+    @classmethod
+    def _build_numbered_question_overview_answer(
+        cls,
+        context_docs: list[Document],
+        outline: list[tuple[int, str, Document]],
+    ) -> str:
+        total = len(outline)
+        if total == 0:
+            return ""
+
+        document_title = cls._extract_document_title_from_docs(context_docs)
+        topic = document_title or "Tài liệu này"
+        lines = [
+            f"{topic} là tài liệu ôn tập gồm {total} câu hỏi chính.",
+            "",
+        ]
+        for number, title, _ in outline:
+            lines.append(f"- Câu {number}: {title}")
+
+        return "\n".join(lines).strip()
+
+    @classmethod
+    def _extract_document_title_from_docs(cls, context_docs: list[Document]) -> str:
+        for doc in sorted(context_docs, key=lambda item: cls._metadata_int(item, "page_number", "page") or 10_000):
+            text = str(doc.page_content or "")
+            lines = [
+                re.sub(r"\s+", " ", line).strip(" .:-–—\t")
+                for line in text.splitlines()
+                if re.sub(r"\s+", " ", line).strip(" .:-–—\t")
+            ]
+            for line in lines[:8]:
+                folded_line = cls._fold_text(line)
+                if folded_line in {"file", "page", "text"} or folded_line.startswith(("file ", "page ", "text ")):
+                    continue
+                if re.match(r"^(?:cau|question)\s*\d{1,3}\b", folded_line):
+                    continue
+                if 4 <= len(line) <= 120:
+                    return line
+        return ""
 
     @classmethod
     def _select_last_page_doc(cls, context_docs: list[Document]) -> Document | None:
@@ -2552,6 +3078,75 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             return False
         return bool(_SECRET_DISCLOSURE_ACTION_RE.search(folded_question))
 
+    @classmethod
+    def _find_missing_presence_check_target(cls, folded_question: str, folded_context: str) -> str:
+        match = _PRESENCE_CHECK_TARGET_RE.search(folded_question)
+        if match is None:
+            return ""
+
+        raw_target = match.group(1).strip()
+        if not raw_target:
+            return ""
+
+        raw_target = re.sub(
+            r"\b(?:trong|file|tai\s*lieu|document|nay|do|doan|van\s*ban|thong\s*tin|noi\s*dung|ve)\b",
+            " ",
+            raw_target,
+        )
+        raw_target = re.sub(r"\b[\w.-]+\.(?:pdf|docx|pptx|xlsx|xls|txt|md|png|jpg|jpeg)\b", " ", raw_target)
+        raw_target = re.sub(r"\s+", " ", raw_target).strip()
+        if not raw_target:
+            return ""
+
+        stopwords = {
+            "bao",
+            "cac",
+            "cho",
+            "co",
+            "cua",
+            "duoc",
+            "gi",
+            "gia",
+            "khong",
+            "la",
+            "may",
+            "muc",
+            "nao",
+            "nhieu",
+            "noi",
+            "tai",
+            "the",
+            "thong",
+            "tin",
+            "trong",
+            "ve",
+            "voi",
+        }
+        target_tokens = [
+            token
+            for token in cls._tokenize(raw_target)
+            if len(token) >= 3 and not token.isdigit() and token not in stopwords
+        ]
+        if not target_tokens:
+            return ""
+
+        target_phrase = " ".join(target_tokens)
+        if target_phrase and target_phrase in folded_context:
+            return ""
+
+        if len(target_tokens) <= 4:
+            proximity_pattern = r"\b" + r"\b.{0,60}\b".join(re.escape(token) for token in target_tokens) + r"\b"
+            if not re.search(proximity_pattern, folded_context):
+                return target_phrase
+            return ""
+
+        present_tokens = [token for token in target_tokens if token in folded_context]
+
+        if len(present_tokens) / max(1, len(target_tokens)) >= 0.5:
+            return ""
+
+        return target_phrase
+
     @staticmethod
     def _find_missing_explicit_codelike_term(folded_question: str, folded_context: str) -> str:
         if not _EXPLICIT_TERM_LOCATION_QUESTION_RE.search(folded_question):
@@ -2628,6 +3223,542 @@ class QuestionAnsweringService(IQuestionAnsweringService):
 
         return ""
 
+    def _spreadsheet_docs_for_answer(
+        self,
+        context_docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None = None,
+    ) -> list[Document]:
+        scoped_docs = self._load_scoped_spreadsheet_docs(metadata_filter) if metadata_filter else []
+        if not scoped_docs:
+            return context_docs
+
+        ordered_docs: list[Document] = []
+        seen: set[str] = set()
+        for doc in [*scoped_docs, *context_docs]:
+            if not self._is_spreadsheet_context_doc(doc):
+                continue
+            doc_key = self._document_key(doc)
+            if doc_key in seen:
+                continue
+            seen.add(doc_key)
+            ordered_docs.append(doc)
+        return ordered_docs or context_docs
+
+    def _select_required_scope_citation_docs(
+        self,
+        docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None,
+        *,
+        max_per_scope: int = 1,
+    ) -> list[Document]:
+        required_sources = ContextBuilder.extract_filter_values(metadata_filter or {}, "source")
+        required_document_ids = ContextBuilder.extract_filter_values(metadata_filter or {}, "document_id")
+        if not required_sources and not required_document_ids:
+            return []
+
+        candidates = self._deduplicate_citation_candidates(docs)
+        if not candidates:
+            return []
+
+        selected: OrderedDict[str, Document] = OrderedDict()
+
+        def rank_doc(doc: Document) -> tuple[float, int, int]:
+            metadata = doc.metadata
+            content_type = str(metadata.get("content_type") or "").lower()
+            section = str(metadata.get("section_title") or metadata.get("structure_path") or "").strip()
+            page_number = self._metadata_int(doc, "page_number", "page") or 10_000
+            slide_number = self._metadata_int(doc, "slide_number", "slide") or 10_000
+            score = 0.0
+            if "summary" in content_type or "overview" in content_type:
+                score += 0.35
+            if section and not self._is_technical_visual_label(section):
+                score += 0.25
+            if page_number == 1 or slide_number == 1:
+                score += 0.2
+            score += self._citation_metadata_specificity_bonus(doc)
+            return (score, -min(page_number, slide_number), len(str(doc.page_content or "")))
+
+        def add_matches(values: list[str], metadata_key: str) -> None:
+            for value in values:
+                matched = [
+                    doc for doc in candidates
+                    if str(doc.metadata.get(metadata_key) or "").strip() == value
+                ]
+                matched.sort(key=rank_doc, reverse=True)
+                added_for_value = 0
+                for doc in matched:
+                    source_ref = CitationBuilder._build_source_ref(doc)
+                    if not source_ref or source_ref in selected:
+                        continue
+                    selected[source_ref] = doc
+                    added_for_value += 1
+                    if added_for_value >= max_per_scope:
+                        break
+
+        add_matches(required_document_ids, "document_id")
+        add_matches(required_sources, "source")
+
+        return list(selected.values())
+
+    @staticmethod
+    def _is_spreadsheet_sheet_question(folded_question: str) -> bool:
+        return bool(
+            folded_question
+            and (
+                _SPREADSHEET_SHEET_COUNT_HINT_RE.search(folded_question)
+                or _SPREADSHEET_SHEET_LIST_HINT_RE.search(folded_question)
+            )
+        )
+
+    def _try_build_multi_source_comparison_answer(
+        self,
+        question: str,
+        context_docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None = None,
+    ) -> str:
+        if not self._is_multi_source_comparison_question(question, metadata_filter):
+            return ""
+        folded_question = self._fold_text(question)
+
+        required_sources = ContextBuilder.extract_filter_values(metadata_filter or {}, "source")
+        required_document_ids = ContextBuilder.extract_filter_values(metadata_filter or {}, "document_id")
+        scoped_docs = self._load_scoped_context_docs(metadata_filter) if metadata_filter else []
+        comparison_docs = self._deduplicate_citation_candidates([*scoped_docs, *context_docs]) if scoped_docs else context_docs
+
+        source_groups: OrderedDict[str, list[Document]] = OrderedDict()
+        for doc in comparison_docs:
+            key = str(doc.metadata.get("source") or doc.metadata.get("document_id") or "").strip()
+            if not key:
+                continue
+            if required_sources and key not in required_sources:
+                continue
+            if required_document_ids:
+                document_id = str(doc.metadata.get("document_id") or "").strip()
+                if document_id not in required_document_ids:
+                    continue
+            source_groups.setdefault(key, []).append(doc)
+
+        if len(source_groups) < 2:
+            return ""
+
+        items: list[tuple[str, str, set[str]]] = []
+        for source, docs in list(source_groups.items())[:4]:
+            label = self._display_name_for_source(source, docs[0])
+            summary = self._extract_brief_source_summary(docs)
+            if not summary:
+                continue
+            items.append((label, summary, self._topic_tokens(summary)))
+
+        if len(items) < 2:
+            return ""
+
+        first_tokens = items[0][2]
+        shared_tokens = set(first_tokens)
+        for _, _, tokens in items[1:]:
+            shared_tokens &= tokens
+        minimum_topic_size = min((len(tokens) for _, _, tokens in items if tokens), default=0)
+        overlap_ratio = len(shared_tokens) / max(1, minimum_topic_size)
+
+        asks_same_topic = bool(re.search(r"\b(cung\s*chu\s*de|giong\s*nhau|tuong\s*dong|same\s*topic)\b", folded_question))
+        if asks_same_topic:
+            opening = (
+                "Có, các tài liệu có một phần chủ đề giao nhau."
+                if overlap_ratio >= 0.25
+                else "Hai tài liệu không cùng chủ đề chính."
+            )
+        else:
+            opening = "Các tài liệu khác nhau ở phạm vi nội dung chính."
+
+        details = [f"{label}: {summary}" for label, summary, _ in items]
+        return f"{opening} " + "; ".join(details) + "."
+
+    def _is_multi_source_comparison_question(
+        self,
+        question: str,
+        metadata_filter: dict[str, str | list[str]] | None = None,
+    ) -> bool:
+        folded_question = self._fold_text(question)
+        if not folded_question or not re.search(
+            r"\b(so\s*sanh|compare|doi\s*chieu|khac\s*biet|tuong\s*dong|giong\s*nhau|cung\s*chu\s*de)\b",
+            folded_question,
+        ):
+            return False
+
+        required_sources = ContextBuilder.extract_filter_values(metadata_filter or {}, "source")
+        required_document_ids = ContextBuilder.extract_filter_values(metadata_filter or {}, "document_id")
+        return len(required_sources) >= 2 or len(required_document_ids) >= 2
+
+    @classmethod
+    def _extract_brief_source_summary(cls, docs: list[Document]) -> str:
+        candidates: list[str] = []
+        for doc in docs[:6]:
+            metadata_candidates = [
+                doc.metadata.get("section_title"),
+                doc.metadata.get("structure_path"),
+                doc.metadata.get("citation_hint"),
+            ]
+            for raw_metadata_text in metadata_candidates:
+                metadata_text = str(raw_metadata_text or "").split(">", 1)[0]
+                metadata_text = re.sub(r"\s+", " ", metadata_text).strip(" -•\t")
+                folded_metadata = cls._fold_text(metadata_text)
+                if not folded_metadata or folded_metadata in {"overview", "tong quan"}:
+                    continue
+                if re.search(r"\.(pdf|docx|pptx|xlsx|xls|txt|md|png|jpg|jpeg)\b", folded_metadata):
+                    continue
+                if _TECHNICAL_VISUAL_LABEL_RE.search(folded_metadata):
+                    continue
+                if metadata_text not in candidates:
+                    candidates.append(metadata_text[:220])
+                    break
+
+            for raw_line in str(doc.page_content or "").splitlines():
+                line = re.sub(r"\s+", " ", raw_line).strip(" -•\t")
+                if not line:
+                    continue
+                raw_label = cls._fold_text(line.split(":", 1)[0]) if ":" in line else ""
+                if raw_label in {
+                    "file",
+                    "ocr text",
+                    "source",
+                    "type",
+                    "vision description",
+                }:
+                    continue
+
+                folded_line = cls._fold_text(line)
+                if not folded_line or len(folded_line) < 8:
+                    continue
+                if folded_line in {"poster mau", "noi dung", "tom tat"}:
+                    continue
+                if re.match(
+                    r"^(file|source|page|slide|sheet|row|rows|headers?|structured rows|chunk|range|table)\s*:",
+                    folded_line,
+                ):
+                    continue
+                if _TECHNICAL_VISUAL_LABEL_RE.search(folded_line) or _TECHNICAL_VISUAL_VALUE_RE.search(folded_line):
+                    continue
+                if len(line) > 220:
+                    line = f"{line[:217].rstrip()}..."
+                candidates.append(line)
+                if len(candidates) >= 2:
+                    break
+            if len(candidates) >= 2:
+                break
+
+        summary = "; ".join(candidates)
+        return summary[:360].rstrip(" ;.")
+
+    @staticmethod
+    def _display_name_for_source(source: str, doc: Document) -> str:
+        raw_name = (
+            doc.metadata.get("document_name")
+            or doc.metadata.get("original_name")
+            or Path(str(source or "")).name
+            or str(source or "Tài liệu")
+        )
+        name = re.sub(r"^[0-9a-f]{24,40}_", "", str(raw_name)).strip()
+        return name or "Tài liệu"
+
+    @classmethod
+    def _topic_tokens(cls, text: str) -> set[str]:
+        stopwords = {
+            "bang",
+            "cac",
+            "cho",
+            "chu",
+            "cua",
+            "duoc",
+            "file",
+            "gom",
+            "la",
+            "mot",
+            "nay",
+            "noi",
+            "noi dung",
+            "tai",
+            "tai lieu",
+            "the",
+            "trong",
+            "ve",
+            "voi",
+        }
+        return {
+            token
+            for token in cls._tokenize(cls._fold_text(text))
+            if len(token) >= 3 and token not in stopwords and not token.isdigit()
+        }
+
+    def _try_build_slide_location_answer(
+        self,
+        question: str,
+        context_docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None = None,
+    ) -> str:
+        slide_number = self._extract_slide_number_hint(question)
+        if slide_number is None:
+            return ""
+
+        folded_question = self._fold_text(question)
+        if not _SLIDE_CONTENT_QUESTION_RE.search(folded_question):
+            return ""
+
+        slide_docs = self._slide_docs_for_answer(question, context_docs, metadata_filter)
+        if not slide_docs:
+            return ""
+
+        fragments: list[str] = []
+        seen_fragments: set[str] = set()
+        for doc in slide_docs:
+            for fragment in self._extract_slide_text_fragments(doc):
+                folded_fragment = self._fold_text(fragment)
+                if not folded_fragment or folded_fragment in seen_fragments:
+                    continue
+                seen_fragments.add(folded_fragment)
+                fragments.append(fragment)
+                if len(fragments) >= 6:
+                    break
+            if len(fragments) >= 6:
+                break
+
+        if not fragments:
+            return ""
+
+        if re.search(r"\b(tieu\s*de|title)\b", folded_question):
+            return f'Tiêu đề slide {slide_number} là "{fragments[0]}".'
+
+        return f"Slide {slide_number} nói về: " + "; ".join(fragments[:6]) + "."
+
+    def _slide_docs_for_answer(
+        self,
+        question: str,
+        context_docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None = None,
+    ) -> list[Document]:
+        slide_number = self._extract_slide_number_hint(question)
+        scoped_docs = self._load_scoped_context_docs(metadata_filter) if metadata_filter else []
+        candidates = self._deduplicate_citation_candidates([*scoped_docs, *context_docs])
+        if slide_number is not None:
+            candidates = [
+                doc for doc in candidates
+                if self._metadata_int(doc, "slide_number", "slide") == slide_number
+            ]
+
+        slide_docs = []
+        for doc in candidates:
+            metadata = doc.metadata
+            extension = str(metadata.get("extension") or metadata.get("document_type") or "").lower().lstrip(".")
+            if extension in {"ppt", "pptx"} or metadata.get("slide_number") is not None:
+                slide_docs.append(doc)
+
+        return sorted(
+            slide_docs,
+            key=lambda doc: (
+                self._metadata_int(doc, "slide_number", "slide") or 10_000,
+                self._coerce_int(doc.metadata.get("reading_order_start")),
+                self._coerce_int(doc.metadata.get("chunk_sequence_in_parent")),
+                self._coerce_int(doc.metadata.get("chunk_index")),
+            ),
+        )
+
+    @classmethod
+    def _extract_slide_text_fragments(cls, doc: Document) -> list[str]:
+        fragments: list[str] = []
+        for raw_line in str(doc.page_content or "").splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+
+            match = re.match(r"^(?:-\s*)?\[\d+\]\s+[^:]{1,120}:\s*(.+)$", line)
+            if match:
+                line = match.group(1).strip()
+            elif re.match(r"^(file|slide|layout|reading\s*order|slide\s*blocks)\s*:", line, flags=re.IGNORECASE):
+                continue
+            elif re.match(r"^title\s*:\s*slide\s*\d+\s*$", line, flags=re.IGNORECASE):
+                continue
+            elif line.lower().startswith("title:"):
+                line = line.split(":", 1)[1].strip()
+
+            for part in re.split(r"\s+\|\s+", line):
+                fragment = cls._clean_slide_text_fragment(part)
+                if not fragment:
+                    continue
+                if cls._looks_like_slide_footer_fragment(fragment):
+                    continue
+                fragments.append(fragment)
+
+        return fragments
+
+    @classmethod
+    def _clean_slide_text_fragment(cls, value: str) -> str:
+        text = re.sub(r"\s+", " ", str(value or "")).strip(" -•\t")
+        if not text:
+            return ""
+        folded_text = cls._fold_text(text)
+        if not folded_text or len(folded_text) < 3:
+            return ""
+        if _STRUCTURAL_VISUAL_COORDINATE_RE.search(text):
+            return ""
+        if _TECHNICAL_VISUAL_LABEL_RE.search(folded_text):
+            return ""
+        if _TECHNICAL_VISUAL_VALUE_RE.search(folded_text):
+            return ""
+        return text[:240].rstrip(" ;.")
+
+    @classmethod
+    def _looks_like_slide_footer_fragment(cls, value: str) -> bool:
+        folded_value = cls._fold_text(value)
+        if not folded_value:
+            return True
+        if re.search(r"\b(file|slide|pptx|ppt)\b.*\b\d{1,3}\b$", folded_value):
+            return True
+        return False
+
+    def _try_build_spreadsheet_explicit_row_number_answer(
+        self,
+        question: str,
+        context_docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None = None,
+    ) -> str:
+        folded_question = self._fold_text(question)
+        row_match = _SPREADSHEET_EXPLICIT_ROW_NUMBER_RE.search(folded_question)
+        if row_match is None:
+            return ""
+
+        try:
+            target_row_number = int(row_match.group(1))
+        except ValueError:
+            return ""
+        if target_row_number <= 0:
+            return ""
+
+        spreadsheet_docs = self._spreadsheet_docs_for_answer(context_docs, metadata_filter)
+        spreadsheet_docs = self._expand_spreadsheet_aggregate_docs(
+            spreadsheet_docs,
+            metadata_filter=metadata_filter,
+        )
+        target_sheet = self._resolve_spreadsheet_sheet_hint(question, spreadsheet_docs or context_docs)
+        rows = self._extract_spreadsheet_structured_rows(spreadsheet_docs or context_docs, target_sheet=target_sheet)
+        if not rows:
+            return ""
+
+        matched_row: dict[str, object] | None = None
+        for row in rows:
+            if int(row.get("row_number", 0) or 0) == target_row_number:
+                matched_row = row
+                break
+
+        if matched_row is None:
+            return ""
+
+        values = matched_row.get("values")
+        if not isinstance(values, dict) or not values:
+            return ""
+
+        fragments: list[str] = []
+        for label, value in values.items():
+            label_text = str(label or "").strip()
+            value_text = str(value or "").strip()
+            if not label_text or not value_text:
+                continue
+            fragments.append(f"{label_text}: {value_text}")
+            if len(fragments) >= 10:
+                break
+
+        if not fragments:
+            return ""
+
+        sheet_name = str(matched_row.get("sheet_name") or target_sheet or "").strip()
+        sheet_prefix = f"Ở sheet '{sheet_name}', " if sheet_name else ""
+        return f"{sheet_prefix}dòng {target_row_number} có: " + "; ".join(fragments) + "."
+
+    def _try_build_spreadsheet_sheet_focus_answer(
+        self,
+        question: str,
+        context_docs: list[Document],
+        metadata_filter: dict[str, str | list[str]] | None = None,
+    ) -> str:
+        folded_question = self._fold_text(question)
+        if not folded_question or "sheet" not in folded_question:
+            return ""
+        if not re.search(r"\b(?:lien\s*quan|chi\s*tiet|y|muc|noi\s*dung|gom|co\s*gi)\b", folded_question):
+            return ""
+
+        spreadsheet_docs = self._spreadsheet_docs_for_answer(context_docs, metadata_filter)
+        spreadsheet_docs = self._expand_spreadsheet_aggregate_docs(
+            spreadsheet_docs,
+            metadata_filter=metadata_filter,
+        )
+        target_sheet = self._resolve_spreadsheet_sheet_hint(question, spreadsheet_docs or context_docs)
+        if not target_sheet:
+            return ""
+
+        sheet_docs = [
+            doc for doc in (spreadsheet_docs or context_docs)
+            if self._sheet_name_matches(target_sheet, self._extract_sheet_name_from_doc(doc))
+        ]
+        if not sheet_docs:
+            return ""
+
+        sheet_name = self._extract_sheet_name_from_doc(sheet_docs[0]) or target_sheet
+        headers: list[str] = []
+        row_count = 0
+        for doc in sheet_docs:
+            metadata = doc.metadata
+            raw_headers = metadata.get("headers")
+            if isinstance(raw_headers, list):
+                headers.extend(str(item or "").strip() for item in raw_headers if str(item or "").strip())
+            elif isinstance(raw_headers, str):
+                headers.extend(part.strip() for part in raw_headers.split(",") if part.strip())
+
+            row_count = max(
+                row_count,
+                self._safe_positive_int(metadata.get("rows_with_data") or metadata.get("row_count")),
+            )
+
+            for raw_line in str(doc.page_content or "").splitlines():
+                line = raw_line.strip()
+                if not line or ":" not in line:
+                    continue
+                key, value = line.split(":", 1)
+                folded_key = self._fold_text(key)
+                if folded_key == "header columns":
+                    headers.extend(part.strip() for part in value.split(",") if part.strip())
+                elif folded_key == "rows with data":
+                    row_count = max(row_count, self._safe_positive_int(value))
+
+        deduped_headers: list[str] = []
+        seen_headers: set[str] = set()
+        for header in headers:
+            folded_header = self._fold_text(header)
+            if not folded_header or folded_header in seen_headers:
+                continue
+            seen_headers.add(folded_header)
+            deduped_headers.append(header)
+
+        parts = [f"sheet {sheet_name}"]
+        if deduped_headers:
+            parts.append(f"các cột chính gồm {', '.join(deduped_headers[:8])}")
+        if row_count:
+            parts.append(f"khoảng {row_count} dòng dữ liệu")
+
+        rows = self._extract_spreadsheet_structured_rows(sheet_docs, target_sheet=target_sheet)
+        sample_fragments: list[str] = []
+        for row in rows:
+            values = row.get("values")
+            if not isinstance(values, dict):
+                continue
+            for label, value in list(values.items())[:4]:
+                label_text = str(label or "").strip()
+                value_text = str(value or "").strip()
+                if label_text and value_text:
+                    sample_fragments.append(f"{label_text}: {value_text}")
+            if sample_fragments:
+                break
+        if sample_fragments:
+            parts.append("ví dụ " + "; ".join(sample_fragments[:4]))
+
+        return "; ".join(parts) + "."
+
     def _try_build_spreadsheet_sheet_count_answer(
         self,
         question: str,
@@ -2637,7 +3768,7 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             return ""
 
         folded_question = self._fold_text(question)
-        if not folded_question or not _SPREADSHEET_SHEET_COUNT_HINT_RE.search(folded_question):
+        if not self._is_spreadsheet_sheet_question(folded_question):
             return ""
 
         sheets: dict[str, dict[str, object]] = {}
@@ -2711,8 +3842,8 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         if not matching_rows:
             return ""
 
-        target_column = self._select_spreadsheet_date_lookup_column(question, matching_rows)
-        if not target_column:
+        target_columns = self._select_spreadsheet_date_lookup_columns(question, matching_rows)
+        if not target_columns:
             return ""
 
         fragments: list[str] = []
@@ -2722,8 +3853,14 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             if not isinstance(values, dict):
                 continue
 
-            value_text = str(values.get(target_column) or "").strip()
-            if not value_text:
+            details: list[str] = []
+            for target_column in target_columns:
+                value_text = str(values.get(target_column) or "").strip()
+                if not value_text:
+                    continue
+                details.append(f"{target_column}: {value_text}")
+
+            if not details:
                 continue
 
             sheet_name = str(row.get("sheet_name") or "").strip()
@@ -2735,7 +3872,8 @@ class QuestionAnsweringService(IQuestionAnsweringService):
                 location_parts.append(f"dòng {row_number}")
 
             prefix = ", ".join(location_parts)
-            fragment = f"{prefix}, {target_column}: {value_text}" if prefix else f"{target_column}: {value_text}"
+            detail_text = "; ".join(details)
+            fragment = f"{prefix}, {detail_text}" if prefix else detail_text
             if fragment in seen:
                 continue
             seen.add(fragment)
@@ -2747,6 +3885,46 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             return ""
 
         return "; ".join(fragments) + "."
+
+    def _select_spreadsheet_date_lookup_columns(
+        self,
+        question: str,
+        rows: list[dict[str, object]],
+    ) -> list[str]:
+        folded_question = self._fold_text(question)
+        if not folded_question:
+            return []
+
+        requested_hints: list[tuple[str, tuple[str, ...]]] = [
+            ("hoat dong", ("hoat dong", "activity", "noi dung")),
+            ("khu vuc", ("khu vuc", "dia diem", "location", "area")),
+            ("nguoi phu trach", ("nguoi phu trach", "phu trach", "owner", "assignee")),
+            ("chi phi", ("chi phi", "cost", "ngan sach")),
+            ("so nguoi", ("so nguoi", "nguoi tham gia", "participant")),
+            ("rac tai che", ("rac tai che", "tai che", "recycle")),
+        ]
+        columns: list[str] = []
+        for _, hints in requested_hints:
+            if not any(hint in folded_question for hint in hints):
+                continue
+            matched_column = self._match_spreadsheet_column_by_hint(rows, " ".join(hints))
+            if matched_column and not self._is_spreadsheet_date_column(matched_column, rows):
+                columns.append(matched_column)
+
+        if not columns:
+            matched_column = self._select_spreadsheet_date_lookup_column(question, rows)
+            if matched_column:
+                columns.append(matched_column)
+
+        deduplicated: list[str] = []
+        seen: set[str] = set()
+        for column in columns:
+            folded_column = self._fold_text(column)
+            if not folded_column or folded_column in seen:
+                continue
+            seen.add(folded_column)
+            deduplicated.append(column)
+        return deduplicated[:4]
 
     def _try_build_spreadsheet_row_answer(
         self,
@@ -3317,7 +4495,7 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         folded_question = self._fold_text(raw_question)
         if not folded_question:
             return None
-        if not _SPREADSHEET_SHEET_COUNT_HINT_RE.search(folded_question):
+        if not self._is_spreadsheet_sheet_question(folded_question):
             return None
 
         scoped_docs = self._load_scoped_context_docs(metadata_filter) if metadata_filter else []
@@ -3621,10 +4799,18 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             document_id = metadata_filter.get("document_id")
             if isinstance(document_id, str) and document_id.strip():
                 return {"document_id": document_id.strip()}
+            if isinstance(document_id, list):
+                document_ids = [str(item or "").strip() for item in document_id if str(item or "").strip()]
+                if document_ids:
+                    return {"document_id": document_ids if len(document_ids) > 1 else document_ids[0]}
 
             source = metadata_filter.get("source")
             if isinstance(source, str) and source.strip():
                 return {"source": source.strip()}
+            if isinstance(source, list):
+                sources = [str(item or "").strip() for item in source if str(item or "").strip()]
+                if sources:
+                    return {"source": sources if len(sources) > 1 else sources[0]}
 
         spreadsheet_docs = [doc for doc in context_docs if self._is_spreadsheet_context_doc(doc)]
         if not spreadsheet_docs:
@@ -3666,6 +4852,10 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         if not folded_question:
             return ""
 
+        explicit_sheet = self._extract_explicit_spreadsheet_sheet_hint(folded_question, context_docs)
+        if explicit_sheet:
+            return explicit_sheet
+
         compact_question = re.sub(r"\s+", "", folded_question)
         best_sheet = ""
         best_length = 0
@@ -3688,6 +4878,35 @@ class QuestionAnsweringService(IQuestionAnsweringService):
 
         return self._extract_sheet_hint(folded_question)
 
+    def _extract_explicit_spreadsheet_sheet_hint(
+        self,
+        folded_question: str,
+        context_docs: list[Document],
+    ) -> str:
+        match = re.search(
+            r"\bsheet\s+(.+?)(?:\s+(?:dong|row|co|gom|chua|noi|la|bao|ten|danh\s*sach|trong)\b|$)",
+            folded_question,
+        )
+        if match is None:
+            return ""
+
+        candidate = re.sub(r"\s+", "", match.group(1)).strip()
+        candidate = re.sub(r"[^a-z0-9\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF]+", "", candidate)
+        if not candidate or candidate in _GENERIC_SPREADSHEET_SHEET_HINT_TOKENS:
+            return ""
+
+        for doc in context_docs:
+            sheet_name = self._extract_sheet_name_from_doc(doc)
+            canonical_sheet = self._canonical_sheet_name(sheet_name)
+            if not canonical_sheet:
+                continue
+            normalized_candidate = re.sub(r"^sheet", "", candidate)
+            normalized_sheet = re.sub(r"^sheet", "", canonical_sheet)
+            if candidate == canonical_sheet or normalized_candidate == normalized_sheet:
+                return canonical_sheet
+
+        return ""
+
     @staticmethod
     def _extract_sheet_name_from_doc(doc: Document) -> str:
         metadata = doc.metadata
@@ -3700,6 +4919,25 @@ class QuestionAnsweringService(IQuestionAnsweringService):
                 return line.split(":", 1)[1].strip()
 
         return ""
+
+    def _select_spreadsheet_sheet_citation_docs(self, docs: list[Document]) -> list[Document]:
+        selected: OrderedDict[tuple[str, str], Document] = OrderedDict()
+        preferred_docs = sorted(
+            docs,
+            key=lambda doc: 0
+            if str(doc.metadata.get("content_type") or "") == "spreadsheet_sheet_summary"
+            else 1,
+        )
+        for doc in preferred_docs:
+            source = str(doc.metadata.get("source") or "").strip()
+            sheet_name = self._extract_sheet_name_from_doc(doc)
+            canonical_sheet = self._canonical_sheet_name(sheet_name)
+            key = (source, canonical_sheet)
+            if not source or not canonical_sheet or key in selected:
+                continue
+            selected[key] = doc
+
+        return list(selected.values()) or docs
 
     def _extract_spreadsheet_structured_rows(
         self,
@@ -4481,7 +5719,12 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         match = _SPREADSHEET_SHEET_HINT_RE.search(str(folded_question or ""))
         if match is None:
             return ""
-        return cls._canonical_sheet_name(match.group(1))
+        raw_hint = match.group(1)
+        candidate = re.sub(r"^sheet\s*", "", raw_hint, flags=re.IGNORECASE).strip()
+        folded_candidate = cls._fold_text(candidate)
+        if not folded_candidate or folded_candidate in _GENERIC_SPREADSHEET_SHEET_HINT_TOKENS:
+            return ""
+        return cls._canonical_sheet_name(raw_hint)
 
     @classmethod
     def _canonical_sheet_name(cls, value: str) -> str:
@@ -5045,7 +6288,7 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         boost += self._structure_alignment_bonus(raw_question, doc)
 
         if re.search(r"\b(image|figure|diagram|screenshot|chart|anh|ảnh|hinh|hình)\b", question):
-            if extension in {"png", "jpg", "jpeg", "bmp", "webp"}:
+            if extension in {"png", "jpg", "jpeg"}:
                 boost += 0.06
             if metadata.get("ocr_applied") or metadata.get("image_analysis_applied"):
                 boost += 0.04
@@ -5383,6 +6626,24 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         if scoped_candidates:
             candidates = scoped_candidates
 
+        folded_question = self._fold_text(question)
+        if self._is_document_question_count_question(folded_question) or self._is_document_overview_question(folded_question):
+            outline = self._extract_numbered_question_outline(candidates)
+            if len(outline) >= 2:
+                max_sources = self._resolve_citation_limit(question)
+                selected_outline_docs: list[Document] = []
+                seen_outline_refs: set[str] = set()
+                for _, _, doc in outline:
+                    source_ref = CitationBuilder._build_source_ref(doc)
+                    if source_ref in seen_outline_refs:
+                        continue
+                    seen_outline_refs.add(source_ref)
+                    selected_outline_docs.append(doc)
+                    if len(selected_outline_docs) >= max_sources:
+                        break
+                if selected_outline_docs:
+                    return selected_outline_docs
+
         answer_terms = self._extract_answer_support_terms(answer)
         focus_terms = self._extract_focus_terms(question)
         question_tokens = self._tokenize(self._fold_text(question))
@@ -5448,6 +6709,15 @@ class QuestionAnsweringService(IQuestionAnsweringService):
     def _filter_citation_docs_by_location(self, question: str, docs: list[Document]) -> list[Document]:
         filtered = list(docs)
 
+        question_number = self._extract_question_number_hint(question)
+        if question_number is not None:
+            question_docs = [
+                doc for doc in filtered
+                if self._content_mentions_question_number(doc, question_number)
+            ]
+            if question_docs:
+                filtered = question_docs
+
         slide_number = self._extract_slide_number_hint(question)
         if slide_number is not None:
             slide_docs = [
@@ -5475,7 +6745,91 @@ class QuestionAnsweringService(IQuestionAnsweringService):
             if sheet_docs:
                 filtered = sheet_docs
 
+        row_number = self._extract_explicit_row_number_hint(question)
+        if row_number is not None:
+            row_docs = [
+                doc for doc in filtered
+                if self._doc_mentions_spreadsheet_row_number(doc, row_number)
+            ]
+            if row_docs:
+                filtered = row_docs
+
         return filtered
+
+    @classmethod
+    def _extract_explicit_row_number_hint(cls, raw_question: str) -> int | None:
+        match = _SPREADSHEET_EXPLICIT_ROW_NUMBER_RE.search(cls._fold_text(raw_question))
+        if match is None:
+            return None
+        try:
+            row_number = int(match.group(1))
+        except ValueError:
+            return None
+        return row_number if row_number > 0 else None
+
+    @classmethod
+    def _doc_mentions_spreadsheet_row_number(cls, doc: Document, row_number: int) -> bool:
+        metadata = doc.metadata
+        for key in ("row_number", "row_index"):
+            try:
+                if int(metadata.get(key, 0) or 0) == row_number:
+                    return True
+            except (TypeError, ValueError):
+                continue
+
+        structured_rows = metadata.get("structured_rows")
+        if isinstance(structured_rows, list):
+            for row in structured_rows:
+                if not isinstance(row, dict):
+                    continue
+                try:
+                    if int(row.get("row_number", 0) or 0) == row_number:
+                        return True
+                except (TypeError, ValueError):
+                    continue
+
+        folded_content = cls._fold_text(str(doc.page_content or "")[:5000])
+        return bool(re.search(rf"\brow\s*{row_number}\b", folded_content))
+
+    @classmethod
+    def _extract_question_number_hint(cls, raw_question: str) -> int | None:
+        folded_question = cls._fold_text(raw_question)
+        direct_match = re.search(
+            r"\b(?:cau|question|q)\s*(?:so|number|#)?\s*(\d{1,3})\b",
+            folded_question,
+        )
+        if direct_match:
+            return int(direct_match.group(1))
+
+        word_to_number = {
+            "mot": 1,
+            "hai": 2,
+            "ba": 3,
+            "bon": 4,
+            "tu": 4,
+            "nam": 5,
+            "sau": 6,
+            "bay": 7,
+            "tam": 8,
+            "chin": 9,
+            "muoi": 10,
+        }
+        word_match = re.search(
+            r"\b(?:cau|question|q)\s*(?:so|number)?\s*("
+            + "|".join(word_to_number)
+            + r")\b",
+            folded_question,
+        )
+        if word_match:
+            return word_to_number.get(word_match.group(1))
+        return None
+
+    @classmethod
+    def _content_mentions_question_number(cls, doc: Document, question_number: int) -> bool:
+        folded_content = cls._fold_text(str(doc.page_content or "")[:4000])
+        return bool(
+            re.search(rf"\b(?:cau|question|q)\s*{question_number}\b", folded_content)
+        )
 
     @staticmethod
     def _metadata_int(doc: Document, *keys: str) -> int | None:
@@ -5543,10 +6897,20 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         return terms
 
     def _resolve_citation_limit(self, question: str) -> int:
-        if self._extract_slide_number_hint(question) is not None or QueryRouter.extract_page_number_hint(question) is not None:
+        if (
+            self._extract_slide_number_hint(question) is not None
+            or QueryRouter.extract_page_number_hint(question) is not None
+            or self._extract_question_number_hint(question) is not None
+        ):
             return 1
 
+        if self._is_document_question_count_question(self._fold_text(question)):
+            return 5
+
         folded_question = self._fold_text(question)
+        if self._is_spreadsheet_sheet_question(folded_question):
+            return 5
+
         if self._extract_sheet_hint(folded_question):
             return 2
 
@@ -5920,10 +7284,103 @@ class QuestionAnsweringService(IQuestionAnsweringService):
 
         return branches
 
+    def _collect_spreadsheet_visual_branches(self, context_docs: list[Document]) -> OrderedDict[str, list[str]]:
+        branches: OrderedDict[str, list[str]] = OrderedDict()
+        sheet_names: list[str] = []
+        headers: list[str] = []
+        row_counts: list[int] = []
+        seen_sheets: set[str] = set()
+        seen_headers: set[str] = set()
+
+        def add_sheet_name(value: object) -> None:
+            sheet_name = str(value or "").strip()
+            canonical = self._canonical_sheet_name(sheet_name)
+            if not sheet_name or not canonical or canonical in seen_sheets:
+                return
+            seen_sheets.add(canonical)
+            sheet_names.append(sheet_name)
+
+        def add_header(value: object) -> None:
+            header = self._clean_mindmap_label(str(value or ""))
+            folded_header = self._fold_text(header)
+            if not header or not folded_header or folded_header in seen_headers:
+                return
+            if self._is_technical_visual_label(header):
+                return
+            seen_headers.add(folded_header)
+            headers.append(header)
+
+        for doc in context_docs[:10]:
+            if not self._is_spreadsheet_context_doc(doc):
+                continue
+
+            metadata = doc.metadata
+            add_sheet_name(metadata.get("sheet_name") or metadata.get("sheet"))
+
+            raw_headers = metadata.get("headers")
+            if isinstance(raw_headers, list):
+                for item in raw_headers:
+                    add_header(item)
+            elif isinstance(raw_headers, str):
+                for item in re.split(r"[,;|]", raw_headers):
+                    add_header(item)
+
+            parsed_rows = self._safe_positive_int(
+                metadata.get("rows_with_data")
+                or metadata.get("row_count")
+                or metadata.get("rows")
+            )
+            if parsed_rows > 0:
+                row_counts.append(parsed_rows)
+
+            for raw_line in str(doc.page_content or "").splitlines():
+                line = raw_line.strip()
+                if not line or ":" not in line:
+                    continue
+
+                key, value = line.split(":", 1)
+                folded_key = self._fold_text(key)
+                clean_value = value.strip()
+                if not clean_value:
+                    continue
+
+                if folded_key == "sheet":
+                    add_sheet_name(clean_value)
+                elif folded_key in {"headers", "header columns", "headercolumns"}:
+                    for item in re.split(r"[,;|]", clean_value):
+                        add_header(item)
+                elif folded_key in {"rows with data", "rowswithdata", "row count", "rows"}:
+                    parsed_line_rows = self._safe_positive_int(clean_value)
+                    if parsed_line_rows > 0:
+                        row_counts.append(parsed_line_rows)
+
+        for sheet_name in sheet_names[:5]:
+            self._append_branch(branches, "Các sheet", sheet_name)
+
+        for header in headers[:6]:
+            self._append_branch(branches, "Các cột chính", header)
+
+        if row_counts:
+            self._append_branch(branches, "Quy mô dữ liệu", f"khoảng {max(row_counts)} dòng dữ liệu")
+
+        if len(sheet_names) == 1 and sheet_names[0] not in branches:
+            self._append_branch(branches, f"Sheet {sheet_names[0]}", "dữ liệu trong worksheet")
+
+        return branches
+
     def _collect_branches_from_context(self, context_docs: list[Document]) -> OrderedDict[str, list[str]]:
         branches: OrderedDict[str, list[str]] = OrderedDict()
 
+        for branch, children in self._collect_spreadsheet_visual_branches(context_docs).items():
+            for child in children or [None]:
+                self._append_branch(branches, branch, child)
+            if len(branches) >= 8:
+                return branches
+
         for doc in context_docs[:4]:
+            if self._is_spreadsheet_context_doc(doc):
+                continue
+
             for raw_line in doc.page_content.splitlines():
                 line = raw_line.strip()
                 if not line or len(line) < 3 or len(line) > 90:
@@ -5968,9 +7425,33 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         return cleaned, None
 
     @staticmethod
+    def _is_technical_visual_label(value: str) -> bool:
+        normalized = str(value or "").strip()
+        if not normalized:
+            return True
+
+        folded = QuestionAnsweringService._fold_text(normalized)
+        compact = re.sub(r"[^a-z0-9\u3040-\u30FF\u4E00-\u9FFF]+", " ", folded).strip()
+        squashed = re.sub(r"[^a-z0-9\u3040-\u30FF\u4E00-\u9FFF]+", "", folded)
+
+        if _TECHNICAL_VISUAL_LABEL_RE.match(compact) or _TECHNICAL_VISUAL_LABEL_RE.match(squashed):
+            return True
+
+        if _TECHNICAL_VISUAL_VALUE_RE.match(compact) or _TECHNICAL_VISUAL_VALUE_RE.match(squashed):
+            return True
+
+        if re.match(r"^[a-z]{1,4}\d{1,6}\s*rows\s*\d+$", compact):
+            return True
+
+        return False
+
+    @staticmethod
     def _is_noisy_visual_branch_line(line: str) -> bool:
         normalized = str(line or "").strip()
         if not normalized:
+            return True
+
+        if QuestionAnsweringService._is_technical_visual_label(normalized):
             return True
 
         if _STRUCTURAL_VISUAL_BRANCH_LINE_RE.match(normalized):
@@ -6073,7 +7554,7 @@ class QuestionAnsweringService(IQuestionAnsweringService):
                 continue
 
             branch = QuestionAnsweringService._clean_mindmap_label(raw_line.strip())
-            if branch:
+            if branch and not QuestionAnsweringService._is_noisy_visual_branch_line(branch):
                 top_level_branches.add(branch.lower())
 
         return len(top_level_branches) >= 3
@@ -6084,6 +7565,8 @@ class QuestionAnsweringService(IQuestionAnsweringService):
         text = re.sub(r"[`\[\]{}<>|()\"'*!?~^]", " ", text)
         text = re.sub(r"[/\\]+", " ", text)
         text = re.sub(r"\s+", " ", text).strip(" -:;,._\t")
+        if QuestionAnsweringService._is_technical_visual_label(text):
+            return ""
         if len(text) > 64:
             text = text[:61].rstrip() + "..."
         return text

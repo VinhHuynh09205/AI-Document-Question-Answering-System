@@ -12,7 +12,7 @@ _STRUCTURED_EXTENSIONS = {".xlsx", ".xls", ".xlsm"}
 _SECTION_EXTENSIONS = {".docx", ".md"}
 _SLIDE_EXTENSIONS = {".ppt", ".pptx"}
 _PARAGRAPH_EXTENSIONS = {".pdf", ".txt"}
-_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".tif", ".tiff"}
+_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg"}
 
 
 def _compose_structure_path(*parts: str | int | None) -> str:
@@ -751,18 +751,22 @@ class SlideBasedChunkingStrategy(IChunkingStrategy):
     @staticmethod
     def _format_block_text(block: dict) -> str:
         block_type = str(block.get("block_type") or "object").strip()
-        object_type = str(block.get("object_type") or "unknown").strip()
-        reading_order = int(block.get("reading_order", 0) or 0)
-        position = str(block.get("position") or "").strip()
         content = _normalized_text(str(block.get("content") or ""))
 
         if not content:
             return ""
 
-        prefix = f"[{reading_order}] {block_type}/{object_type}"
-        if position:
-            prefix += f" @ {position}"
-        return f"{prefix}: {content}".strip()
+        if block_type in {"table", "chart", "image_ocr", "image_vision", "speaker_notes"}:
+            label = {
+                "table": "Table",
+                "chart": "Chart",
+                "image_ocr": "Image OCR",
+                "image_vision": "Image description",
+                "speaker_notes": "Speaker notes",
+            }.get(block_type, "Slide content")
+            return f"{label}: {content}".strip()
+
+        return content
 
     @staticmethod
     def _build_slide_chunk_text(
@@ -780,15 +784,8 @@ class SlideBasedChunkingStrategy(IChunkingStrategy):
         file_name = str(document.metadata.get("file_name") or document.metadata.get("document_name") or "")
         lines = [
             f"File: {file_name}" if file_name else "File: unknown",
-            f"Slide: {slide_number}",
+            f"Slide {slide_number}" if slide_number > 0 else "Slide",
             f"Title: {slide_title}",
-            f"Layout: {slide_layout}" if slide_layout else "",
-            (
-                f"Reading Order: {min(reading_orders)}-{max(reading_orders)}"
-                if reading_orders
-                else "Reading Order: n/a"
-            ),
-            "Slide Blocks:",
         ]
         lines.extend(f"- {line}" for line in block_lines)
         return _normalized_text("\n".join(line for line in lines if line))

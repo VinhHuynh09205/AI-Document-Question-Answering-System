@@ -94,6 +94,9 @@ class AuthService(IAuthService):
 
         return self._create_token(user.username, role=user.role)
 
+    def get_user(self, username: str) -> UserAccount | None:
+        return self._user_repository.get_by_username(username.strip())
+
     def forgot_password(self, username: str, redirect_uri: str) -> ForgotPasswordResult:
         generic_message = "Nếu tài khoản tồn tại, bạn sẽ nhận được liên kết đặt lại mật khẩu."
         normalized_username = username.strip()

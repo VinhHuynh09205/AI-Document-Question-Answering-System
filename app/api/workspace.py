@@ -17,6 +17,7 @@ from fastapi.responses import StreamingResponse
 from app.core.config import Settings
 from app.core.dependencies import (
     get_app_settings,
+    get_ingestion_service,
     get_question_answering_service,
     get_rate_limiter,
     get_runtime_metrics,
@@ -46,11 +47,13 @@ from app.models.schemas import (
 from app.services.interfaces.question_answering_service import IQuestionAnsweringService
 from app.services.interfaces.rate_limiter import IRateLimiter
 from app.services.interfaces.runtime_metrics import IRuntimeMetrics
+from app.services.interfaces.document_ingestion_service import IDocumentIngestionService
 from app.services.interfaces.upload_job_service import IUploadJobService
 from app.repositories.interfaces.vector_store_repository import IVectorStoreRepository
 from app.services.interfaces.workspace_service import IWorkspaceService
 from app.services.qa_constants import FALLBACK_ANSWER
 from app.utils.file_hash import compute_file_sha256
+from starlette.concurrency import run_in_threadpool
 
 
 router = APIRouter(prefix="/workspace", tags=["workspace"])
@@ -72,7 +75,7 @@ _DOC_CROSS_ALL_RE = re.compile(
     re.IGNORECASE,
 )
 _SCOPE_SENSITIVE_RE = re.compile(
-    r"\b(tom\s*tat|summary|tong\s*quan|phan\s*tich|so\s*sanh|trich\s*xuat|mindmap|so\s*do|"
+    r"\b(tom\s*tat|summary|tong\s*quan|noi\s*dung\s*chinh|phan\s*tich|so\s*sanh|trich\s*xuat|mindmap|so\s*do|"
     r"bieu\s*do|diagram|chart|giai\s*thich|dich|ket\s*luan|liet\s*ke|danh\s*gia)\b",
     re.IGNORECASE,
 )
@@ -279,6 +282,112 @@ def _build_metadata_filter(
         metadata_filter["source"] = source_paths
 
     return metadata_filter
+
+
+def _extract_source_filter_values(metadata_filter: dict[str, str | list[str]]) -> list[str]:
+    raw_source = metadata_filter.get("source")
+    if isinstance(raw_source, list):
+        return [
+            str(source).strip()
+            for source in raw_source
+            if str(source).strip()
+        ]
+    if isinstance(raw_source, str) and raw_source.strip():
+        return [raw_source.strip()]
+    return []
+
+
+def _documents_matching_metadata_scope(
+    documents: list[StoredDocument],
+    metadata_filter: dict[str, str | list[str]],
+) -> list[StoredDocument]:
+    source_values = set(_extract_source_filter_values(metadata_filter))
+    if not source_values:
+        return list(documents)
+
+    return [
+        document
+        for document in documents
+        if str(document.stored_path or "").strip() in source_values
+    ]
+
+
+def _ensure_workspace_scope_indexed(
+    *,
+    username: str,
+    chat_id: str,
+    metadata_filter: dict[str, str | list[str]],
+    workspace_service: IWorkspaceService,
+    vector_store_repository: IVectorStoreRepository,
+    ingestion_service: IDocumentIngestionService,
+) -> int:
+    workspace_documents = workspace_service.list_documents(username=username, chat_id=chat_id)
+    scoped_documents = _documents_matching_metadata_scope(workspace_documents, metadata_filter)
+    if not scoped_documents:
+        return 0
+
+    missing_paths: list[Path] = []
+    seen_paths: set[str] = set()
+
+    for document in scoped_documents:
+        raw_path = str(document.stored_path or "").strip()
+        if not raw_path or raw_path in seen_paths:
+            continue
+        seen_paths.add(raw_path)
+
+        index_filter = {
+            "owner": username,
+            "chat_id": chat_id,
+            "source": raw_path,
+        }
+        try:
+            indexed_chunks = vector_store_repository.list_documents(index_filter, limit=1)
+        except Exception:
+            logger.exception(
+                "workspace_scope_index_check_failed username=%s chat_id=%s path=%s",
+                username,
+                chat_id,
+                raw_path,
+            )
+            indexed_chunks = []
+
+        if indexed_chunks:
+            continue
+
+        path = Path(raw_path)
+        if not path.exists():
+            logger.warning(
+                "workspace_scope_reindex_missing_file username=%s chat_id=%s document_id=%s path=%s",
+                username,
+                chat_id,
+                document.document_id,
+                raw_path,
+            )
+            continue
+
+        missing_paths.append(path)
+
+    if not missing_paths:
+        return 0
+
+    logger.warning(
+        "workspace_scope_reindex_started username=%s chat_id=%s files=%s",
+        username,
+        chat_id,
+        len(missing_paths),
+    )
+    result = ingestion_service.ingest(
+        missing_paths,
+        {"owner": username, "chat_id": chat_id},
+    )
+    logger.info(
+        "workspace_scope_reindex_completed username=%s chat_id=%s files=%s chunks=%s",
+        username,
+        chat_id,
+        len(missing_paths),
+        result.chunks_indexed,
+    )
+    return result.chunks_indexed
 
 
 def _resolve_selected_documents_from_ids(
@@ -1056,8 +1165,10 @@ def ask_in_chat(
     request: Request,
     payload: AskRequest,
     username: str = Depends(get_workspace_username),
+    ingestion_service: IDocumentIngestionService = Depends(get_ingestion_service),
     question_answering_service: IQuestionAnsweringService = Depends(get_question_answering_service),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
+    vector_store_repository: IVectorStoreRepository = Depends(get_vector_store_repository),
     rate_limiter: IRateLimiter = Depends(get_rate_limiter),
     runtime_metrics: IRuntimeMetrics = Depends(get_runtime_metrics),
 ) -> AskResponse:
@@ -1099,6 +1210,15 @@ def ask_in_chat(
             content=routing.clarification_answer,
         )
         return AskResponse(answer=routing.clarification_answer, sources=[])
+
+    _ensure_workspace_scope_indexed(
+        username=username,
+        chat_id=chat_id,
+        metadata_filter=routing.metadata_filter,
+        workspace_service=workspace_service,
+        vector_store_repository=vector_store_repository,
+        ingestion_service=ingestion_service,
+    )
 
     # When multiple specific documents are selected, query each separately so
     # that every document is represented equally in the final answer,
@@ -1164,8 +1284,10 @@ async def ask_in_chat_stream(
     request: Request,
     payload: AskRequest,
     username: str = Depends(get_workspace_username),
+    ingestion_service: IDocumentIngestionService = Depends(get_ingestion_service),
     question_answering_service: IQuestionAnsweringService = Depends(get_question_answering_service),
     workspace_service: IWorkspaceService = Depends(get_workspace_service),
+    vector_store_repository: IVectorStoreRepository = Depends(get_vector_store_repository),
     rate_limiter: IRateLimiter = Depends(get_rate_limiter),
     runtime_metrics: IRuntimeMetrics = Depends(get_runtime_metrics),
 ) -> StreamingResponse:
@@ -1217,6 +1339,16 @@ async def ask_in_chat_stream(
             media_type="text/event-stream",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
+
+    await run_in_threadpool(
+        _ensure_workspace_scope_indexed,
+        username=username,
+        chat_id=chat_id,
+        metadata_filter=routing.metadata_filter,
+        workspace_service=workspace_service,
+        vector_store_repository=vector_store_repository,
+        ingestion_service=ingestion_service,
+    )
 
     async def _event_generator() -> AsyncIterator[str]:
         full_answer_parts: list[str] = []

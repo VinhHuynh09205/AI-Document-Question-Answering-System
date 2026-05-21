@@ -1,0 +1,17 @@
+{
+  "total_files": 43,
+  "total_questions": 450,
+  "full_correct": 252,
+  "partial_correct": 134,
+  "fail": 64,
+  "full_accuracy": 0.56,
+  "accepted_count": 386,
+  "accepted_rate": 0.8578,
+  "retrieval_correct": 377,
+  "retrieval_rate": 0.8378,
+  "citation_correct": 377,
+  "citation_rate": 0.8378,
+  "hallucination_count": 0,
+  "hallucination_rate": 0.0,
+  "mean_latency_ms": 2276.23
+}

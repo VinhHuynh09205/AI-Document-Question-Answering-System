@@ -608,25 +608,26 @@ class PptxDocumentLoader(IDocumentLoader):
     ) -> str:
         lines: list[str] = [
             f"File: {file_name}",
-            f"Slide: {slide_index}",
+            f"Slide {slide_index}",
             f"Title: {slide_title}" if slide_title else "",
-            f"Layout: {slide_layout}" if slide_layout else "",
-            "Blocks:",
+            "Content:",
         ]
 
         for block in blocks:
-            reading_order = int(block.get("reading_order", 0) or 0)
             block_type = str(block.get("block_type") or "object")
-            object_type = str(block.get("object_type") or "unknown")
-            position = str(block.get("position") or "")
             content = str(block.get("content") or "").strip()
             if not content:
                 continue
 
-            prefix = f"- [{reading_order}] {block_type}/{object_type}"
-            if position:
-                prefix += f" @ {position}"
-            lines.append(prefix)
+            if block_type in {"table", "chart", "image_ocr", "image_vision", "speaker_notes"}:
+                label = {
+                    "table": "Table",
+                    "chart": "Chart",
+                    "image_ocr": "Image OCR",
+                    "image_vision": "Image description",
+                    "speaker_notes": "Speaker notes",
+                }.get(block_type, "Slide content")
+                lines.append(f"- {label}:")
 
             for content_line in content.splitlines():
                 compact = str(content_line).strip()

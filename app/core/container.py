@@ -40,6 +40,7 @@ from app.utils.filesystem import ensure_directory
 
 @dataclass(slots=True)
 class AppContainer:
+    settings: Settings
     ingestion_service: IDocumentIngestionService
     question_answering_service: IQuestionAnsweringService
     auth_service: IAuthService
@@ -182,12 +183,14 @@ def build_container(settings: Settings) -> AppContainer:
         user_repository=user_repository,
         admin_repository=admin_repository,
         vector_store_repository=vector_store_repository,
+        workspace_service=workspace_service,
         runtime_metrics=runtime_metrics,
         settings=settings,
         hash_password_fn=AuthService._hash_password,
     )
 
     return AppContainer(
+        settings=settings,
         ingestion_service=ingestion_service,
         question_answering_service=question_answering_service,
         auth_service=auth_service,

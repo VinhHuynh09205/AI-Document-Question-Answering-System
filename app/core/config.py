@@ -17,11 +17,6 @@ _UPLOAD_EXTENSION_ALLOWLIST = {
     ".png",
     ".jpg",
     ".jpeg",
-    ".webp",
-    ".bmp",
-    ".tif",
-    ".tiff",
-    ".gif",
 }
 
 
@@ -56,7 +51,7 @@ class Settings(BaseSettings):
     pg_user: str = "aichatbox"
     pg_password: str = "aichatbox"
     users_file_path: str = "data/users.json"
-    supported_upload_extensions: str = ".pdf,.docx,.xlsx,.xls,.pptx,.txt,.md,.png,.jpg,.jpeg,.webp,.bmp,.tif,.tiff,.gif"
+    supported_upload_extensions: str = ".pdf,.docx,.xlsx,.xls,.pptx,.txt,.md,.png,.jpg,.jpeg"
     replace_existing_documents_on_upload: bool = True
     allow_duplicate_keep_both_uploads: bool = True
 
@@ -140,6 +135,7 @@ class Settings(BaseSettings):
     upload_job_max_retries: int = 3
     upload_job_worker_poll_seconds: float = 0.8
     upload_job_stale_processing_seconds: int = 120
+    startup_rebuild_max_documents: int = 40
     log_level: str = "INFO"
     rate_limit_window_seconds: int = 60
     login_rate_limit_per_window: int = 20

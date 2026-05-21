@@ -11,9 +11,23 @@ _PAGE_NUMBER_HINT_RE = re.compile(
     re.IGNORECASE,
 )
 _SHEET_HINT_RE = re.compile(r"\b(sheet\s*[a-z0-9_]+)\b", re.IGNORECASE)
+_GENERIC_SHEET_HINT_TOKENS = {
+    "bao",
+    "co",
+    "count",
+    "danh",
+    "gi",
+    "list",
+    "may",
+    "nao",
+    "nhieu",
+    "sach",
+    "ten",
+    "va",
+}
 _RANGE_HINT_RE = re.compile(r"\b([A-Z]{1,3}\d{1,6}:[A-Z]{1,3}\d{1,6})\b")
 _FILENAME_HINT_RE = re.compile(
-    r"\b([A-Za-z0-9][A-Za-z0-9._ -]{0,120}\.(?:pdf|docx|pptx|xlsx|xls|txt|md|png|jpg|jpeg|webp|bmp|tif|tiff|gif))\b",
+    r"\b([A-Za-z0-9][A-Za-z0-9._ -]{0,120}\.(?:pdf|docx|pptx|xlsx|xls|txt|md|png|jpg|jpeg))\b",
     re.IGNORECASE,
 )
 _TABLE_CALC_HINT_RE = re.compile(
@@ -206,7 +220,18 @@ class QueryRouter:
         match = _SHEET_HINT_RE.search(str(question or ""))
         if match is None:
             return ""
-        return match.group(1).strip().split(None, 1)[1] if " " in match.group(1).strip() else ""
+        raw_hint = match.group(1).strip()
+        if " " in raw_hint:
+            candidate = raw_hint.split(None, 1)[1].strip()
+        else:
+            candidate = raw_hint[5:].strip()
+
+        folded_candidate = QueryRouter.fold_text(candidate)
+        if not folded_candidate or folded_candidate in _GENERIC_SHEET_HINT_TOKENS:
+            return ""
+        if folded_candidate.isdigit():
+            return f"Sheet{folded_candidate}"
+        return candidate
 
     @staticmethod
     def extract_range_hint(question: str) -> str:
@@ -258,7 +283,7 @@ class QueryRouter:
             hints.update({"pdf", "docx", "md", "txt"})
 
         if re.search(r"\b(image|figure|diagram|screenshot|chart|anh|hinh|scan|ocr)\b", folded_question):
-            hints.update({"png", "jpg", "jpeg", "webp", "bmp", "pdf", "pptx", "docx"})
+            hints.update({"png", "jpg", "jpeg", "pdf", "pptx", "docx"})
 
         filename_hint = cls.extract_filename_hint(question)
         if filename_hint and "." in filename_hint:

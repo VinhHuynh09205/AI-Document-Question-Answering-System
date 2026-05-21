@@ -8,6 +8,18 @@ from app.core.container import build_container
 from main import app
 
 
+def test_supported_upload_extensions_limit_standalone_images_to_png_jpg_jpeg() -> None:
+    settings = Settings(
+        supported_upload_extensions=".pdf,.png,.jpg,.jpeg,.webp,.bmp,.gif,.tif,.tiff",
+        openai_api_key="",
+        google_api_key="",
+        groq_api_key="",
+        local_semantic_embeddings=False,
+    )
+
+    assert settings.get_supported_upload_extensions() == {".pdf", ".png", ".jpg", ".jpeg"}
+
+
 def test_upload_accepts_markdown_and_text() -> None:
     with TemporaryDirectory() as tmp_dir:
         base_path = Path(tmp_dir)

@@ -1,0 +1,412 @@
+[
+  {
+    "file": "AI Document Question Answering System.pptx",
+    "document_id": "a0103586229a4c419e4cd7124f836de1",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/70ca26fa595040e9b83a3abceda94891_AI Document Question Answering System.pptx",
+    "chunks": 14,
+    "content_types": {
+      "slide_chunk": 10,
+      "slide_block_chunk": 4
+    },
+    "pages_sheets_slides_sample": [
+      "1",
+      "10",
+      "11",
+      "12",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "sample": "File: 70ca26fa595040e9b83a3abceda94891_AI Document Question Answering System.pptx Slide: 1 Title: Slide 1 Layout: Blank Reading Order: 4-7 Slide Blocks: - [4] textbox/text_box @ x=3043085,y=1287313,w=3922424,h=575310: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH - [5] textbox/text_box @ x=822104,y=2005498,w=8398108,h=2095500: ĐỀ TÀI: AI Document Question Answering System - [6] textbox/text_box @ x=1275945,y=3781911,w=7596306,h=561975: Giảng viên hướng dẫn: Nguyễn Văn Huy - [7] textbox/text_box @ x=1275945,y=4505811,w=8329223,h=561975: Sinh viên thực hiện: Huỳnh Ngọc Quang Vinh\n---\nFile: 70ca26fa595040e9b83a3abceda94891_AI Document Question Answering System.pptx Slide: 2 Title: Slide 2 Layout: Blank Reading Order: 3-4 Slide Blocks: - [3] textbox/text_box @ x=3789681,y=300037,w=2326649,h=685800: Nội dung - [4] bullet/text_box @ x=253943,y=1071627,w=5862388,h=4848225: Giới thiệu đề tài Vấn đề thực tế Giải pháp đề xuất Kiến trúc tổng thể hệ thống Chức năng chính Pipeline xử lý tài liệu Luồng hỏi đáp AI/RAG Giao diện hệ thống/demo Kết quả benchmark và Kết luận\n---\nFile: 70ca26fa595040e9b83a3abceda94891_AI Document Question Answering System.pptx Slide: 3 Title: Slide 3 Layout: Blank Reading Order: 3-5 Slide Blocks: - [3] textbox/text_box @ x=212475,y=206829,w=6692068,h=685800: 1. Giới thiệu đề tài - [5] bullet/text_box @ x=437398,y=1795305,w=9324957,h=5289550: AI Document Question Answering System Hệ thống hỏi đáp tài liệu AI Hỗ trợ upload nhiều định dạng Quản lý tài liệu theo workspace Hỏi đáp bằng ngôn ngữ tự nhiên Trả lời dựa trên tài liệu Hỗ trợ truy xuất thông tin nhanh"
+  },
+  {
+    "file": "bai_trinh_chieu_mau_thu_vien_thong_minh.pptx",
+    "document_id": "7296745183c743879b915fa016aa67b5",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/53044cca9cb0410c8388504e6b2bd315_bai_trinh_chieu_mau_thu_vien_thong_minh.pptx",
+    "chunks": 25,
+    "content_types": {
+      "slide_block_chunk": 25
+    },
+    "pages_sheets_slides_sample": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7"
+    ],
+    "sample": "File: 53044cca9cb0410c8388504e6b2bd315_bai_trinh_chieu_mau_thu_vien_thong_minh.pptx Slide: 1 Title: Slide 1 Layout: DEFAULT Reading Order: 1-5 Slide Blocks: - [1] textbox/auto_shape @ x=685800,y=640080,w=3840480,h=256032: BÀI TRÌNH CHIẾU MẪU - [3] textbox/auto_shape @ x=685800,y=1097280,w=6583680,h=1417320: Thư viện thông minh cho trường học hiện đại - [5] textbox/auto_shape @ x=8366760,y=2148840,w=1920240,h=822960: LIBRARY\n---\nFile: 53044cca9cb0410c8388504e6b2bd315_bai_trinh_chieu_mau_thu_vien_thong_minh.pptx Slide: 1 Title: Slide 1 Layout: DEFAULT Reading Order: 5-10 Slide Blocks: - [5] textbox/auto_shape @ x=8366760,y=2148840,w=1920240,h=822960: LIBRARY - [6] textbox/auto_shape @ x=713232,y=2880360,w=6217920,h=868680: Một bộ slide có nội dung dài vừa phải, chủ đề riêng biệt so với PDF, Markdown và hình ảnh. Dùng để kiểm thử khả năng đọc PPTX, tách nội dung theo slide, nhận diện tiêu đề và xử lý đoạn văn. - [10] textbox/auto_shape @ x=832104,y=5202936,w=1225296,h=146304: Dữ liệu sách\n---\nFile: 53044cca9cb0410c8388504e6b2bd315_bai_trinh_chieu_mau_thu_vien_thong_minh.pptx Slide: 1 Title: Slide 1 Layout: DEFAULT Reading Order: 10-13 Slide Blocks: - [10] textbox/auto_shape @ x=832104,y=5202936,w=1225296,h=146304: Dữ liệu sách - [11] textbox/auto_shape @ x=2450592,y=5202936,w=1499616,h=146304: Tìm kiếm nhanh - [12] textbox/auto_shape @ x=4370832,y=5202936,w=1499616,h=146304: Gợi ý học tập - [13] textbox/auto_shape @ x=9921240,y=6446520,w=1645920,h=182880: File PPTX mẫu • 1"
+  },
+  {
+    "file": "bao_cao_an_toan_du_lieu_ca_nhan.docx",
+    "document_id": "12098a3a8bd74e039d1fd85d308a1cb9",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/ea8b9afa398e44b6883ad24f67e29c17_bao_cao_an_toan_du_lieu_ca_nhan.docx",
+    "chunks": 6,
+    "content_types": {
+      "docx_page": 6
+    },
+    "pages_sheets_slides_sample": [
+      "1"
+    ],
+    "sample": "BÁO CÁO NGẮN AN TOÀN DỮ LIỆU CÁ NHÂN TRONG ỨNG DỤNG SỐ Tài liệu mẫu này trình bày một vấn đề xã hội - công nghệ đang được quan tâm: bảo vệ dữ liệu cá nhân khi sử dụng các ứng dụng trực tuyến. Nội dung được tạo ngẫu nhiên nhằm phục vụ mục đích kiểm thử định dạng DOCX.\n---\nKhi người dùng đăng ký tài khoản, mua sắm, học tập hoặc làm việc trên nền tảng số, nhiều loại dữ liệu như họ tên, số điện thoại, vị trí, lịch sử tìm kiếm và hành vi sử dụng được thu thập. Nếu dữ liệu này không được quản lý tốt, người dùng có thể gặp rủi ro như lộ thông tin, bị giả mạo hoặc bị theo dõi trái phép.\n---\nMột số nguyên nhân thường gặp gồm: người dùng đặt mật khẩu yếu, hệ thống thiếu mã hóa, nhân viên nội bộ truy cập dữ liệu không đúng quyền, và doanh nghiệp chưa có quy trình xóa hoặc ẩn danh dữ liệu khi không còn cần thiết."
+  },
+  {
+    "file": "bao_cao_mau_chuyen_doi_so_giao_duc.pdf",
+    "document_id": "68206ebb170d47a3936c3f84daec87ee",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/a2995087d96f432687ec20bcc040f16d_bao_cao_mau_chuyen_doi_so_giao_duc.pdf",
+    "chunks": 15,
+    "content_types": {
+      "pdf_page": 15
+    },
+    "pages_sheets_slides_sample": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "sample": "File: a2995087d96f432687ec20bcc040f16d_bao_cao_mau_chuyen_doi_so_giao_duc.pdf Page: 1 Text: BÁO CÁO MẪU: CHUYỂN ĐỔI SỐ TRONG  GIÁO DỤC Tài liệu minh họa nội dung dài, có nhiều mục, bảng số liệu giả lập và khuyến nghị triển khai. 1. Bối cảnh chung Chuyển đổi số trong giáo dục không chỉ là việc đưa máy tính hoặc phần mềm vào lớp học. Đây là quá trình thay đổi toàn diện cách nhà trường quản lý dữ liệu, thiết kế bài giảng, đánh giá kết quả học tập và kết nối giữa giáo viên, học sinh, phụ huynh. Trong môi trường học tập hiện đại, dữ liệu trở thành tài sản quan trọng giúp nhà trường ra quyết định nhanh hơn và chính xác hơn.\n---\nMột hệ thống giáo dục số thường bao gồm nền tảng quản lý học tập, kho học liệu điện tử, hệ thống điểm danh, công cụ kiểm tra trực tuyến, báo cáo tiến độ học tập và các kênh trao đổi nội bộ. Khi các thành phần này được kết nối tốt, giáo viên có thể giảm thời gian làm việc thủ công, còn học sinh có thêm nhiều cách tiếp cận kiến thức phù hợp với năng lực cá nhân. Tuy nhiên, chuyển đổi số không thể thành công nếu chỉ tập trung vào công nghệ. Nhà trường cần thay đổi quy trình vận hành, đào tạo con người, chuẩn hóa dữ liệu và xây dựng văn hóa sử dụng công cụ số một cách có trách nhiệm. 2. Mục tiêu triển khai\n---\n2. Mục tiêu triển khai Mục tiêu đầu tiên là tăng hiệu quả quản lý. Thay vì lưu trữ hồ sơ trên giấy hoặc nhiều file rời rạc, nhà trường có thể xây dựng một hệ thống dữ liệu tập trung, cho phép truy xuất thông tin nhanh chóng. Điều này đặc biệt quan trọng khi cần thống kê điểm số, tỷ lệ chuyên cần, tình trạng học sinh hoặc báo cáo theo từng học kỳ. Mục tiêu thứ hai là nâng cao chất lượng dạy và học. Giáo viên có thể sử dụng bài giảng tương tác, ngân hàng câu hỏi, video ngắn, bài tập tự động chấm điểm và phân tích kết quả học tập. Học sinh cũng có thể học lại nội dung chưa hiểu, làm bài luyện tập theo tốc độ cá nhân và nhận phản hồi nhanh hơn."
+  },
+  {
+    "file": "bao_cao_quan_ly_rac_thai_nhua.pdf",
+    "document_id": "57f6564c12724e90954a6fe419432793",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/6dba050012254d23b2e12cae2756b44d_bao_cao_quan_ly_rac_thai_nhua.pdf",
+    "chunks": 3,
+    "content_types": {
+      "pdf_page": 3
+    },
+    "pages_sheets_slides_sample": [
+      "1"
+    ],
+    "sample": "File: 6dba050012254d23b2e12cae2756b44d_bao_cao_quan_ly_rac_thai_nhua.pdf Page: 1 Text: BÁO CÁO NGẮN: QUẢN LÝ RÁC THẢI NHỰA TẠI KHU  DÂN CƯ Tài liệu PDF mẫu này trình bày một vấn đề môi trường khác với file DOCX: cách quản lý rác thải nhựa trong khu dân cư. Nội dung được tạo ngẫu nhiên để dùng thử khả năng đọc file PDF. 1. Thực trạng Rác thải nhựa xuất hiện nhiều trong sinh hoạt hằng ngày, đặc biệt là túi nilon, chai nước, hộp đựng thức ăn và bao bì dùng một lần. Khi không được phân loại, lượng rác này dễ bị chôn lấp hoặc trôi ra kênh rạch, gây ô nhiễm đất và nước. 2. Nguyên nhân Nguyên nhân phổ biến là thói quen sử dụng sản phẩm tiện lợi, thiếu điểm thu gom phân loại, chi phí tái chế chưa hấp dẫn và việc tuyên truyền trong cộng đồng chưa liên tục. 3. Hậu quả\n---\n3. Hậu quả Nhựa khó phân hủy, có thể tồn tại trong môi trường rất lâu. Khi bị phân rã thành vi nhựa, chúng có thể đi vào nguồn nước và chuỗi thức ăn, làm tăng nguy cơ ảnh hưởng đến sức khỏe con người và hệ sinh thái. 4. Kế hoạch hành động đề xuất Hoạt động Cách thực hiện Kết quả mong đợi Phân loại tại nguồn Đặt thùng riêng cho nhựa, giấy, Giảm rác lẫn tạp chất.  rác hữu cơ. Ngày đổi rác lấy quà Người dân mang chai nhựa để Tăng động lực tham gia.  đổi cây xanh hoặc nhu yếu  phẩm. Giảm nhựa dùng một Khuyến khích bình nước cá nhân, Giảm lượng rác phát sinh.  lần túi vải, hộp tái sử dụng. Theo dõi số liệu Ghi nhận khối lượng rác nhựa Có cơ sở đánh giá hiệu quả.  thu gom mỗi tháng. 5. Kết luận\n---\n5. Kết luận Quản lý rác thải nhựa cần bắt đầu từ những hành động nhỏ nhưng đều đặn. Khi khu dân cư có quy trình phân loại rõ ràng, điểm thu gom thuận tiện và hoạt động truyền thông phù hợp, lượng rác nhựa thải ra môi trường có thể giảm đáng kể."
+  },
+  {
+    "file": "content_summary.md",
+    "document_id": "37c002cabb4e4a5ea328230bdbf64335",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/0a0d870eb77c416492a024a7b05b0474_content_summary.md",
+    "chunks": 72,
+    "content_types": {
+      "": 72
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "Dimensions: 1086x1448, Mode: RGB  ---\n---\nDimensions: 1448x1086, Mode: RGB  ---\n---\nTotal paragraphs: 346 - BỘ GIAO THÔNG VẬN TẢI TRƯỜNG ĐẠI HỌC VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH VIỆN CÔNG NGHỆ THÔNG TIN VÀ ĐIỆN, ĐIỆN TỬ"
+  },
+  {
+    "file": "file_excel_mau_song_xanh.xlsx",
+    "document_id": "4bda36acca534ac7bd2a7b0638eea821",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/11d2f2fbf956447396404b97e5ca1c97_file_excel_mau_song_xanh.xlsx",
+    "chunks": 41,
+    "content_types": {
+      "spreadsheet_sheet_summary": 2,
+      "spreadsheet_table_chunk": 39
+    },
+    "pages_sheets_slides_sample": [
+      "Du_lieu_chien_dich",
+      "Tong_quan"
+    ],
+    "sample": "File: 11d2f2fbf956447396404b97e5ca1c97_file_excel_mau_song_xanh.xlsx Sheet: Du_lieu_chien_dich Sheet Index: 1 Hidden Sheet: False Header Columns: Ngày, Khu vực, Hoạt động, Người phụ trách, Số người tham gia, Rác tái chế (kg), Chi phí (VND), Mức hài lòng, Ghi chú, Chi phí/người, Kg/người, Đánh giá Header Units: Rác tái chế (kg)=kg, Chi phí (VND)=VND Rows With Data: 32 Tables/Ranges: 1 Detected Tables/Ranges: - used_range_1 [used_range] A1:L32: rows=30 Row Preview: - Row 1: DỮ LIỆU CHIẾN DỊCH SỐNG XANH TRONG TRƯỜNG HỌC - Row 2: Ngày; Khu vực; Hoạt động; Người phụ trách; Số người tham gia; Rác tái chế (kg); Chi phí (VND); Mức hài lòng - Row 3: 2026-05-01 00:00:00; Ký túc xá; Đổi rác lấy cây; An; 32; 4.1; 450000; 4.6 - Row 4: 2026-05-02 00:00:00; Căn tin; Thu gom rác tái chế; Minh; 87; 12.9; 300000; 3.7 - Row 5: 2026-05-03 00:00:00; Thư viện; Workshop sống xanh; Huy; 95; 12.2; 450000; 4.1 - \n---\nFile: 11d2f2fbf956447396404b97e5ca1c97_file_excel_mau_song_xanh.xlsx Sheet: Du_lieu_chien_dich Sheet Index: 1 Hidden Sheet: False Table: used_range_1 Table Type: used_range Range: A1:L32 Chunk Row Range: 3:3 Headers: Ngày, Khu vực, Hoạt động, Người phụ trách, Số người tham gia, Rác tái chế (kg), Chi phí (VND), Mức hài lòng, Ghi chú, Chi phí/người, Kg/người, Đánh giá Header Units: Rác tái chế (kg)=kg, Chi phí (VND)=VND Structured Rows: - Row 3 [A3:L3]: Ngày (A3): 2026-05-01 00:00:00; Khu vực (B3): Ký túc xá; Hoạt động (C3): Đổi rác lấy cây; Người phụ trách (D3): An; Số người tham gia (E3): 32; Rác tái chế (kg) (F3): 4.1; Chi phí (VND) (G3): 450000; Mức hài lòng (H3): 4.6; Ghi chú (I3): Hiệu quả cao; Chi phí/người (J3): 14062.5 [formula==G3/E3]; Kg/người (K3): 0.128125 [formula==F3/E3]; Đánh giá (L3): Rất tốt [formula==IF(H3>=4.5,\"Rất tốt\",IF(H3>=4,\"Tốt\",\"Cần cải thiện\"))]\n---\nFile: 11d2f2fbf956447396404b97e5ca1c97_file_excel_mau_song_xanh.xlsx Sheet: Du_lieu_chien_dich Sheet Index: 1 Hidden Sheet: False Table: used_range_1 Table Type: used_range Range: A1:L32 Chunk Row Range: 4:4 Headers: Ngày, Khu vực, Hoạt động, Người phụ trách, Số người tham gia, Rác tái chế (kg), Chi phí (VND), Mức hài lòng, Ghi chú, Chi phí/người, Kg/người, Đánh giá Header Units: Rác tái chế (kg)=kg, Chi phí (VND)=VND Structured Rows: - Row 4 [A4:L4]: Ngày (A4): 2026-05-02 00:00:00; Khu vực (B4): Căn tin; Hoạt động (C4): Thu gom rác tái chế; Người phụ trách (D4): Minh; Số người tham gia (E4): 87; Rác tái chế (kg) (F4): 12.9; Chi phí (VND) (G4): 300000; Mức hài lòng (H4): 3.7; Ghi chú (I4): Nên tổ chức lại; Chi phí/người (J4): 3448.2758620689656 [formula==G4/E4]; Kg/người (K4): 0.1482758620689655 [formula==F4/E4]; Đánh giá (L4): Cần cải thiện [formula==IF(H4>=4.5,\"Rất tốt\",IF(H4>=4,\"Tốt\","
+  },
+  {
+    "file": "infographic_mau_an_toan_mang.png",
+    "document_id": "9c486b0e44c74d9c93f9b0df84eeb863",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/80895512cbb04522ae16053cf3708dec_infographic_mau_an_toan_mang.png",
+    "chunks": 1,
+    "content_types": {
+      "image_document": 1
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "File: 80895512cbb04522ae16053cf3708dec_infographic_mau_an_toan_mang.png Type: image OCR Text: INFOGRAPHIC MAU An toan mang g cho sinh vien Noi dung minh hoa dai hon, dung de kiem thu nhan dien chu trong anh PNG. 1. Mat khau manh 2. Xac thuc hai lop 1 2 Khong dung ngay sinh, so dien thoai Bat xac thuc hai lop cho email, mang xa hoac ten ca nhan lam mat khau. Nen hoi, vi dien tu va tai khoan hoc tap. Khi dung cum tu dai, c6 chu hoa, chu mat khau bi lo, lop xac thuc b6 sung giúp thuong, so va ky tu dac biet. Moi tai giam nguy co bi chiem quyen. khoan quan trong nen c6 mot mat khau riena. 3. canh giac lien ket la 4. Sao luu dt lieu 3 4 Khong bam vao lién ket nhan tur tin nhan Tai liéu hoc tap, d6 án va anh quan trong khong ro nguon goc. Hay kiem tra tén nen duqc sao luu trén 6 cung hoac dich mién, loi chinh ta, yeu cau dang nhap vu dam may dang tin cay. Sao luu giup bat thuong va cac loi hua"
+  },
+  {
+    "file": "ke_hoach_mau_du_lich_da_lat.md",
+    "document_id": "969d35bfba8a4c7792e6af7f3a38299f",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/eae05f8d24524d31967636495934d242_ke_hoach_mau_du_lich_da_lat.md",
+    "chunks": 12,
+    "content_types": {
+      "": 12
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "Tài liệu này là một bản kế hoạch mẫu có nội dung dài hơn, dùng để kiểm tra khả năng đọc file Markdown trong hệ thống AI document chat. Nội dung không đại diện cho lịch trình thực tế bắt buộc, mà chỉ là ví dụ minh họa với nhiều phần, nhiều tiêu đề, danh sách và bảng.\n---\nChuyến đi được thiết kế cho một nhóm bạn trẻ muốn nghỉ ngơi sau thời gian học tập và làm việc căng thẳng. Mục tiêu chính không phải là đi thật nhiều điểm, mà là có đủ thời gian tận hưởng không khí mát mẻ, ăn uống thoải mái, chụp ảnh và trải nghiệm một vài hoạt động nhẹ nhàng. Lịch trình ưu tiên sự cân bằng giữa tham quan, nghỉ ngơi và linh hoạt thay đổi theo thời tiết.  Một mục tiêu khác là kiểm soát chi phí. Nhóm giả định gồm 4 người, di chuyển bằng xe khách từ Thành phố Hồ Chí Minh đến Đà Lạt, thuê xe máy trong nội thành và ở homestay gần trung tâm. Cách tổ chức này giúp giảm chi phí nhưng vẫn giữ được sự chủ động trong lịch trình.\n---\n- Không xếp quá nhiều điểm trong cùng một ngày. - Ưu tiên điểm gần nhau để giảm thời gian di chuyển. - Luôn có phương án dự phòng nếu trời mưa. - Bữa ăn nên xen kẽ giữa món địa phương và quán dễ tìm. - Buổi tối không nên đi quá xa trung tâm nếu nhóm không quen đường."
+  },
+  {
+    "file": "nhat_ky_mau_vuon_rau_do_thi.txt",
+    "document_id": "480da3e1b69541fa81aff470ca174a99",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/d20eae79e1cd492e875183a1fa688294_nhat_ky_mau_vuon_rau_do_thi.txt",
+    "chunks": 11,
+    "content_types": {
+      "": 11
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "NHẬT KÝ MẪU: DỰ ÁN VƯỜN RAU ĐÔ THỊ TRÊN SÂN THƯỢNG Tài liệu TXT này có nội dung khác với PDF, Markdown, PNG, JPG, JPEG và PPTX. Mục đích là tạo một file văn bản thuần có độ dài tương đối để kiểm thử khả năng đọc file .txt, tách đoạn, trả lời câu hỏi theo ngữ cảnh và tóm tắt nội dung dài. 1. GIỚI THIỆU Ý TƯỞNG Dự án vườn rau đô thị trên sân thượng bắt đầu từ nhu cầu tận dụng khoảng không gian trống trong nhà phố. Thay vì để sân thượng chỉ dùng để phơi đồ hoặc đặt vật dụng cũ, nhóm quyết định biến khu vực này thành một vườn nhỏ có thể trồng rau ăn lá, rau thơm và một số loại cây gia vị. Ý tưởng chính không phải là tự cung cấp toàn bộ thực phẩm cho gia đình, mà là tạo ra một mô hình sống xanh, giảm lãng phí và giúp mọi người hiểu hơn về quá trình tạo ra thức ăn.\n---\nKhông gian sân thượng ban đầu có diện tích khoảng ba mươi mét vuông. Khu vực này nhận nắng mạnh vào buổi sáng và đầu giờ chiều, nhưng gió khá lớn vào mùa mưa. Vì vậy, nhóm cần thiết kế hệ thống chậu trồng chắc chắn, có khay thoát nước, có lưới che nắng một phần và có lối đi đủ rộng để chăm sóc cây. Một yêu cầu quan trọng là không làm ảnh hưởng đến kết cấu nhà, không để nước thấm xuống tầng dưới và không tạo môi trường cho muỗi sinh sản. 2. MỤC TIÊU CỦA DỰ ÁN\n---\n2. MỤC TIÊU CỦA DỰ ÁN Mục tiêu đầu tiên là xây dựng một khu vườn nhỏ có thể vận hành ổn định trong điều kiện đô thị. Khu vườn cần dễ chăm sóc, không đòi hỏi quá nhiều thời gian mỗi ngày và phù hợp với người mới bắt đầu. Các loại cây được chọn phải có vòng đời ngắn, dễ quan sát kết quả và ít rủi ro thất bại. Rau cải, xà lách, rau muống, húng quế, bạc hà và hành lá là những lựa chọn phù hợp cho giai đoạn đầu. Mục tiêu thứ hai là ghi lại dữ liệu chăm sóc cây. Nhóm muốn biết mỗi loại cây cần bao nhiêu ngày để nảy mầm, cần tưới nước bao nhiêu lần, phát triển tốt trong điều kiện nắng như thế nào và thường gặp loại sâu bệnh nào. Các ghi chép này giúp lần trồng sau hiệu quả hơn, đồng thời tạo thành tài liệu hướng dẫn cho người khác nếu muốn làm vườn tương tự."
+  },
+  {
+    "file": "noi_dung_mau_thanh_pho_xanh.pdf",
+    "document_id": "00ed43ff83d04a73809762e5772143ac",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/660025fa22ba471eb8466c065841f03d_noi_dung_mau_thanh_pho_xanh.pdf",
+    "chunks": 2,
+    "content_types": {
+      "pdf_page": 2
+    },
+    "pages_sheets_slides_sample": [
+      "1"
+    ],
+    "sample": "File: 660025fa22ba471eb8466c065841f03d_noi_dung_mau_thanh_pho_xanh.pdf Page: 1 Text: Hành trình Thành phố Xanh 2030 Một bộ nội dung mẫu ngẫu nhiên về lối sống bền vững, công nghệ và cộng đồng. Tổng quan Tài liệu PDF mẫu này có nội dung ngẫu nhiên, dùng để kiểm tra khả năng hiển thị văn bản, bảng và bố cục cơ bản trong một file PDF. Bối cảnh Thành phố Xanh 2030 là một ý tưởng giả định về đô thị hiện đại, nơi công nghệ được dùng để giảm lãng phí năng lượng, cải thiện chất lượng không khí và khuyến khích người dân sống thân thiện với môi trường. Mục tiêu chính Dự án hướng đến ba mục tiêu: giảm rác thải nhựa, tăng không gian xanh và xây dựng thói quen di chuyển sạch như đi bộ, xe đạp hoặc phương tiện công cộng.\n---\nHoạt động nổi bật Các hoạt động mẫu gồm ngày không khói xe, tuần lễ đổi rác lấy cây, bản đồ điểm sạc xe điện, lớp học tái chế sáng tạo và cuộc thi thiết kế góc xanh tại trường học. Kết quả kỳ vọng Sau sáu tháng triển khai thử nghiệm, cộng đồng có thể giảm lượng rác thải dùng một lần, tăng nhận thức về phân loại rác và hình thành mạng lưới tình nguyện viên xanh. Bảng số liệu mẫu Chỉ số Giá trị mẫu Ghi chú Cây xanh mới 1.250 cây Trồng tại trường học và công viên Rác tái chế 8,4 tấn Nhựa, giấy, kim loại Người tham gia 3.600 người Học sinh, sinh viên, cư dân Tuyến xe đạp 12 tuyến Kết nối khu dân cư và trường học Kết luận Một thành phố xanh bắt đầu từ những hành động nhỏ: tiết kiệm điện, giảm nhựa dùng một lần, phân loại rác và bảo vệ mảng xanh xung quanh."
+  },
+  {
+    "file": "pdf_page_index.md",
+    "document_id": "5ff20b5b181840eda551b519fff17ba9",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/a1cf004680bc450e87d1047dade8b9dd_pdf_page_index.md",
+    "chunks": 45,
+    "content_types": {
+      "": 45
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "Total chars: 184\n---\n- Tổng quan về thị giác máy tính và xử lý ảnh TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI TP.HCM\n---\nTotal chars: 1634"
+  },
+  {
+    "file": "poster_mau_nang_luong_tai_tao.jpg",
+    "document_id": "9aecd0ca32b6451eac5fd8028329e2ef",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/120a682f883f430a8be00a7797509ad2_poster_mau_nang_luong_tai_tao.jpg",
+    "chunks": 1,
+    "content_types": {
+      "image_document": 1
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "File: 120a682f883f430a8be00a7797509ad2_poster_mau_nang_luong_tai_tao.jpg Type: image OCR Text: POSTER MAU Nang g luong tai tao trong doi sd Noi dung khac voi PNG va PDF, trinh bay theo dang poster JPG. Dien mat troi Phu hop mái nha, truong hoc va nha xuong. Hé thong giup tao dién vao ban ngay, giam chi phi van hanh va tang tinh chu dong nang lugng. Dién gi6 Hiéu qua ? khu vuc c6 toc do gi6 6n dinh. Tuabin gi6 thuong dugc trien khai ? vung ven bien, cao nguyen hoäc ngoai khoi. Sinh khoi Tan dung phu pham nong nghiep, rác huu co va chat thai sinh hoc. Day la yuew da!ybu bugu buop zeoy 9o sn^ nuy !o^ doy nyd !p buony Tiet kiem nang Iuong Nguon nang lurgng sach nhat la phan nang lugng khong bi lang phi. Tat thiet bi khi khong dung, dung den LED va toi uu dieu hoa la các buoc don gian. Thong diép?ng luong tai tao khong chi la cong nghe lon cua quoc gia, ma con bat dau tu th6i quen sur dung di"
+  },
+  {
+    "file": "RETRIEVAL_TESTING_QUESTION_SET.md",
+    "document_id": "a9744b0ba01844c39b72fc6ac320deab",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/292ddb34951740358d3b0401e33cd38e_RETRIEVAL_TESTING_QUESTION_SET.md",
+    "chunks": 23,
+    "content_types": {
+      "": 23
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "Bo test nay duoc xay dung truc tiep tu bo file trong thu muc: - Test md.md - Test docx.docx - Test xlsx.xlsx - Test pptx.pptx - Test pdf.pdf - Test pdf scan.pdf - test txt.txt - Test JPG.jpg - Test PNG.png - Test jpeg.jpeg\n---\n- Kiem tra retrieval theo nguon (dung file) - Kiem tra retrieval theo noi dung (dung fact/chu de) - Kiem tra retrieval da ngon ngu (Viet - Anh - Nhat) - Kiem tra fallback khi tai lieu khong co thong tin\n---\n1. Dat cau hoi trong he thong. 2. Ghi lai Top-1 source va Top-3 source (neu he thong co hien thi). 3. Doi chieu voi cot Nguon ky vong va Tu khoa neo."
+  },
+  {
+    "file": "storyboard_mau_suc_khoe_hoc_duong.jpeg",
+    "document_id": "d8d9dcfd79364507b62312ad2420f07e",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/77cbe999090941b2946887ceca3a56bc_storyboard_mau_suc_khoe_hoc_duong.jpeg",
+    "chunks": 1,
+    "content_types": {
+      "image_document": 1
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "File: 77cbe999090941b2946887ceca3a56bc_storyboard_mau_suc_khoe_hoc_duong.jpeg Type: image OCR Text: MAu: Surc khoe hoc duong STORYBOARD Anh JPEG c6 noi dung riéng, mo ta 6 canh truyén thong ngan. Canh 1 1 Canh 2 Canh 3 3 Hoc sinh bat dau ngay mái Trong lop, giáo vien nhac ca Gid ra choi, nhom ban van bang bura sang du chat thay lopngoi dung tu theva nghi dong nhe thay vi chi ngoi vi bo bura. mat sau moi tiet hoc. dung dien thoai. canh 4 4 Canh 5 5 Canh ( 6 Cangtinuutiennuocloc, Phong y te truong ghi nhan Cuoi ngay, hoc sinh ngu trái cay va mon an it dau tinh trang surc khoe va ho dung gio de phuc hoi nang mo. trg tu van khi hoc sinh met. luong cho hom sau. Thong diep chinh: cham s6c surc kh?e hoc duong can ket hgp dinh duong, van dong, giac ngu, tu the hoc tap va ho trg tam ly. Vision Description: MAu: Surc khoe hoc duong STORYBOARD Anh JPEG c6 noi dung riéng, mo ta 6 canh truyén thong n"
+  },
+  {
+    "file": "Test docx.docx",
+    "document_id": "9db54dc2211c4f20b71543dba4705197",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/64591ce811e544cfad309ef9103bc9af_Test docx.docx",
+    "chunks": 136,
+    "content_types": {
+      "docx_page": 136
+    },
+    "pages_sheets_slides_sample": [
+      "1",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "2",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27"
+    ],
+    "sample": "BỘ GIAO THÔNG VẬN TẢI TRƯỜNG ĐẠI HỌC VẬN TẢI THÀNH PHỐ HỒ CHÍ MINH VIỆN CÔNG NGHỆ THÔNG TIN VÀ ĐIỆN, ĐIỆN TỬ\n---\nĐề tài: Nghiên cứu, ứng dụng mô hình AI, kết hợp đồ thị tri thức hỗ trợ tra cứu chính xác luật công nghệ thông tin Chuyên ngành: Công nghệ thông tin Giảng viên hướng dẫn: Nguyễn Văn Huy Sinh viên thực hiện: Huỳnh Bá Thành MSSV:084205002647 Lớp: CN2303D Thành phố Hồ Chí Minh, ngày 25 tháng 04 năm 2026\n---\nĐề tài xây dựng một trợ lý hội thoại tư vấn pháp luật Công nghệ thông tin (CNTT) tại Việt Nam dựa trên:. Kiến trúc Hybrid GraphRAG — kết hợp truy xuất vector (Qdrant) với truy hồi đồ thị tri thức (Neo4j) và mô hình ngôn ngữ lớn (Google Gemini). Crawl, chuẩn hóa và chunking 22 văn bản pháp luật cốt lõi (11 Luật và 11 Nghị định) (Luật An ninh mạng, Luật CNTT 2006, Luật Sở hữu trí tuệ, Luật Giao dịch điện tử, Luật Bảo vệ dữ liệu cá nhân, Nghị định 13/2023, 15/2020 sửa đổi, 147/2024…) thành các đơn vị chunk có ngữ cảnh phân cấp Văn bản → Chương → Mục → Điều → Khoản → Điểm. Pha truy xuất sử dụng kỹ thuật Multi-Query Parallel Search (kết hợp các biến thể câu hỏi do LLM sinh ra, mở rộng viết tắt và các luật tĩnh theo domain) cùng với Graph Traversal 1–2 hop để mở rộng ngữ cảnh quan hệ giữa các điều luật. Đánh giá trên bộ test 300 cặp câu hỏi–trích dẫn cho thấy pipeline Hybrid vượt trội cả RAG-o"
+  },
+  {
+    "file": "Test jpeg.jpeg",
+    "document_id": "d171a490f295470187f0bbe1333df0ea",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/ac02acdd801d4d9780c9ecce5a2a595b_Test jpeg.jpeg",
+    "chunks": 1,
+    "content_types": {
+      "image_document": 1
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "File: ac02acdd801d4d9780c9ecce5a2a595b_Test jpeg.jpeg Type: image OCR Text: BAO CAO D0ANH THU THANG05/2026 Monthly Sales Summary Doanh thu theo tuan (trieu dong) Trieu dong 30 25 22 20 18 15 12 10 5 Tuan 1 Tuan 2 Tuan 3 Tuän 4 Kenh ban hang TONG QUAN Channel Orders Revenue Kenh Online tang 18% so voi thang truoc. Online 120 36.5M Tuan 4 dat doanh thu cao nhat. Store 84 28.0M Tong don hang: 260 Delivery 56 14.2M Tong doanh thu: 78.7M Prepared by Data Team - Internal Use Only BAO CAO D0ANH THU THANG 05/2026 Tuan 4 Vision Description: BAO CAO D0ANH THU THANG05/2026 Monthly Sales Summary Doanh thu theo tuan (trieu dong) Trieu dong 30 25 22 20 18 15 12 10 5 Tuan 1 Tuan 2 Tuan 3 Tuän 4 Kenh ban hang TONG QUAN Channel Orders Revenue Kenh Online tang 18% so voi thang truoc. Online 120 36.5M Tuan 4 dat doanh thu cao nhat. Store 84 28.0M Tong don hang: 260 Delivery 56 14.2M Tong doanh thu: 78.7M P"
+  },
+  {
+    "file": "Test JPG.jpg",
+    "document_id": "8e870aa6f1fc4b788a0e8e250ee3f28b",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/2a1d3fe49bb34684a862090bccca1375_Test JPG.jpg",
+    "chunks": 1,
+    "content_types": {
+      "image_document": 1
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "File: 2a1d3fe49bb34684a862090bccca1375_Test JPG.jpg Type: image OCR Text: AI DOCUMENT CHAT - OCR TEST PAGE Tai lieu kiem thu so 01 Muc tieu Kiem tra kha nang nhan dien van ban tieng Viet va tieng Anh Kiem tra trich xuat bang, ngay thang, email va so dien thoai Kiem tra chunking va metadata co ban Thong tin he thong Module Status Notes Upload Service H6 trg PDF, DOCX, PPTX, XLSX OCR Engine Nhan dien tot van ban in ro Vector Index Warning Can kiem tra toc do truy xuat LLM Response Co citation co ban Lien he Email: qa-team@example.com Phone: 028 3876 1234 Date: 14/05/2026 Workspace: Demo-Test-01 Trang 1/1 - Sample OCR Document Vision Description: AI DOCUMENT CHAT - OCR TEST PAGE Tai lieu kiem thu so 01 Muc tieu Kiem tra kha nang nhan dien van ban tieng Viet va tieng Anh Kiem tra trich xuat bang, ngay thang, email va so dien thoai Kiem tra chunking va metadata co ban Thong tin he thong Modul"
+  },
+  {
+    "file": "Test md.md",
+    "document_id": "fd101a3fd79447ac8c8f7c5c4df597f8",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/c66dde57090742f8bf009e10f9ac020e_Test md.md",
+    "chunks": 61,
+    "content_types": {
+      "": 61
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "**Tài liệu mẫu định dạng Markdown** **Chủ đề:** Ứng dụng trí tuệ nhân tạo trong hệ thống AI Document Chat **Mục đích:** Dùng làm tài liệu kiểm thử cho hệ thống đọc, chunking, embedding, retrieval và hỏi đáp tài liệu.  ---\n---\n1. Giới thiệu chung 2. Bối cảnh phát triển AI Document Chat 3. Kiến trúc tổng thể của hệ thống 4. Quy trình xử lý tài liệu 5. Kỹ thuật RAG trong hỏi đáp tài liệu 6. Vai trò của embedding và vector database 7. Kiểm soát chất lượng câu trả lời 8. Bảo mật dữ liệu trong hệ thống 9. Kiểm thử và đánh giá hệ thống 10. Kết luận và hướng phát triển  ---  <div style=\"page-break-after: always;\"></div>\n---\nTrong những năm gần đây, trí tuệ nhân tạo đã trở thành một trong những công nghệ quan trọng nhất trong lĩnh vực công nghệ thông tin. Các mô hình ngôn ngữ lớn có khả năng hiểu câu hỏi, phân tích ngữ cảnh và sinh câu trả lời tự nhiên như con người. Tuy nhiên, nếu chỉ sử dụng mô hình ngôn ngữ thuần túy, hệ thống có thể gặp hiện tượng ảo giác, tức là tạo ra thông tin không chính xác hoặc không có căn cứ.  Để giải quyết vấn đề này, các hệ thống AI Document Chat được xây dựng nhằm cho phép người dùng hỏi đáp trực tiếp trên tài liệu đã cung cấp. Thay vì trả lời dựa hoàn toàn trên kiến thức sẵn có của mô hình, hệ thống sẽ truy xuất thông tin từ tài liệu, đưa các đoạn liên quan vào ngữ cảnh, sau đó mới sinh câu trả lời."
+  },
+  {
+    "file": "Test pdf scan.pdf",
+    "document_id": "84ebb434c2724750a5a82cdc9f1294c0",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/79fdb6ef7c254120b4bb1019733f7122_Test pdf scan.pdf",
+    "chunks": 3,
+    "content_types": {
+      "pdf_page": 3
+    },
+    "pages_sheets_slides_sample": [
+      "1",
+      "2",
+      "3"
+    ],
+    "sample": "File: 79fdb6ef7c254120b4bb1019733f7122_Test pdf scan.pdf Page: 1 Text: Hình 1: OCR From Images: - TreViet Nam Bao bung than boc lay than Tay om, tay niu tre gan nhau them. Thuong nhau, tre chang o riéng Huy thanh tu d6 ma nen hoi nguoi.\n---\nFile: 79fdb6ef7c254120b4bb1019733f7122_Test pdf scan.pdf Page: 2 Text: Hình 2:\n---\nFile: 79fdb6ef7c254120b4bb1019733f7122_Test pdf scan.pdf Page: 3 Text: Hình 3:"
+  },
+  {
+    "file": "Test pdf.pdf",
+    "document_id": "ecfda64dc0014ac2bcb4fd5afa826336",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/bdfc8975699f4c0ca7d7e1af9702c589_Test pdf.pdf",
+    "chunks": 37,
+    "content_types": {
+      "pdf_page": 37
+    },
+    "pages_sheets_slides_sample": [
+      "1",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9"
+    ],
+    "sample": "File: bdfc8975699f4c0ca7d7e1af9702c589_Test pdf.pdf Page: 1 Text: TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI TP.HCM  VIỆN CÔNG NGHỆ THÔNG TIN, ĐIỆN, ĐIỆN TỬ Chương 1: Tổng quan về thị giác máy tính và xử lý ảnh TS. Nguyễn Thị Khánh Tiên  tienntk@ut.edu.vn 1\n---\nFile: bdfc8975699f4c0ca7d7e1af9702c589_Test pdf.pdf Page: 2 Text: Thị giác Máy tính và Xử lý Ảnh là gì? Thị giác máy tính (Computer Vision) và xử lý ảnh (Image processing) là hai lĩnh vực liên quan chặt chẽ trong khoa học máy tính, tập trung vào việc làm cho máy tính có khả năng \"nhìn\" và hiểu được thế giới xung quanh thông qua hình ảnh và video. Xử lý ảnh Thị giác máy tính Xử lý ảnh tập trung vào việc biến đổi hình ảnh Thị giác máy tính hướng tới việc hiểu nội dung  Mục tiêu số để cải thiện chất lượng hình ảnh, trích xuất của hình ảnh, giống như cách con người nhìn và  thông tin hoặc chuẩn bị hình ảnh cho các bước hiểu thế giới xung quanh.  xử lý tiếp theo.\n---\nCải thiện chất lượng: Tăng cường độ tương Nhận dạng vật thể: Xác định các đối tượng có  phản, khử nhiễu, điều chỉnh màu sắc. trong hình ảnh (ví dụ: người, xe, mặt).  Các tác Phân tích hình ảnh: Tính toán các đặc trưng Phân loại hình ảnh: Gán nhãn cho hình ảnh  vụ điển hình ảnh như độ sáng, độ tương phản, kết cấu. dựa trên nội dung (ví dụ: ảnh phong cảnh, ảnh  hình Xử lý trước: Chuẩn bị hình ảnh cho các thuật chân dung).  toán nhận dạng vật thể, phân loại hình ảnh. Theo dõi vật thể: Theo dõi chuyển động của  các đối tượng trong video.  Tái tạo 3D: Tạo ra mô hình 3D từ hình ảnh 2D."
+  },
+  {
+    "file": "Test PNG.png",
+    "document_id": "e9ade0a49a714222a2d685a374039a6c",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/7440a387d2504452bfad877995ce261f_Test PNG.png",
+    "chunks": 1,
+    "content_types": {
+      "image_document": 1
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "File: 7440a387d2504452bfad877995ce261f_Test PNG.png Type: image OCR Text: QUAN CA PHE MAY OPEN 07:00 - 22:00 Scan QR de thanh toan Khuyen mai 20% cho sinh vien Wi-Fi: MayCoffee_Free Hotline: 0901 234 567 Take away available Dia chi: 125 Nguyen Van Nghi, Go Vap, TP.HCM Espresso 35.000d Latte 45.000d Bac xiu 39.000d G0 Vap, TP.HCM Vision Description: QUAN CA PHE MAY OPEN 07:00 - 22:00 Scan QR de thanh toan Khuyen mai 20% cho sinh vien Wi-Fi: MayCoffee_Free Hotline: 0901 234 567 Take away available Dia chi: 125 Nguyen Van Nghi, Go Vap, TP.HCM Espresso 35.000d Latte 45.000d Bac xiu 39.000d G0 Vap, TP.HCM"
+  },
+  {
+    "file": "Test pptx.pptx",
+    "document_id": "65d96848dced4c0aa2af8be299b00abc",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/83740f1ccee14c69ae7781b7d4dc7f0b_Test pptx.pptx",
+    "chunks": 43,
+    "content_types": {
+      "slide_chunk": 40,
+      "slide_structured": 3
+    },
+    "pages_sheets_slides_sample": [
+      "1",
+      "10",
+      "11",
+      "12",
+      "13",
+      "14",
+      "15",
+      "16",
+      "17",
+      "18",
+      "19",
+      "2",
+      "20",
+      "21",
+      "22",
+      "23",
+      "24",
+      "25",
+      "26",
+      "27"
+    ],
+    "sample": "File: 83740f1ccee14c69ae7781b7d4dc7f0b_Test pptx.pptx Slide: 1 Title: オフィス業務 Layout: Title Slide Reading Order: 2-2 Slide Blocks: - [2] textbox/placeholder @ x=4139952,y=3427413,w=3600698,h=2162175: 担当講師 正忠 武\n---\nFile: 83740f1ccee14c69ae7781b7d4dc7f0b_Test pptx.pptx Slide: 2 Title: 主な授業内容 Layout: Title and Content Reading Order: 2-2 Slide Blocks: - [2] textbox/placeholder @ x=323528,y=1412776,w=8459788,h=5112022: 仕事をする意味 職場での１日 あいさつのルールと自己紹介の仕方 仕事の基本 ～ほう・れん・そう～ 電話の受け方・かけ方 メールの送り方 来客対応のマナー\n---\nFile: 83740f1ccee14c69ae7781b7d4dc7f0b_Test pptx.pptx Slide: 3 Title: Slide 3 Layout: Blank Reading Order: 1-2 Slide Blocks: - [1] textbox/auto_shape @ x=161510,y=404664,w=8820980,h=3024336: 先生も頑張ります！ 一緒に頑張って 勉強しましょう！ - [2] image/picture @ x=179512,y=3933056,w=2304256,h=2765107: Image object detected on slide."
+  },
+  {
+    "file": "test txt.txt",
+    "document_id": "5a3e738eeb82447793bc03f98bfbd2ae",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/50116b58dbc5434b99aaa7e4f4094eea_test txt.txt",
+    "chunks": 12,
+    "content_types": {
+      "": 12
+    },
+    "pages_sheets_slides_sample": [
+      ""
+    ],
+    "sample": "DU LỊCH SINH THÁI Ở VIỆT NAM Tài liệu mẫu dạng TXT dùng để kiểm thử hệ thống đọc văn bản thuần 1. GIỚI THIỆU Du lịch sinh thái là hình thức du lịch gắn liền với thiên nhiên, văn hóa địa phương và trách nhiệm bảo vệ môi trường. Khác với du lịch đại trà, du lịch sinh thái hướng đến việc giảm tác động tiêu cực đến hệ sinh thái, đồng thời tạo lợi ích kinh tế cho cộng đồng bản địa. Việt Nam là quốc gia có tài nguyên thiên nhiên đa dạng, bao gồm rừng nhiệt đới, hệ thống sông ngòi, hang động, biển đảo, vườn quốc gia và khu bảo tồn thiên nhiên. Những điều kiện này giúp Việt Nam có nhiều tiềm năng phát triển du lịch sinh thái. 2. ĐẶC ĐIỂM CỦA DU LỊCH SINH THÁI Du lịch sinh thái thường có một số đặc điểm chính:\n---\n2. ĐẶC ĐIỂM CỦA DU LỊCH SINH THÁI Du lịch sinh thái thường có một số đặc điểm chính: - Gắn liền với môi trường tự nhiên. - Tôn trọng văn hóa và đời sống của cộng đồng địa phương. - Hạn chế rác thải và tác động xấu đến thiên nhiên. - Khuyến khích du khách học hỏi về hệ sinh thái. - Góp phần tạo thu nhập cho người dân bản địa. - Hỗ trợ công tác bảo tồn thiên nhiên. Một chuyến du lịch sinh thái không chỉ là hoạt động nghỉ dưỡng, mà còn là cơ hội để người tham gia hiểu rõ hơn về giá trị của môi trường sống. 3. MỘT SỐ ĐỊA ĐIỂM DU LỊCH SINH THÁI NỔI BẬT 3.1. Vườn quốc gia Cúc Phương\n---\n3. MỘT SỐ ĐỊA ĐIỂM DU LỊCH SINH THÁI NỔI BẬT 3.1. Vườn quốc gia Cúc Phương Vườn quốc gia Cúc Phương nằm trên địa bàn ba tỉnh Ninh Bình, Hòa Bình và Thanh Hóa. Đây là một trong những vườn quốc gia lâu đời nhất tại Việt Nam. Cúc Phương nổi bật với hệ sinh thái rừng nhiệt đới, nhiều loài thực vật quý hiếm và các chương trình bảo tồn động vật hoang dã. Du khách đến Cúc Phương có thể tham gia các hoạt động như đi bộ trong rừng, quan sát chim, tham quan cây chò ngàn năm và tìm hiểu về trung tâm cứu hộ linh trưởng. 3.2. Khu du lịch Tràng An Tràng An thuộc tỉnh Ninh Bình, nổi tiếng với hệ thống núi đá vôi, hang động và sông nước. Du khách thường di chuyển bằng thuyền để tham quan cảnh quan tự nhiên. Tràng An cũng là nơi kết hợp giữa giá trị thiên nhiên và giá trị văn hóa lịch sử."
+  },
+  {
+    "file": "Test xlsx.xlsx",
+    "document_id": "91a9abf0911c40989853c1daa354d317",
+    "source": "/app/data/uploads/manual-audit-20260520/85f9512b918e4a7383d2fc217d4f5334/e8e84593cd2f42778e4e39bfc64256dd_Test xlsx.xlsx",
+    "chunks": 48,
+    "content_types": {
+      "spreadsheet_sheet_summary": 3,
+      "spreadsheet_table_chunk": 45
+    },
+    "pages_sheets_slides_sample": [
+      "Sheet1",
+      "Sheet2",
+      "Sheet4"
+    ],
+    "sample": "File: e8e84593cd2f42778e4e39bfc64256dd_Test xlsx.xlsx Sheet: Sheet4 Sheet Index: 1 Hidden Sheet: True Header Columns: No., 受験番号, 氏名, 性別, 学科名, 日本語, 数学, 文学, 総計, 結果, column_11, column_12, column_13, column_14, column_15, column_16, column_17, column_18, column_19, column_20, column_21, column_22, column_23, column_24, column_25, column_26 Header Units: (none) Rows With Data: 30 Tables/Ranges: 1 Detected Tables/Ranges: - used_range_1 [used_range] A1:Z1000: rows=28 Row Preview: - Row 1: 試験結果表 - Row 2: No.; 受験番号; 氏名; 性別; 学科名; 日本語; 数学; 文学 - Row 3: 1.0; KI2; のび太　徳田; A; 教育学科; 9.0; 8.5; 7.5 - Row 4: 2.0; KE2; 優希　カイ; A; 経営学科; 9.0; 7.0; 6.0 - Row 5: 3.0; NH2; 勝弘　系; A; 日本語学科; 8.0; 5.0; 7.0 - Row 6: 4.0; KI1; 山下　恵子; U; 教育学科; 9.0; 10.0; 8.5\n---\nFile: e8e84593cd2f42778e4e39bfc64256dd_Test xlsx.xlsx Sheet: Sheet4 Sheet Index: 1 Hidden Sheet: True Table: used_range_1 Table Type: used_range Range: A1:Z1000 Chunk Row Range: 3:4 Headers: No., 受験番号, 氏名, 性別, 学科名, 日本語, 数学, 文学, 総計, 結果, column_11, column_12, column_13, column_14, column_15, column_16, column_17, column_18, column_19, column_20, column_21, column_22, column_23, column_24, column_25, column_26 Header Units: (none) Structured Rows: - Row 3 [A3:Z3]: No. (A3): 1.0; 受験番号 (B3): KI2; 氏名 (C3): のび太　徳田; 性別 (D3): A; 学科名 (E3): 教育学科 [formula==VLOOKUP(LEFT(B3,2),$E$20:$F$22,2,0)]; 日本語 (F3): 9.0; 数学 (G3): 8.5; 文学 (H3): 7.5; 総計 (I3): 34 [formula==IF(E3=$F$22,SUM(F3:H3),F3*2+SUM(G3:H3))]; 結果 (J3): D; column_12 (L3): 問題1： - Row 4 [A4:Z4]: No. (A4): 2.0; 受験番号 (B4): KE2; 氏名 (C4): 優希　カイ; 性別 (D4): A; 学科名 (E4): 経営学科 [formula==VLOOKUP(LEFT(B4,2),$E$20:$F$22,2,0)]; 日本語 (F4): 9.0; 数学 (G4): 7.0; 文学 \n---\nFile: e8e84593cd2f42778e4e39bfc64256dd_Test xlsx.xlsx Sheet: Sheet4 Sheet Index: 1 Hidden Sheet: True Table: used_range_1 Table Type: used_range Range: A1:Z1000 Chunk Row Range: 5:6 Headers: No., 受験番号, 氏名, 性別, 学科名, 日本語, 数学, 文学, 総計, 結果, column_11, column_12, column_13, column_14, column_15, column_16, column_17, column_18, column_19, column_20, column_21, column_22, column_23, column_24, column_25, column_26 Header Units: (none) Structured Rows: - Row 5 [A5:Z5]: No. (A5): 3.0; 受験番号 (B5): NH2; 氏名 (C5): 勝弘　系; 性別 (D5): A; 学科名 (E5): 日本語学科 [formula==VLOOKUP(LEFT(B5,2),$E$20:$F$22,2,0)]; 日本語 (F5): 8.0; 数学 (G5): 5.0; 文学 (H5): 7.0; 総計 (I5): 28 [formula==IF(E5=$F$22,SUM(F5:H5),F5*2+SUM(G5:H5))]; 結果 (J5): D; column_12 (L5): 性別; column_18 (R5): （10点） - Row 6 [A6:Z6]: No. (A6): 4.0; 受験番号 (B6): KI1; 氏名 (C6): 山下　恵子; 性別 (D6): U; 学科名 (E6): 教育学科 [formula==VLOOKUP(LEFT(B6,2),$E$20:$F$22,2,0)]; 日本語 (F6): 9."
+  }
+]

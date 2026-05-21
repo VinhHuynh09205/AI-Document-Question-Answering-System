@@ -11,11 +11,6 @@ class ImageDocumentLoader(IDocumentLoader):
         ".png",
         ".jpg",
         ".jpeg",
-        ".webp",
-        ".bmp",
-        ".tif",
-        ".tiff",
-        ".gif",
     }
 
     def __init__(self, image_understanding_service: IImageUnderstandingService | None = None) -> None:

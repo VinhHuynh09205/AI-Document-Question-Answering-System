@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "/tmp/run_450_audit_container.py", line 408, in <module>
+    main()
+  File "/tmp/run_450_audit_container.py", line 366, in main
+    audit = load_module("audit300", args.audit_module)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/run_450_audit_container.py", line 18, in load_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/tmp/run_300_audit_container.py", line 19, in <module>
+    from app.api.workspace import (
+ModuleNotFoundError: No module named 'app'

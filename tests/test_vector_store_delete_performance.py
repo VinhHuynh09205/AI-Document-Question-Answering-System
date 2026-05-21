@@ -152,3 +152,39 @@ def test_legacy_store_without_manifest_is_cleared_and_marked_for_rebuild() -> No
         assert reloaded_repository.requires_startup_rebuild() is True
         assert not (index_dir / "index.faiss").exists()
         assert not (index_dir / "documents.json").exists()
+
+
+def test_index_payload_count_mismatch_is_cleared_and_marked_for_rebuild() -> None:
+    embeddings = CountingEmbeddings()
+
+    with TemporaryDirectory() as tmp_dir:
+        index_dir = Path(tmp_dir)
+        seeded_repository = FaissVectorStoreRepository(
+            index_dir=index_dir,
+            embeddings=embeddings,
+        )
+        seeded_repository.add_documents(
+            [
+                Document(
+                    page_content="recoverable chunk",
+                    metadata={"owner": "user-a", "chat_id": "chat-1", "source": "doc-a.txt"},
+                )
+            ]
+        )
+        seeded_repository.save()
+
+        (index_dir / "documents.json").write_text("[]", encoding="utf-8")
+        (index_dir / "manifest.json").write_text(
+            '{"schema_version": 3, "document_count": 0}',
+            encoding="utf-8",
+        )
+
+        reloaded_repository = FaissVectorStoreRepository(
+            index_dir=index_dir,
+            embeddings=embeddings,
+        )
+
+        assert reloaded_repository.document_count() == 0
+        assert reloaded_repository.requires_startup_rebuild() is True
+        assert not (index_dir / "index.faiss").exists()
+        assert not (index_dir / "documents.json").exists()

@@ -17,19 +17,42 @@ class IAdminService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update_user_role(self, admin_username: str, target_username: str, role: str) -> UserAccount:
+    def update_user_role(
+        self,
+        admin_username: str,
+        target_username: str,
+        role: str,
+        audit_context: dict[str, str] | None = None,
+    ) -> UserAccount:
         raise NotImplementedError
 
     @abstractmethod
-    def update_user_status(self, admin_username: str, target_username: str, is_active: bool) -> UserAccount:
+    def update_user_status(
+        self,
+        admin_username: str,
+        target_username: str,
+        is_active: bool,
+        audit_context: dict[str, str] | None = None,
+    ) -> UserAccount:
         raise NotImplementedError
 
     @abstractmethod
-    def delete_user(self, admin_username: str, target_username: str) -> bool:
+    def delete_user(
+        self,
+        admin_username: str,
+        target_username: str,
+        audit_context: dict[str, str] | None = None,
+    ) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def admin_reset_password(self, admin_username: str, target_username: str, new_password: str) -> bool:
+    def admin_reset_password(
+        self,
+        admin_username: str,
+        target_username: str,
+        new_password: str,
+        audit_context: dict[str, str] | None = None,
+    ) -> bool:
         raise NotImplementedError
 
     @abstractmethod
@@ -49,5 +72,10 @@ class IAdminService(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def setup_first_admin(self, username: str, password: str) -> UserAccount:
+    def setup_first_admin(
+        self,
+        username: str,
+        password: str,
+        audit_context: dict[str, str] | None = None,
+    ) -> UserAccount:
         raise NotImplementedError

@@ -72,3 +72,6 @@ class AuditLogEntry:
     target: str
     detail: str
     created_at: str
+    ip_address: str = ""
+    user_agent: str = ""
+    request_id: str = ""

@@ -118,6 +118,14 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
             if matrix.size == 0:
                 continue
 
+            if self._index is not None and self._index.ntotal != len(self._documents):
+                logger.warning(
+                    "faiss_index_payload_mismatch_on_add ntotal=%s payloads=%s resetting_index",
+                    self._index.ntotal,
+                    len(self._documents),
+                )
+                self._reset_index(matrix.shape[1])
+
             if self._index is None:
                 self._index = faiss.IndexFlatL2(matrix.shape[1])
             elif matrix.shape[1] != self._index.d:
@@ -188,7 +196,16 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
         for doc_index in indices[0]:
             if doc_index < 0:
                 continue
-            payload = self._documents[int(doc_index)]
+            safe_doc_index = int(doc_index)
+            if safe_doc_index >= len(self._documents):
+                logger.warning(
+                    "faiss_search_result_missing_payload index=%s payloads=%s ntotal=%s",
+                    safe_doc_index,
+                    len(self._documents),
+                    self._index.ntotal if self._index is not None else 0,
+                )
+                continue
+            payload = self._documents[safe_doc_index]
             metadata = payload.get("metadata", {})
             if metadata_filter and not self._match_metadata_filter(metadata, metadata_filter):
                 continue
@@ -476,9 +493,37 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
             self._reset_index(None)
             return
 
-        self._index = faiss.read_index(str(self._index_file))
+        try:
+            self._index = faiss.read_index(str(self._index_file))
+        except Exception:
+            logger.exception(
+                "faiss_index_load_failed clearing_store index_dir=%s",
+                self._index_dir,
+            )
+            self._requires_startup_rebuild = True
+            self._reset_index(None)
+            return
         payload = self._metadata_file.read_text(encoding="utf-8").strip()
         self._documents = json.loads(payload) if payload else []
+
+        manifest_document_count = int(manifest_payload.get("document_count", -1))
+        index_document_count = int(self._index.ntotal)
+        payload_document_count = len(self._documents)
+        if (
+            manifest_document_count != payload_document_count
+            or index_document_count != payload_document_count
+        ):
+            logger.warning(
+                "faiss_index_payload_mismatch_on_load manifest_count=%s index_count=%s payloads=%s index_dir=%s clearing_store",
+                manifest_document_count,
+                index_document_count,
+                payload_document_count,
+                self._index_dir,
+            )
+            self._requires_startup_rebuild = True
+            self._reset_index(None)
+            return
+
         self._rebuild_keyword_index()
         self._requires_startup_rebuild = False
 
@@ -547,6 +592,27 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
         def _normalize_extension(value: object) -> str:
             return str(value or "").strip().lower().lstrip(".")
 
+        def _source_aliases() -> set[str]:
+            aliases: set[str] = set()
+            for metadata_key in ("source", "file_name", "document_name"):
+                raw_value = str(metadata.get(metadata_key) or "").strip()
+                if not raw_value:
+                    continue
+                aliases.add(raw_value)
+                aliases.add(raw_value.replace("\\", "/").rsplit("/", 1)[-1])
+                parts = raw_value.replace("\\", "/").rsplit("/", 1)[-1].split("_", 1)
+                if len(parts) == 2 and len(parts[0]) >= 16:
+                    aliases.add(parts[1])
+            return {alias for alias in aliases if alias}
+
+        def _matches_source_filter(value: object) -> bool:
+            target = str(value or "").strip()
+            if not target:
+                return False
+            target_basename = target.replace("\\", "/").rsplit("/", 1)[-1]
+            aliases = _source_aliases()
+            return target in aliases or target_basename in aliases
+
         for key, value in metadata_filter.items():
             metadata_value = str(metadata.get(key))
 
@@ -559,6 +625,16 @@ class FaissVectorStoreRepository(IVectorStoreRepository):
                     continue
 
                 if metadata_extension != _normalize_extension(value):
+                    return False
+                continue
+
+            if key == "source":
+                if isinstance(value, list):
+                    if not any(_matches_source_filter(item) for item in value):
+                        return False
+                    continue
+
+                if not _matches_source_filter(value):
                     return False
                 continue
 

@@ -1,0 +1,63 @@
+NHẬT KÝ MẪU: DỰ ÁN VƯỜN RAU ĐÔ THỊ TRÊN SÂN THƯỢNG
+
+Tài liệu TXT này có nội dung khác với PDF, Markdown, PNG, JPG, JPEG và PPTX. Mục đích là tạo một file văn bản thuần có độ dài tương đối để kiểm thử khả năng đọc file .txt, tách đoạn, trả lời câu hỏi theo ngữ cảnh và tóm tắt nội dung dài.
+
+1. GIỚI THIỆU Ý TƯỞNG
+
+Dự án vườn rau đô thị trên sân thượng bắt đầu từ nhu cầu tận dụng khoảng không gian trống trong nhà phố. Thay vì để sân thượng chỉ dùng để phơi đồ hoặc đặt vật dụng cũ, nhóm quyết định biến khu vực này thành một vườn nhỏ có thể trồng rau ăn lá, rau thơm và một số loại cây gia vị. Ý tưởng chính không phải là tự cung cấp toàn bộ thực phẩm cho gia đình, mà là tạo ra một mô hình sống xanh, giảm lãng phí và giúp mọi người hiểu hơn về quá trình tạo ra thức ăn.
+
+Không gian sân thượng ban đầu có diện tích khoảng ba mươi mét vuông. Khu vực này nhận nắng mạnh vào buổi sáng và đầu giờ chiều, nhưng gió khá lớn vào mùa mưa. Vì vậy, nhóm cần thiết kế hệ thống chậu trồng chắc chắn, có khay thoát nước, có lưới che nắng một phần và có lối đi đủ rộng để chăm sóc cây. Một yêu cầu quan trọng là không làm ảnh hưởng đến kết cấu nhà, không để nước thấm xuống tầng dưới và không tạo môi trường cho muỗi sinh sản.
+
+2. MỤC TIÊU CỦA DỰ ÁN
+
+Mục tiêu đầu tiên là xây dựng một khu vườn nhỏ có thể vận hành ổn định trong điều kiện đô thị. Khu vườn cần dễ chăm sóc, không đòi hỏi quá nhiều thời gian mỗi ngày và phù hợp với người mới bắt đầu. Các loại cây được chọn phải có vòng đời ngắn, dễ quan sát kết quả và ít rủi ro thất bại. Rau cải, xà lách, rau muống, húng quế, bạc hà và hành lá là những lựa chọn phù hợp cho giai đoạn đầu.
+
+Mục tiêu thứ hai là ghi lại dữ liệu chăm sóc cây. Nhóm muốn biết mỗi loại cây cần bao nhiêu ngày để nảy mầm, cần tưới nước bao nhiêu lần, phát triển tốt trong điều kiện nắng như thế nào và thường gặp loại sâu bệnh nào. Các ghi chép này giúp lần trồng sau hiệu quả hơn, đồng thời tạo thành tài liệu hướng dẫn cho người khác nếu muốn làm vườn tương tự.
+
+Mục tiêu thứ ba là tạo một hoạt động gắn kết gia đình. Mỗi người có thể phụ trách một phần nhỏ như gieo hạt, tưới nước, kiểm tra sâu bệnh, ghi nhật ký hoặc thu hoạch. Khi mọi người cùng tham gia, khu vườn trở thành một thói quen sinh hoạt tích cực thay vì chỉ là một dự án ngắn hạn.
+
+3. KẾ HOẠCH CHUẨN BỊ
+
+Trước khi trồng, nhóm khảo sát hướng nắng, vị trí thoát nước và khả năng chịu tải của sân thượng. Những chậu lớn được đặt sát tường hoặc khu vực có nền chắc. Các khay nhỏ dùng cho rau mầm và rau thơm được đặt trên kệ thấp. Nhóm tránh đặt quá nhiều vật nặng ở một điểm để giảm rủi ro cho công trình.
+
+Vật tư cần chuẩn bị gồm chậu nhựa, thùng xốp đã xử lý lỗ thoát nước, đất sạch, phân hữu cơ, xơ dừa, hạt giống, bình tưới, găng tay, kéo cắt tỉa và lưới che nắng. Ngoài ra, nhóm chuẩn bị một cuốn sổ ghi chép hoặc file điện tử để theo dõi từng luống cây. Mỗi chậu được dán nhãn gồm tên cây, ngày gieo, loại đất và ghi chú chăm sóc.
+
+4. QUÁ TRÌNH TRIỂN KHAI TUẦN ĐẦU
+
+Ngày đầu tiên, nhóm vệ sinh sân thượng, dọn các vật dụng không cần thiết và kiểm tra đường thoát nước. Sau đó, nhóm bố trí khu vực trồng thành ba vùng: vùng rau ăn lá, vùng rau thơm và vùng cây thử nghiệm. Cách chia này giúp việc chăm sóc dễ hơn vì mỗi nhóm cây có nhu cầu nước và ánh sáng khác nhau.
+
+Ngày thứ hai, nhóm trộn đất với phân hữu cơ và xơ dừa. Đất được làm tơi để rễ cây dễ phát triển. Một số hạt giống được ngâm trong nước ấm trước khi gieo để tăng tỷ lệ nảy mầm. Sau khi gieo, mặt đất được phủ một lớp mỏng và tưới nhẹ bằng bình phun sương.
+
+Ngày thứ ba đến ngày thứ bảy, nhóm tập trung quan sát độ ẩm. Vấn đề xuất hiện là một số chậu bị nắng gắt làm khô nhanh, trong khi vài chậu ở góc khuất lại giữ nước quá lâu. Nhóm điều chỉnh bằng cách di chuyển chậu, thêm lớp phủ hữu cơ và thay đổi thời điểm tưới sang sáng sớm hoặc chiều mát.
+
+5. NHỮNG KHÓ KHĂN BAN ĐẦU
+
+Khó khăn đầu tiên là kiểm soát lượng nước. Người mới làm vườn thường tưới quá nhiều vì lo cây thiếu nước. Tuy nhiên, đất quá ẩm có thể làm rễ yếu, cây chậm lớn và dễ phát sinh nấm. Nhóm học cách kiểm tra đất bằng tay: nếu mặt đất khô nhưng bên dưới vẫn ẩm thì chưa cần tưới thêm.
+
+Khó khăn thứ hai là sâu ăn lá. Một vài cây cải non bị thủng lá sau tuần đầu. Nhóm không dùng thuốc hóa học mà chọn cách kiểm tra lá mỗi sáng, bắt sâu bằng tay và dùng dung dịch tỏi ớt pha loãng ở mức an toàn. Việc quan sát thường xuyên giúp phát hiện vấn đề sớm trước khi lan rộng.
+
+Khó khăn thứ ba là gió mạnh. Một số cây non bị nghiêng khi trời mưa lớn. Nhóm bổ sung que chống nhỏ, đặt chậu sát khu vực có tường chắn và dùng lưới để giảm tác động trực tiếp của gió.
+
+6. KẾT QUẢ SAU MỘT THÁNG
+
+Sau một tháng, các loại rau thơm phát triển khá tốt. Húng quế và bạc hà cho lá đều, có thể cắt tỉa nhẹ để dùng trong bữa ăn. Rau cải phát triển nhanh nhưng cần chăm kỹ hơn vì dễ bị sâu. Xà lách cần vị trí mát hơn, nếu nắng quá mạnh thì lá dễ héo vào buổi trưa.
+
+Điều đáng chú ý là mọi người trong gia đình bắt đầu quan tâm hơn đến việc phân loại rác hữu cơ. Một phần vỏ rau củ được dùng để ủ phân ở quy mô nhỏ. Dù lượng phân tạo ra chưa nhiều, hoạt động này giúp giảm rác thải và tạo ý thức tiết kiệm tài nguyên.
+
+7. BÀI HỌC RÚT RA
+
+Bài học quan trọng nhất là nên bắt đầu nhỏ. Nếu trồng quá nhiều loại cây ngay từ đầu, người làm vườn dễ bị quá tải và khó theo dõi nguyên nhân khi cây phát triển kém. Một khu vườn nhỏ nhưng được chăm đều đặn sẽ hiệu quả hơn một khu vườn lớn nhưng thiếu kế hoạch.
+
+Bài học thứ hai là phải ghi chép. Những chi tiết như ngày gieo hạt, lượng nước tưới, vị trí đặt chậu và tình trạng sâu bệnh có vẻ nhỏ, nhưng lại rất hữu ích khi cần cải thiện vụ sau. Không có dữ liệu, người làm vườn dễ lặp lại lỗi cũ.
+
+Bài học thứ ba là làm vườn cần kiên nhẫn. Có cây phát triển nhanh, có cây thất bại, có ngày thời tiết không thuận lợi. Điều quan trọng là xem mỗi lần thử nghiệm như một cơ hội học tập.
+
+8. HƯỚNG PHÁT TRIỂN TIẾP THEO
+
+Trong giai đoạn tiếp theo, nhóm muốn lắp hệ thống tưới nhỏ giọt đơn giản để giảm thời gian tưới thủ công. Hệ thống này có thể dùng hẹn giờ và điều chỉnh lượng nước theo từng khu vực. Nhóm cũng muốn thử trồng cà chua bi, ớt và dưa leo trong chậu lớn, nhưng sẽ triển khai từng loại để dễ kiểm soát.
+
+Ngoài ra, nhóm dự định tạo một bảng theo dõi điện tử gồm tên cây, ngày gieo, ngày nảy mầm, số lần tưới, tình trạng sâu bệnh và ngày thu hoạch. Nếu có đủ dữ liệu, nhóm có thể so sánh hiệu quả giữa các loại đất, vị trí đặt chậu và cách tưới khác nhau.
+
+9. KẾT LUẬN
+
+Dự án vườn rau đô thị trên sân thượng không chỉ tạo ra một ít rau sạch mà còn giúp thay đổi thói quen sống. Mọi người quan sát thiên nhiên nhiều hơn, hiểu giá trị của thực phẩm hơn và có thêm một hoạt động thư giãn sau giờ học hoặc giờ làm. Dù quy mô nhỏ, dự án vẫn có ý nghĩa nếu được duy trì đều đặn và cải tiến từng bước.

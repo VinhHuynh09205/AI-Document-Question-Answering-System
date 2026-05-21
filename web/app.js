@@ -4011,15 +4011,66 @@ function getChatExportStyleSheet() {
     .chat-export-message.chat-export-user { border-left: 5px solid #f59e0b; background: #fffbeb; }
     .chat-export-role { font-size: 11px; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: #334155; margin-bottom: 8px; }
     .chat-export-content { font-size: 13px; line-height: 1.6; color: #0f172a; }
+    .chat-export-doc .chat-export-content,
+    .chat-export-doc .chat-export-content .bubble,
+    .chat-export-doc .chat-export-content .bubble-content {
+      background: transparent !important;
+      color: #0f172a !important;
+      opacity: 1 !important;
+      text-shadow: none !important;
+    }
     .chat-export-content p { margin: 0 0 8px; }
     .chat-export-content p:last-child { margin-bottom: 0; }
     .chat-export-content ul, .chat-export-content ol { margin: 8px 0 8px 20px; }
     .chat-export-content blockquote { margin: 8px 0; border-left: 4px solid #cbd5e1; padding: 6px 10px; color: #334155; background: #f8fafc; border-radius: 4px; }
-    .chat-export-content pre { margin: 8px 0; padding: 10px; border-radius: 8px; background: #0f172a; color: #e2e8f0; overflow-x: auto; white-space: pre-wrap; }
-    .chat-export-content code { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; }
-    .chat-export-content table { width: 100%; border-collapse: collapse; margin: 8px 0; }
-    .chat-export-content th, .chat-export-content td { border: 1px solid #cbd5e1; padding: 7px 8px; vertical-align: top; }
-    .chat-export-content th { background: #f1f5f9; font-weight: 800; }
+    .chat-export-doc .chat-export-content pre {
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: #f8fafc !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+    .chat-export-doc .chat-export-content code {
+      font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 12px;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+    }
+    .chat-export-doc .chat-export-content table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      border-spacing: 0 !important;
+      margin: 8px 0 !important;
+      background: #ffffff !important;
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+    }
+    .chat-export-doc .chat-export-content table *,
+    .chat-export-doc .chat-export-content th,
+    .chat-export-doc .chat-export-content td {
+      color: #0f172a !important;
+      -webkit-text-fill-color: #0f172a !important;
+      opacity: 1 !important;
+      text-shadow: none !important;
+    }
+    .chat-export-doc .chat-export-content th,
+    .chat-export-doc .chat-export-content td {
+      border: 1px solid #94a3b8 !important;
+      padding: 7px 8px !important;
+      vertical-align: top !important;
+      background: #ffffff !important;
+    }
+    .chat-export-doc .chat-export-content th {
+      background: #e2e8f0 !important;
+      color: #0f172a !important;
+      font-weight: 800 !important;
+    }
+    .chat-export-doc .chat-export-content tbody tr:nth-child(even) td {
+      background: #f8fafc !important;
+    }
     .chat-export-content img { max-width: 100%; height: auto; }
     .chat-export-content .source-list { margin-top: 10px; padding: 8px; border-radius: 8px; border: 1px solid #dbe6eb; background: #f8fafc; }
     .chat-export-content .source-label { display: inline-block; margin-right: 4px; font-size: 11px; font-weight: 700; color: #334155; }
@@ -4147,7 +4198,7 @@ async function exportChatToPdf() {
         margin: [10, 10, 10, 10],
         filename: `${getExportFileBaseName()}.pdf`,
         pagebreak: { mode: ["css", "legacy"] },
-        image: { type: "jpeg", quality: 0.98 },
+        image: { type: "png", quality: 1 },
         html2canvas: {
           scale: 2,
           useCORS: true,

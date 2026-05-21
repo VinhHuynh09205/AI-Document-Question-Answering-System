@@ -150,11 +150,7 @@ def get_current_admin_username(
     username: str = Depends(get_current_username),
     container: AppContainer = Depends(get_container),
 ) -> str:
-    from app.repositories.interfaces.user_repository import IUserRepository
-
-    auth_service = container.auth_service
-    user_repo: IUserRepository = auth_service._user_repository  # noqa: SLF001
-    user = user_repo.get_by_username(username)
+    user = container.auth_service.get_user(username)
     if user is None or user.role != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

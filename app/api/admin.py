@@ -1,6 +1,6 @@
 import secrets
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 
 from app.core.config import Settings
 from app.core.dependencies import get_admin_service, get_app_settings, get_current_admin_username
@@ -22,8 +22,19 @@ from app.services.interfaces.admin_service import IAdminService
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
+def _audit_context(request: Request) -> dict[str, str]:
+    forwarded_for = str(request.headers.get("x-forwarded-for", "")).split(",", maxsplit=1)[0].strip()
+    client_host = request.client.host if request.client else ""
+    return {
+        "ip_address": forwarded_for or client_host,
+        "user_agent": str(request.headers.get("user-agent", "")),
+        "request_id": str(request.headers.get("x-request-id", "")),
+    }
+
+
 @router.post("/setup", response_model=AdminUserResponse)
 def setup_first_admin(
+    request: Request,
     payload: SetupFirstAdminRequest,
     setup_secret: str | None = Header(default=None, alias="X-Admin-Setup-Secret"),
     settings: Settings = Depends(get_app_settings),
@@ -39,6 +50,7 @@ def setup_first_admin(
         user = admin_service.setup_first_admin(
             username=payload.username,
             password=payload.password,
+            audit_context=_audit_context(request),
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
@@ -95,6 +107,7 @@ def get_user(
 
 @router.put("/users/{username}/role", response_model=AdminUserResponse)
 def update_user_role(
+    request: Request,
     username: str,
     payload: UpdateRoleRequest,
     admin_username: str = Depends(get_current_admin_username),
@@ -105,6 +118,7 @@ def update_user_role(
             admin_username=admin_username,
             target_username=username,
             role=payload.role,
+            audit_context=_audit_context(request),
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
@@ -118,6 +132,7 @@ def update_user_role(
 
 @router.put("/users/{username}/status", response_model=AdminUserResponse)
 def update_user_status(
+    request: Request,
     username: str,
     payload: UpdateStatusRequest,
     admin_username: str = Depends(get_current_admin_username),
@@ -128,6 +143,7 @@ def update_user_status(
             admin_username=admin_username,
             target_username=username,
             is_active=payload.is_active,
+            audit_context=_audit_context(request),
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
@@ -141,6 +157,7 @@ def update_user_status(
 
 @router.delete("/users/{username}")
 def delete_user(
+    request: Request,
     username: str,
     admin_username: str = Depends(get_current_admin_username),
     admin_service: IAdminService = Depends(get_admin_service),
@@ -149,6 +166,7 @@ def delete_user(
         deleted = admin_service.delete_user(
             admin_username=admin_username,
             target_username=username,
+            audit_context=_audit_context(request),
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
@@ -159,6 +177,7 @@ def delete_user(
 
 @router.post("/users/{username}/reset-password")
 def admin_reset_password(
+    request: Request,
     username: str,
     payload: AdminResetPasswordRequest,
     admin_username: str = Depends(get_current_admin_username),
@@ -169,6 +188,7 @@ def admin_reset_password(
             admin_username=admin_username,
             target_username=username,
             new_password=payload.new_password,
+            audit_context=_audit_context(request),
         )
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

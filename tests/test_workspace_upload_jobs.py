@@ -1,5 +1,6 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import json
 import time
 import uuid
 
@@ -7,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.core.config import Settings
 from app.core.container import build_container
+from app.services.qa_constants import FALLBACK_ANSWER
 from main import app
 
 
@@ -476,7 +478,7 @@ def test_workspace_upload_replace_reindexes_without_creating_duplicate_record() 
 def test_workspace_startup_rebuilds_vector_store_when_manifest_is_missing() -> None:
     with TemporaryDirectory() as tmp_dir:
         base_path = Path(tmp_dir)
-        settings = _build_test_settings(base_path)
+        settings = _build_test_settings(base_path, startup_rebuild_max_documents=0)
         manifest_path = Path(settings.vector_store_path) / "manifest.json"
 
         original_container = app.state.container
@@ -517,6 +519,86 @@ def test_workspace_startup_rebuilds_vector_store_when_manifest_is_missing() -> N
                 )
                 assert docs_response.status_code == 200
                 assert len(docs_response.json()["documents"]) == 1
+        finally:
+            app.state.container = original_container
+
+
+def test_workspace_stream_ask_reindexes_selected_document_when_vector_store_is_empty() -> None:
+    with TemporaryDirectory() as tmp_dir:
+        base_path = Path(tmp_dir)
+        settings = _build_test_settings(base_path)
+
+        original_container = app.state.container
+        app.state.container = build_container(settings)
+        try:
+            with TestClient(app) as client:
+                headers, chat_id = _create_user_and_chat(client)
+
+                upload_response = _upload_chat_files(
+                    client,
+                    chat_id=chat_id,
+                    headers=headers,
+                    files=[
+                        (
+                            "files",
+                            (
+                                "cloud-notes.md",
+                                b"# Cloud Computing\nCloud Computing theo NIST co nam dac tinh cot loi: on-demand self-service, broad network access, resource pooling, rapid elasticity va measured service.",
+                                "text/markdown",
+                            ),
+                        )
+                    ],
+                )
+                assert upload_response.status_code == 200
+                completed_payload = _wait_for_job_terminal_status(
+                    client,
+                    chat_id=chat_id,
+                    job_id=upload_response.json()["job_id"],
+                    headers=headers,
+                )
+                assert completed_payload["status"] == "completed"
+
+                docs_response = client.get(
+                    f"/api/v1/workspace/chats/{chat_id}/documents",
+                    headers=headers,
+                )
+                assert docs_response.status_code == 200
+                document_id = docs_response.json()["documents"][0]["document_id"]
+
+                app.state.container.vector_store_repository.clear()
+                assert app.state.container.vector_store_repository.document_count() == 0
+
+                with client.stream(
+                    "POST",
+                    f"/api/v1/workspace/chats/{chat_id}/ask/stream",
+                    headers=headers,
+                    json={
+                        "question": "Cloud Computing theo NIST có các đặc tính gì?",
+                        "selected_document_ids": [document_id],
+                    },
+                ) as response:
+                    assert response.status_code == 200
+                    body = "".join(response.iter_text())
+
+                streamed_answer_parts: list[str] = []
+                streamed_sources: list[str] = []
+                for line in body.splitlines():
+                    if not line.startswith("data: "):
+                        continue
+                    event = json.loads(line.removeprefix("data: "))
+                    token = event.get("token")
+                    if isinstance(token, str):
+                        streamed_answer_parts.append(token)
+                    sources = event.get("sources")
+                    if isinstance(sources, list):
+                        streamed_sources.extend(str(source) for source in sources)
+
+                streamed_answer = "".join(streamed_answer_parts)
+                assert FALLBACK_ANSWER not in streamed_answer
+                assert "NIST" in streamed_answer
+                assert "Cloud Computing" in streamed_answer
+                assert streamed_sources
+                assert app.state.container.vector_store_repository.document_count() >= 1
         finally:
             app.state.container = original_container
 

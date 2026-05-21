@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from app.models.entities import AuthTokenResult
+from app.models.entities import AuthTokenResult, UserAccount
 
 
 @dataclass(slots=True)
@@ -24,6 +24,10 @@ class IAuthService(ABC):
 
     @abstractmethod
     def login(self, username: str, password: str) -> AuthTokenResult:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_user(self, username: str) -> UserAccount | None:
         raise NotImplementedError
 
     @abstractmethod

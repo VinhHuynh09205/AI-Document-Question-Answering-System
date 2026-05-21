@@ -778,6 +778,11 @@ class ExcelDocumentLoader(IDocumentLoader):
         header_units: dict[str, str],
         structured_rows: list[dict[str, object]],
     ) -> str:
+        header_unit_pairs = [
+            f"{header}={header_units.get(header, '')}"
+            for header in headers
+            if header_units.get(header, "")
+        ]
         lines = [
             f"File: {file_name}",
             f"Sheet: {sheet_name}",
@@ -787,7 +792,7 @@ class ExcelDocumentLoader(IDocumentLoader):
             f"Table Type: {table_kind}",
             f"Range: {table_range}",
             f"Headers: {', '.join(headers) if headers else '(none)'}",
-            f"Header Units: {', '.join(f'{header}={header_units.get(header, "")}' for header in headers if header_units.get(header, "")) or '(none)'}",
+            f"Header Units: {', '.join(header_unit_pairs) or '(none)'}",
             f"Rows: {len(structured_rows)}",
             "Rows Preview:",
         ]

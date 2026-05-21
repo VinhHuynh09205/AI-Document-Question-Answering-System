@@ -99,6 +99,26 @@ def test_resolve_ask_routing_requests_confirmation_for_ambiguous_scope() -> None
     _clear_pending_scope_question("alice", "chat-1")
 
 
+def test_resolve_ask_routing_requests_confirmation_for_ambiguous_main_content_question() -> None:
+    docs = _make_documents()
+    workspace_service = _FakeWorkspaceService(docs)
+
+    _clear_pending_scope_question("alice", "chat-1")
+    routing = _resolve_ask_routing(
+        username="alice",
+        chat_id="chat-1",
+        question="Noi dung chinh la gi?",
+        selected_document_ids=None,
+        workspace_service=workspace_service,
+    )
+
+    assert routing.clarification_answer is not None
+    assert "hop-dong-2025.pdf" in routing.clarification_answer
+    assert _get_pending_scope_question("alice", "chat-1") == "Noi dung chinh la gi?"
+
+    _clear_pending_scope_question("alice", "chat-1")
+
+
 def test_resolve_ask_routing_uses_pending_question_with_follow_up_selection() -> None:
     docs = _make_documents()
     workspace_service = _FakeWorkspaceService(docs)

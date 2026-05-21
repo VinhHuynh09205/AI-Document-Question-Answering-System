@@ -1,0 +1,23 @@
+Traceback (most recent call last):
+  File "/tmp/run_450_audit_container.py", line 411, in <module>
+    main()
+  File "/tmp/run_450_audit_container.py", line 369, in main
+    audit = load_module("audit300", args.audit_module)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/run_450_audit_container.py", line 21, in load_module
+    spec.loader.exec_module(module)
+  File "<frozen importlib._bootstrap_external>", line 999, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "/tmp/run_300_audit_container.py", line 159, in <module>
+    @dataclass(slots=True)
+     ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dataclasses.py", line 1265, in wrap
+    return _process_class(cls, init, repr, eq, order, unsafe_hash,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dataclasses.py", line 983, in _process_class
+    and _is_type(type, cls, dataclasses, dataclasses.KW_ONLY,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/dataclasses.py", line 749, in _is_type
+    ns = sys.modules.get(cls.__module__).__dict__
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute '__dict__'. Did you mean: '__dir__'?

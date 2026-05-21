@@ -60,6 +60,22 @@ def _rebuild_vector_store_if_needed(application: FastAPI) -> None:
 
         grouped_paths[(document.username, document.chat_id)].append(file_path)
 
+    settings = getattr(container, "settings", get_settings())
+    max_blocking_rebuild_documents = max(0, int(settings.startup_rebuild_max_documents))
+    accessible_file_count = sum(len(paths) for paths in grouped_paths.values())
+    if (
+        max_blocking_rebuild_documents > 0
+        and accessible_file_count > max_blocking_rebuild_documents
+    ):
+        logger.warning(
+            "vector_store_startup_rebuild_deferred reason=too_many_accessible_files documents=%s accessible_files=%s missing=%s threshold=%s",
+            len(stored_documents),
+            accessible_file_count,
+            missing_paths,
+            max_blocking_rebuild_documents,
+        )
+        return
+
     if not grouped_paths:
         logger.warning(
             "vector_store_startup_rebuild_skipped reason=no_accessible_files documents=%s missing=%s",

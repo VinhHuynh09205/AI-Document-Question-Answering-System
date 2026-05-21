@@ -80,6 +80,17 @@ class FakeLLMProvider:
         yield self.generate_grounded_answer(question, context_docs)
 
 
+class FixedAnswerLLMProvider:
+    def __init__(self, answer: str) -> None:
+        self._answer = answer
+
+    def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
+        return self._answer
+
+    def stream_grounded_answer(self, question: str, context_docs: list[Document]):
+        yield self._answer
+
+
 class AlwaysMissingLLMProvider:
     def generate_grounded_answer(self, question: str, context_docs: list[Document]) -> str:
         return "Không tìm thấy thông tin về mục được hỏi trong CONTEXT."
@@ -226,6 +237,163 @@ def test_private_identifier_question_requires_direct_evidence() -> None:
 
     assert result.context_found is False
     assert result.answer == FALLBACK_ANSWER
+
+
+def test_presence_check_question_falls_back_when_topic_is_absent() -> None:
+    raw_question = 'Trong file "deck.pptx" co thong tin ve blockchain khong?'
+    doc = Document(
+        page_content="Slide 1 noi ve he thong hoi dap tai lieu va pipeline upload.",
+        metadata={"source": "deck.pptx", "document_id": "doc-pptx", "extension": ".pptx", "slide_number": 1},
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={raw_question: [doc]}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_presence_check_requires_all_short_topic_tokens() -> None:
+    raw_question = 'Trong file "city.pdf" co thong tin ve luong nhan vien khong?'
+    doc = Document(
+        page_content="Tai lieu noi ve khong gian xanh, chat luong song va nhan thuc cong dong.",
+        metadata={"source": "city.pdf", "document_id": "doc-pdf", "extension": ".pdf"},
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={raw_question: [doc]}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_phone_question_requires_labeled_phone_evidence() -> None:
+    raw_question = 'Trong file "travel.md" co thong tin ve so dien thoai ca nhan khong?'
+    doc = Document(
+        page_content="Ngan sach du kien: 250000-300000 VND moi nguoi. Lich trinh di bo va tham quan.",
+        metadata={"source": "travel.md", "document_id": "doc-md", "extension": ".md"},
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(docs_by_query={raw_question: [doc]}),
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_slide_number_question_uses_slide_metadata_directly() -> None:
+    raw_question = 'Slide 1 cua file "deck.pptx" noi ve noi dung gi?'
+    doc = Document(
+        page_content=(
+            "File: deck.pptx\n"
+            "Slide: 1\n"
+            "Title: Slide 1\n"
+            "Layout: DEFAULT\n"
+            "Slide Blocks:\n"
+            "- [2] textbox/text_box @ x=100,y=200,w=300,h=100: Tong quan he thong AI Document QA\n"
+            "- [3] textbox/text_box @ x=100,y=350,w=300,h=100: Upload tai lieu, truy xuat hybrid va tra loi co citation"
+        ),
+        metadata={
+            "source": "deck.pptx",
+            "document_id": "doc-pptx",
+            "extension": ".pptx",
+            "content_type": "slide_block_chunk",
+            "slide_number": 1,
+            "slide": 1,
+            "slide_title": "Slide 1",
+            "reading_order_start": 1,
+        },
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(
+            docs_by_query={raw_question: [doc]},
+            listed_docs=[doc],
+        ),
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question, metadata_filter={"document_id": "doc-pptx"})
+
+    assert result.context_found is True
+    assert "Slide 1" in result.answer
+    assert "Tong quan he thong AI Document QA" in result.answer
+    assert len(result.sources) == 1
+
+
+def test_spreadsheet_explicit_row_number_uses_structured_rows() -> None:
+    raw_question = 'Trong file "campaign.xlsx", o sheet "Du_lieu_chien_dich", dong 3 co thong tin gi?'
+    doc = Document(
+        page_content="Sheet: Du_lieu_chien_dich\nRow 3 [A3:E3]: Ngay: 2026-05-01; Khu vuc: Ky tuc xa",
+        metadata={
+            "source": "campaign.xlsx",
+            "document_id": "doc-xlsx",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 3,
+                    "values": OrderedDict(
+                        [
+                            ("Ngay", "2026-05-01 00:00:00"),
+                            ("Khu vuc", "Ky tuc xa"),
+                            ("Hoat dong", "Doi rac lay cay"),
+                            ("Nguoi phu trach", "An"),
+                        ]
+                    ),
+                }
+            ],
+        },
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(
+            docs_by_query={raw_question: [doc]},
+            listed_docs=[doc],
+        ),
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=4,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(raw_question, metadata_filter={"document_id": "doc-xlsx"})
+
+    assert result.context_found is True
+    assert "dong 3" in QuestionAnsweringService._fold_text(result.answer)
+    assert "2026-05-01" in result.answer
+    assert "Ky tuc xa" in result.answer
+    assert "Doi rac lay cay" in result.answer
 
 
 def test_explicit_model_page_question_requires_model_term_in_context() -> None:
@@ -611,6 +779,141 @@ def test_answer_style_strips_deferential_prefix_and_inline_source() -> None:
     assert result.context_found is True
     assert result.answer == 'Tiêu đề slide 1 là "オフィス業務".'
     assert result.sources == ["deck.pptx (slide 1, オフィス業務)"]
+
+
+def test_numbered_question_citation_uses_matching_question_section_only() -> None:
+    question = "câu 2 có nội dung gì"
+    page_1 = Document(
+        page_content="Câu 1: Khái niệm Cloud Computing theo NIST và 5 đặc tính cốt lõi.",
+        metadata={"source": "cloud.docx", "extension": ".docx", "page": 1},
+    )
+    page_2 = Document(
+        page_content="Câu 2: Lợi ích và thách thức của Cloud Computing đối với doanh nghiệp và nhà cung cấp dịch vụ.",
+        metadata={"source": "cloud.docx", "extension": ".docx", "page": 2},
+    )
+    page_5 = Document(
+        page_content="Câu 5: So sánh Cloud, Fog Computing và Edge Computing.",
+        metadata={"source": "cloud.docx", "extension": ".docx", "page": 5},
+    )
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [page_5, page_2, page_1]},
+        listed_docs=[page_1, page_2, page_5],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FixedAnswerLLMProvider(
+            "Câu 2 có nội dung là Lợi ích và thách thức của Cloud Computing đối với doanh nghiệp và nhà cung cấp dịch vụ."
+        ),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"source": "cloud.docx"})
+
+    assert result.context_found is True
+    assert result.sources == ["cloud.docx (trang 2)"]
+
+
+def test_numbered_question_count_is_answered_from_document_outline() -> None:
+    question = "tài liệu này có bao nhiêu câu hỏi"
+    docs = [
+        Document(
+            page_content=(
+                "CÂU HỎI ÔN TẬP CLOUD COMPUTING\n"
+                "Câu 1: Khái niệm Cloud Computing theo NIST và 5 đặc tính\n"
+                "cốt lõi\n"
+                "Theo định nghĩa chuẩn của NIST..."
+            ),
+            metadata={"source": "cloud.pdf", "extension": ".pdf", "page": 1},
+        ),
+        Document(
+            page_content=(
+                "Câu 2: Lợi ích và thách thức của Cloud Computing đối với\n"
+                "doanh nghiệp và nhà cung cấp dịch vụ\n"
+                "Đối với doanh nghiệp..."
+            ),
+            metadata={"source": "cloud.pdf", "extension": ".pdf", "page": 2},
+        ),
+        Document(
+            page_content=(
+                "Câu 5: Vai trò của Cloud trong triển khai nền tảng IoT quy\n"
+                "mô lớn\n"
+                "Cloud đóng vai trò trung tâm..."
+            ),
+            metadata={"source": "cloud.pdf", "extension": ".pdf", "page": 6},
+        ),
+    ]
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(
+            docs_by_query={question: docs[:1]},
+            listed_docs=docs,
+        ),
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"source": "cloud.pdf"})
+
+    assert result.context_found is True
+    assert result.answer == "Tài liệu có 3 câu hỏi chính (Câu 1, Câu 2, Câu 5)."
+
+
+def test_document_overview_uses_numbered_question_outline() -> None:
+    question = "toàn bộ tài liệu này nói về cái gì"
+    docs = [
+        Document(
+            page_content=(
+                "CÂU HỎI ÔN TẬP CLOUD COMPUTING\n"
+                "Câu 1: Khái niệm Cloud Computing theo NIST và 5 đặc tính\n"
+                "cốt lõi\n"
+                "Theo định nghĩa chuẩn của NIST..."
+            ),
+            metadata={"source": "cloud.pdf", "extension": ".pdf", "page": 1},
+        ),
+        Document(
+            page_content=(
+                "Câu 2: Lợi ích và thách thức của Cloud Computing đối với\n"
+                "doanh nghiệp và nhà cung cấp dịch vụ\n"
+                "Đối với doanh nghiệp..."
+            ),
+            metadata={"source": "cloud.pdf", "extension": ".pdf", "page": 2},
+        ),
+        Document(
+            page_content=(
+                "Câu 3: Kiến trúc Cloud-RAN và vai trò của BBU Pool,\n"
+                "RRH, Fronthaul\n"
+                "Cloud-RAN, hay C-RAN..."
+            ),
+            metadata={"source": "cloud.pdf", "extension": ".pdf", "page": 3},
+        ),
+    ]
+    service = QuestionAnsweringService(
+        vector_store_repository=FakeVectorStoreRepository(
+            docs_by_query={question: docs[1:]},
+            listed_docs=docs,
+        ),
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"source": "cloud.pdf"})
+
+    assert result.context_found is True
+    assert "CÂU HỎI ÔN TẬP CLOUD COMPUTING là tài liệu ôn tập gồm 3 câu hỏi chính." in result.answer
+    assert "- Câu 1: Khái niệm Cloud Computing theo NIST và 5 đặc tính cốt lõi" in result.answer
+    assert "- Câu 2: Lợi ích và thách thức của Cloud Computing đối với doanh nghiệp và nhà cung cấp dịch vụ" in result.answer
+    assert "- Câu 3: Kiến trúc Cloud-RAN và vai trò của BBU Pool, RRH, Fronthaul" in result.answer
 
 
 def test_spreadsheet_row_lookup_returns_structured_answer_when_llm_misses() -> None:
@@ -1468,6 +1771,224 @@ def test_spreadsheet_date_lookup_returns_requested_column_from_matching_row() ->
     assert "Chi phí(VND): 480000" in result.answer
 
 
+def test_spreadsheet_sheet_list_uses_all_scoped_sheet_metadata() -> None:
+    question = "Workbook Test xlsx co bao nhieu sheet va ten gi?"
+    retrieved_doc = Document(
+        page_content="Workbook Test xlsx\nSheet: Sheet4",
+        metadata={
+            "source": "test.xlsx",
+            "document_id": "doc-1",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_sheet_summary",
+            "sheet_name": "Sheet4",
+            "sheet_index": 1,
+        },
+    )
+    scoped_docs = [
+        retrieved_doc,
+        Document(
+            page_content="Workbook Test xlsx\nSheet: Sheet2",
+            metadata={
+                "source": "test.xlsx",
+                "document_id": "doc-1",
+                "extension": ".xlsx",
+                "content_type": "spreadsheet_sheet_summary",
+                "sheet_name": "Sheet2",
+                "sheet_index": 2,
+            },
+        ),
+        Document(
+            page_content="Workbook Test xlsx\nSheet: Sheet1",
+            metadata={
+                "source": "test.xlsx",
+                "document_id": "doc-1",
+                "extension": ".xlsx",
+                "content_type": "spreadsheet_sheet_summary",
+                "sheet_name": "Sheet1",
+                "sheet_index": 3,
+            },
+        ),
+    ]
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [retrieved_doc]},
+        listed_docs=scoped_docs,
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert service._extract_sheet_hint(service._fold_text(question)) == ""
+    assert "3 sheet" in result.answer
+    assert "Sheet4" in result.answer
+    assert "Sheet2" in result.answer
+    assert "Sheet1" in result.answer
+    assert len(result.sources) <= 3
+    assert any("Sheet1" in source for source in result.sources)
+
+
+def test_spreadsheet_overview_uses_all_scoped_docs_for_summary() -> None:
+    question = "Tom tat file Excel song xanh nay noi ve du lieu gi"
+    scoped_docs = [
+        Document(
+            page_content="File Excel song xanh\nSheet: Du_lieu_chien_dich\nHeader Columns: Ngay, Khu vuc, Hoat dong",
+            metadata={
+                "source": "song_xanh.xlsx",
+                "document_id": "doc-1",
+                "extension": ".xlsx",
+                "content_type": "spreadsheet_table_chunk",
+                "sheet_name": "Du_lieu_chien_dich",
+                "sheet_index": 1,
+                "headers": ["Ngay", "Khu vuc", "Hoat dong"],
+                "rows_with_data": 30,
+            },
+        ),
+        Document(
+            page_content="File Excel song xanh\nSheet: Tong_quan\nHeader Columns: Khoa, So nguoi tham gia",
+            metadata={
+                "source": "song_xanh.xlsx",
+                "document_id": "doc-1",
+                "extension": ".xlsx",
+                "content_type": "spreadsheet_table_chunk",
+                "sheet_name": "Tong_quan",
+                "sheet_index": 2,
+                "headers": ["Khoa", "So nguoi tham gia"],
+                "rows_with_data": 5,
+            },
+        ),
+    ]
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [scoped_docs[0]]},
+        listed_docs=scoped_docs,
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question, metadata_filter={"document_id": "doc-1"})
+
+    assert result.context_found is True
+    assert "2 sheet" in result.answer
+    assert "Du_lieu_chien_dich" in result.answer
+    assert "Tong_quan" in result.answer
+    assert "Hoat dong" in result.answer
+
+
+def test_spreadsheet_date_lookup_returns_multiple_requested_columns() -> None:
+    question = "Ngay 2026-05-01 co hoat dong gi va o khu vuc nao?"
+    table_doc = Document(
+        page_content="Structured campaign table",
+        metadata={
+            "source": "campaign.xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Du_lieu_chien_dich",
+            "structured_rows": [
+                {
+                    "row_number": 2,
+                    "values": {
+                        "Ngay": "2026-05-01 00:00:00",
+                        "Khu vuc": "Ky tuc xa",
+                        "Hoat dong": "Doi rac lay cay",
+                    },
+                }
+            ],
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [table_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=AlwaysMissingLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is True
+    assert "Hoat dong: Doi rac lay cay" in result.answer
+    assert "Khu vuc: Ky tuc xa" in result.answer
+
+
+def test_spreadsheet_false_revenue_question_falls_back_when_column_missing() -> None:
+    question = "No.1 co tong doanh thu 78.7M dung khong?"
+    table_doc = Document(
+        page_content="Sheet: Sheet1\nNo.: 1; Tong diem: 34; Ket qua: Pass",
+        metadata={
+            "source": "scores.xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Sheet1",
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={question: [table_doc]})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(question)
+
+    assert result.context_found is False
+    assert result.answer == FALLBACK_ANSWER
+
+
+def test_compare_question_keeps_context_from_each_selected_source() -> None:
+    question = "So sanh noi dung file PDF va file JPG"
+    pdf_doc = Document(
+        page_content="PDF: Thanh pho xanh tap trung vao cay xanh va giao thong ben vung.",
+        metadata={"source": "/tmp/city.pdf", "document_id": "doc-pdf"},
+    )
+    jpg_doc = Document(
+        page_content="JPG: Poster nang luong tai tao trinh bay theo dang poster JPG gom mat troi, gio va thuy dien.",
+        metadata={"source": "/tmp/poster.jpg", "document_id": "doc-jpg"},
+    )
+    fake_repo = FakeVectorStoreRepository(
+        docs_by_query={question: [pdf_doc]},
+        listed_docs=[pdf_doc, jpg_doc],
+    )
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    result = service.ask(
+        question,
+        metadata_filter={"source": ["/tmp/city.pdf", "/tmp/poster.jpg"]},
+    )
+
+    assert result.context_found is True
+    assert "Thanh pho xanh" in result.answer
+    assert "nang luong tai tao" in result.answer
+
+
 def test_table_query_group_by_sum_returns_grouped_totals_with_citations() -> None:
     question = "Tổng chi phí theo khu vực là bao nhiêu?"
     table_doc = Document(
@@ -1662,6 +2183,18 @@ def test_query_router_classifies_specific_sheet_calculation_question() -> None:
     assert route.metadata_filter is not None
     assert route.metadata_filter.get("sheet_name") == "Sales"
     assert route.metadata_filter.get("range_address") == "A1:C10"
+
+
+def test_query_router_does_not_treat_sheet_list_words_as_sheet_name() -> None:
+    router = QueryRouter()
+
+    route = router.route(
+        "Workbook Test xlsx co bao nhieu sheet va ten gi?",
+        metadata_filter={"source": "test.xlsx"},
+    )
+
+    assert route.metadata_filter is not None
+    assert "sheet_name" not in route.metadata_filter
 
 
 def test_query_router_classifies_multi_file_comparison() -> None:
@@ -2451,7 +2984,7 @@ def test_ensure_mindmap_answer_normalizes_markdown_table_without_separator() -> 
     assert "| Quan ly vong doi syllabus | Quan ly tu soan thao den cong bo |" in cleaned
 
 
-def test_ensure_visual_answer_prefers_text_and_mindmap_for_overview_detail_question() -> None:
+def test_ensure_visual_answer_prefers_table_and_overview_diagram_for_broad_question() -> None:
     doc = Document(
         page_content=(
             "Muc tieu: Ho tro hoc vien\n"
@@ -2481,9 +3014,65 @@ def test_ensure_visual_answer_prefers_text_and_mindmap_for_overview_detail_quest
 
     assert "Noi dung tong quan ve tai lieu." in enriched
     assert "### Tóm tắt nhanh" in enriched
-    assert "### Bảng tổng hợp" not in enriched
-    assert "### Mindmap chủ đề" in enriched
-    assert "```mermaid\nmindmap" in enriched
+    assert "### Bảng tổng hợp" in enriched
+    assert "### Sơ đồ tổng quan" in enriched
+    assert "```mermaid\nflowchart TB" in enriched
+    assert "mindmap" not in enriched
+
+
+def test_visual_answer_filters_spreadsheet_technical_metadata_from_overview() -> None:
+    doc = Document(
+        page_content=(
+            "File: Test xlsx.xlsx\n"
+            "Sheet: Sheet1\n"
+            "Sheet Index: 1\n"
+            "Table: used_range_1\n"
+            "Table Type: used_range\n"
+            "Range: A1:Z1000\n"
+            "Chunk Row Range: 6:6\n"
+            "Headers: 受験番号, 氏名, 総計, 結果\n"
+            "Header Units: none\n"
+            "Rows With Data: 30\n"
+            "Structured Rows:\n"
+            "- Row 8 [A8:Z8]: 受験番号=1; 氏名=山下 恵子; 総計=36.5; 結果=合格"
+        ),
+        metadata={
+            "source": "Test xlsx.xlsx",
+            "extension": ".xlsx",
+            "content_type": "spreadsheet_table_chunk",
+            "sheet_name": "Sheet1",
+            "headers": ["受験番号", "氏名", "総計", "結果"],
+            "row_count": 30,
+        },
+    )
+
+    fake_repo = FakeVectorStoreRepository(docs_by_query={})
+    service = QuestionAnsweringService(
+        vector_store_repository=fake_repo,
+        llm_provider=FakeLLMProvider(),
+        backup_llm_provider=None,
+        top_k=3,
+        min_context_token_overlap=0.0,
+        min_relevant_chunks=1,
+        cache_ttl_seconds=0,
+    )
+
+    enriched = service._ensure_visual_answer(
+        "Tài liệu là bảng dữ liệu kết quả kiểm tra.",
+        context_docs=[doc],
+        normalized_question="cho tôi cái nhìn tổng quan về tài liệu này",
+    )
+
+    assert "### Bảng tổng hợp" in enriched
+    assert "### Sơ đồ tổng quan" in enriched
+    assert "flowchart TB" in enriched
+    assert "Các cột chính" in enriched
+    assert "総計" in enriched
+    assert "Chunk Row Range" not in enriched
+    assert "Header Units" not in enriched
+    assert "Sheet Index" not in enriched
+    assert "used_range" not in enriched
+    assert "Rows With Data" not in enriched
 
 
 def test_ensure_visual_answer_combines_table_and_flowchart_for_process_comparison_question() -> None:
@@ -2581,7 +3170,7 @@ def test_visual_plan_prefers_flowchart_for_sequential_content() -> None:
     assert mermaid_variant == "flowchart"
 
 
-def test_visual_plan_prefers_mindmap_for_broad_topic_question() -> None:
+def test_visual_plan_prefers_table_and_overview_flowchart_for_broad_topic_question() -> None:
     fake_repo = FakeVectorStoreRepository(docs_by_query={})
     service = QuestionAnsweringService(
         vector_store_repository=fake_repo,
@@ -2609,8 +3198,8 @@ def test_visual_plan_prefers_mindmap_for_broad_topic_question() -> None:
     )
 
     assert add_summary is True
-    assert table_variant is None
-    assert mermaid_variant == "mindmap"
+    assert table_variant == "overview"
+    assert mermaid_variant == "overview_flowchart"
 
 
 def test_table_heavy_answer_is_converted_to_text_first_with_single_support_table() -> None:
@@ -2829,6 +3418,14 @@ def test_strip_presentation_meta_removes_format_narration() -> None:
     assert cleaned == "This is the actual answer."
 
 
+def test_strip_presentation_meta_keeps_single_paragraph_content_mentions() -> None:
+    answer = "poster.jpg: Noi dung khac voi PNG va PDF, trinh bay theo dang poster JPG."
+
+    cleaned = QuestionAnsweringService._strip_presentation_meta(answer)
+
+    assert cleaned == answer
+
+
 def test_sanitize_context_references_removes_prompt_echo_prefix() -> None:
     cleaned = QuestionAnsweringService._sanitize_context_references(
         "Trả lời câu hỏi dựa trên CONTEXT:\n\nSlide 6 là slide mô tả kiến trúc tổng thể của hệ thống."
@@ -2933,7 +3530,7 @@ def test_build_overview_diagram_block_uses_flowchart_for_process_intent() -> Non
     assert "flowchart LR" in diagram
 
 
-def test_build_overview_diagram_block_uses_mindmap_for_overview_intent() -> None:
+def test_build_overview_diagram_block_uses_top_down_flowchart_for_overview_intent() -> None:
     fake_repo = FakeVectorStoreRepository(docs_by_query={})
     service = QuestionAnsweringService(
         vector_store_repository=fake_repo,
@@ -2960,7 +3557,8 @@ def test_build_overview_diagram_block_uses_mindmap_for_overview_intent() -> None
     )
 
     assert "```mermaid" in diagram
-    assert "mindmap" in diagram
+    assert "flowchart TB" in diagram
+    assert "mindmap" not in diagram
 
 
 def test_flowchart_diagram_wraps_long_labels_for_readability() -> None:

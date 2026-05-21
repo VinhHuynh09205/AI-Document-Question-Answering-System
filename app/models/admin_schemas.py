@@ -78,6 +78,8 @@ class SystemConfigResponse(BaseModel):
     has_groq_key: bool
     has_oauth_google: bool
     has_oauth_github: bool
+    auth_secret_configured: bool
+    admin_setup_enabled: bool
 
 
 class AuditLogEntryResponse(BaseModel):
@@ -87,6 +89,9 @@ class AuditLogEntryResponse(BaseModel):
     target: str
     detail: str
     created_at: str
+    ip_address: str = ""
+    user_agent: str = ""
+    request_id: str = ""
 
 
 class AuditLogListResponse(BaseModel):

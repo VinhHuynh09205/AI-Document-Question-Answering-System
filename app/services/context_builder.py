@@ -72,9 +72,15 @@ class ContextBuilder:
         if not ranked_scoped_docs:
             return context_docs
 
+        coverage_docs = self._select_required_scope_coverage_docs(
+            raw_question=raw_question,
+            metadata_filter=metadata_filter,
+            docs=[*ranked_scoped_docs, *scoped_docs],
+        )
+
         merged_docs: list[Document] = []
         seen: set[str] = set()
-        for doc in [*context_docs, *ranked_scoped_docs]:
+        for doc in [*coverage_docs, *context_docs, *ranked_scoped_docs]:
             doc_key = self._document_key(doc)
             if doc_key in seen:
                 continue
@@ -139,15 +145,15 @@ class ContextBuilder:
         if not callable(list_documents):
             return []
 
-        scope_filter: dict[str, str] = {}
-        document_id = self.extract_single_filter_value(metadata_filter, "document_id")
-        if document_id:
-            scope_filter["document_id"] = document_id
+        scope_filter: dict[str, str | list[str]] = {}
+        document_ids = self.extract_filter_values(metadata_filter, "document_id")
+        if document_ids:
+            scope_filter["document_id"] = document_ids[0] if len(document_ids) == 1 else document_ids
         else:
-            source = self.extract_single_filter_value(metadata_filter, "source")
-            if not source:
+            sources = self.extract_filter_values(metadata_filter, "source")
+            if not sources:
                 return []
-            scope_filter["source"] = source
+            scope_filter["source"] = sources[0] if len(sources) == 1 else sources
 
         try:
             docs = list_documents(metadata_filter=scope_filter)
@@ -169,23 +175,69 @@ class ContextBuilder:
 
         return filtered_docs
 
+    def _select_required_scope_coverage_docs(
+        self,
+        *,
+        raw_question: str,
+        metadata_filter: dict[str, str | list[str]] | None,
+        docs: list[Document],
+    ) -> list[Document]:
+        if not metadata_filter or not docs:
+            return []
+
+        folded_question = self._fold_text(raw_question)
+        if not re.search(
+            r"\b(so\s*sanh|compare|doi\s*chieu|khac\s*biet|tuong\s*dong|tong\s*hop|vs)\b",
+            folded_question,
+        ):
+            return []
+
+        for key in ("source", "document_id"):
+            required_values = self.extract_filter_values(metadata_filter, key)
+            if len(required_values) < 2:
+                continue
+
+            required_set = set(required_values)
+            selected: list[Document] = []
+            seen_values: set[str] = set()
+            for doc in docs:
+                value = str(doc.metadata.get(key) or "").strip()
+                if value not in required_set or value in seen_values:
+                    continue
+                selected.append(doc)
+                seen_values.add(value)
+                if len(seen_values) == len(required_set):
+                    break
+
+            if len(selected) >= 2:
+                return selected
+
+        return []
+
+    @staticmethod
+    def extract_filter_values(
+        metadata_filter: dict[str, str | list[str]],
+        key: str,
+    ) -> list[str]:
+        raw_value = metadata_filter.get(key)
+        if isinstance(raw_value, list):
+            unique_values: list[str] = []
+            for item in raw_value:
+                value = str(item or "").strip()
+                if value and value not in unique_values:
+                    unique_values.append(value)
+            return unique_values
+
+        value = str(raw_value or "").strip()
+        return [value] if value else []
+
     @staticmethod
     def extract_single_filter_value(
         metadata_filter: dict[str, str | list[str]],
         key: str,
     ) -> str:
-        raw_value = metadata_filter.get(key)
-        if isinstance(raw_value, list):
-            normalized = [str(item or "").strip() for item in raw_value if str(item or "").strip()]
-            unique_values: list[str] = []
-            for item in normalized:
-                if item not in unique_values:
-                    unique_values.append(item)
-            if len(unique_values) == 1:
-                return unique_values[0]
-            return ""
-
-        return str(raw_value or "").strip()
+        values = ContextBuilder.extract_filter_values(metadata_filter, key)
+        return values[0] if len(values) == 1 else ""
 
     def rank_scoped_context_docs(
         self,

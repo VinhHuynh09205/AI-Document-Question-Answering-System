@@ -31,6 +31,23 @@ def test_match_metadata_filter_keeps_exact_match_for_non_extension_keys() -> Non
     )
 
 
+def test_match_metadata_filter_source_accepts_original_document_name() -> None:
+    metadata = {
+        "source": "/app/data/uploads/user/chat/abc123456789abcdef123456789abc_report.pdf",
+        "file_name": "abc123456789abcdef123456789abc_report.pdf",
+        "document_name": "report.pdf",
+    }
+
+    assert FaissVectorStoreRepository._match_metadata_filter(
+        metadata,
+        {"source": "report.pdf"},
+    )
+    assert FaissVectorStoreRepository._match_metadata_filter(
+        metadata,
+        {"source": "abc123456789abcdef123456789abc_report.pdf"},
+    )
+
+
 def test_tokenize_keywords_supports_multilingual_terms() -> None:
     tokens = FaissVectorStoreRepository._tokenize_keywords(
         "Điều khoản thanh toán 支払い条件 hợp đồng"

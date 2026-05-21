@@ -1,0 +1,147 @@
+profiles=43 focused_cases=65 extra_cases=40
+focused 1/65 score=1.0 id=NEG-001
+focused 2/65 score=1.0 id=NEG-002
+focused 3/65 score=1.0 id=NEG-005
+focused 4/65 score=1.0 id=NEG-010
+focused 5/65 score=0.0 id=NEG-015
+focused 6/65 score=0.0 id=NEG-019
+focused 7/65 score=1.0 id=NEG-020
+focused 8/65 score=1.0 id=NEG-003
+focused 9/65 score=1.0 id=NEG-004
+focused 10/65 score=1.0 id=NEG-006
+focused 11/65 score=1.0 id=NEG-007
+focused 12/65 score=1.0 id=NEG-008
+focused 13/65 score=1.0 id=NEG-009
+focused 14/65 score=1.0 id=NEG-011
+focused 15/65 score=1.0 id=NEG-012
+focused 16/65 score=1.0 id=NEG-013
+focused 17/65 score=1.0 id=NEG-014
+focused 18/65 score=1.0 id=NEG-016
+focused 19/65 score=1.0 id=NEG-017
+focused 20/65 score=1.0 id=NEG-018
+focused 21/65 score=1.0 id=TAB-002
+focused 22/65 score=1.0 id=TAB-003
+focused 23/65 score=1.0 id=TAB-004
+focused 24/65 score=1.0 id=TAB-005
+focused 25/65 score=1.0 id=TAB-006
+focused 26/65 score=1.0 id=TAB-007
+focused 27/65 score=1.0 id=TAB-008
+focused 28/65 score=1.0 id=TAB-009
+focused 29/65 score=1.0 id=TAB-010
+focused 30/65 score=1.0 id=TAB-011
+focused 31/65 score=1.0 id=TAB-012
+focused 32/65 score=1.0 id=TAB-013
+focused 33/65 score=1.0 id=TAB-016
+focused 34/65 score=1.0 id=TAB-017
+focused 35/65 score=1.0 id=TAB-018
+focused 36/65 score=1.0 id=TAB-019
+focused 37/65 score=1.0 id=TAB-020
+focused 38/65 score=1.0 id=TAB-021
+focused 39/65 score=1.0 id=TAB-022
+focused 40/65 score=1.0 id=TAB-023
+focused 41/65 score=1.0 id=TAB-024
+focused 42/65 score=0.5 id=TAB-025
+focused 43/65 score=0.5 id=TAB-026
+focused 44/65 score=1.0 id=TAB-028
+focused 45/65 score=1.0 id=TAB-029
+focused 46/65 score=1.0 id=TAB-030
+focused 47/65 score=1.0 id=TAB-031
+focused 48/65 score=1.0 id=TAB-032
+focused 49/65 score=1.0 id=TAB-033
+focused 50/65 score=0.5 id=TAB-035
+focused 51/65 score=0.5 id=TAB-036
+focused 52/65 score=0.5 id=TAB-037
+focused 53/65 score=0.5 id=TAB-038
+focused 54/65 score=1.0 id=TAB-040
+focused 55/65 score=1.0 id=TAB-015
+focused 56/65 score=0.5 id=TAB-034
+focused 57/65 score=1.0 id=TAB-001
+focused 58/65 score=1.0 id=TAB-014
+focused 59/65 score=1.0 id=TAB-027
+focused 60/65 score=1.0 id=TAB-039
+focused 61/65 score=0.5 id=SLD-001
+focused 62/65 score=0.5 id=SLD-002
+focused 63/65 score=1.0 id=SLD-003
+focused 64/65 score=0.5 id=SLD-004
+focused 65/65 score=1.0 id=SLD-005
+extra 1/40 score=1.0 id=EXT-001
+extra 2/40 score=1.0 id=EXT-002
+extra 3/40 score=1.0 id=EXT-003
+extra 4/40 score=1.0 id=EXT-004
+extra 5/40 score=1.0 id=EXT-005
+extra 6/40 score=1.0 id=EXT-006
+extra 7/40 score=1.0 id=EXT-007
+extra 8/40 score=1.0 id=EXT-008
+extra 9/40 score=1.0 id=EXT-009
+extra 10/40 score=1.0 id=EXT-010
+extra 11/40 score=1.0 id=EXT-011
+extra 12/40 score=1.0 id=EXT-012
+extra 13/40 score=0.5 id=EXT-013
+extra 14/40 score=0.5 id=EXT-014
+extra 15/40 score=0.5 id=EXT-015
+extra 16/40 score=1.0 id=EXT-016
+extra 17/40 score=0.5 id=EXT-017
+extra 18/40 score=0.5 id=EXT-018
+extra 19/40 score=0.5 id=EXT-019
+extra 20/40 score=0.5 id=EXT-020
+extra 21/40 score=0.5 id=EXT-021
+extra 22/40 score=0.5 id=EXT-022
+extra 23/40 score=1.0 id=EXT-023
+extra 24/40 score=1.0 id=EXT-024
+extra 25/40 score=1.0 id=EXT-025
+extra 26/40 score=1.0 id=EXT-026
+extra 27/40 score=1.0 id=EXT-027
+extra 28/40 score=1.0 id=EXT-028
+extra 29/40 score=1.0 id=EXT-029
+extra 30/40 score=1.0 id=EXT-030
+extra 31/40 score=1.0 id=EXT-031
+extra 32/40 score=1.0 id=EXT-032
+extra 33/40 score=1.0 id=EXT-033
+extra 34/40 score=1.0 id=EXT-034
+extra 35/40 score=1.0 id=EXT-035
+extra 36/40 score=1.0 id=EXT-036
+extra 37/40 score=1.0 id=EXT-037
+extra 38/40 score=0.5 id=EXT-038
+extra 39/40 score=0.5 id=EXT-039
+extra 40/40 score=0.5 id=EXT-040
+{
+  "focused": {
+    "Total": 65,
+    "Full Correct": 53,
+    "Partial": 10,
+    "Fail": 2,
+    "Answer Accuracy": "53/65 = 81.54%",
+    "Retrieval Correctness": "65/65 = 100.00%",
+    "Citation Correctness": "65/65 = 100.00%",
+    "Hallucination": 2,
+    "Mean Latency": "2990.63 ms"
+  },
+  "extra": {
+    "Total": 40,
+    "Full Correct": 28,
+    "Partial": 12,
+    "Fail": 0,
+    "Answer Accuracy": "28/40 = 70.00%",
+    "Retrieval Correctness": "40/40 = 100.00%",
+    "Citation Correctness": "40/40 = 100.00%",
+    "Hallucination": 0,
+    "Mean Latency": "2379.14 ms"
+  },
+  "all": {
+    "Total": 105,
+    "Full Correct": 81,
+    "Partial": 22,
+    "Fail": 2,
+    "Answer Accuracy": "81/105 = 77.14%",
+    "Retrieval Correctness": "105/105 = 100.00%",
+    "Citation Correctness": "105/105 = 100.00%",
+    "Hallucination": 2,
+    "Mean Latency": "2757.68 ms"
+  },
+  "baseline_scores": {
+    "0.0": 46,
+    "1.0": 17,
+    "0.5": 2
+  },
+  "failed_count": 24
+}

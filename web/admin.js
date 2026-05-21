@@ -513,30 +513,44 @@
       const roleCls = u.role === "admin" ? "role-admin" : "role-user";
       const statusCls = u.is_active ? "status-active" : "status-inactive";
       const statusText = u.is_active ? "Active" : "Inactive";
+      const usernameAttr = escapeHtml(u.username);
+      const roleAttr = escapeHtml(u.role);
       return `<tr>
         <td><div class="user-cell"><div class="user-avatar" style="background:${color}">${initial}</div><span class="user-name">${escapeHtml(u.username)}</span></div></td>
         <td><span class="role-badge ${roleCls}">${escapeHtml(u.role)}</span></td>
         <td><span class="status-badge ${statusCls}"><span class="status-dot"></span>${statusText}</span></td>
         <td>${escapeHtml(u.created_at || "—")}</td>
         <td><div class="action-btns">
-          <button class="action-btn" title="Đổi vai trò" onclick="AdminApp.changeRole('${escapeHtml(u.username)}','${escapeHtml(u.role)}')">
+          <button class="action-btn" title="Đổi vai trò" data-action="change-role" data-username="${usernameAttr}" data-role="${roleAttr}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </button>
-          <button class="action-btn" title="${u.is_active ? 'Khóa' : 'Mở khóa'}" onclick="AdminApp.toggleStatus('${escapeHtml(u.username)}',${u.is_active})">
+          <button class="action-btn" title="${u.is_active ? 'Khóa' : 'Mở khóa'}" data-action="toggle-status" data-username="${usernameAttr}" data-active="${u.is_active ? "1" : "0"}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${u.is_active
               ? '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'
               : '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>'
             }</svg>
           </button>
-          <button class="action-btn" title="Đặt lại mật khẩu" onclick="AdminApp.resetPassword('${escapeHtml(u.username)}')">
+          <button class="action-btn" title="Đặt lại mật khẩu" data-action="reset-password" data-username="${usernameAttr}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
           </button>
-          <button class="action-btn danger" title="Xóa" onclick="AdminApp.deleteUser('${escapeHtml(u.username)}')">
+          <button class="action-btn danger" title="Xóa" data-action="delete-user" data-username="${usernameAttr}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           </button>
         </div></td>
       </tr>`;
     }).join("");
+    body.querySelectorAll("[data-action='change-role']").forEach((btn) => {
+      btn.onclick = () => AdminApp.changeRole(btn.dataset.username || "", btn.dataset.role || "");
+    });
+    body.querySelectorAll("[data-action='toggle-status']").forEach((btn) => {
+      btn.onclick = () => AdminApp.toggleStatus(btn.dataset.username || "", btn.dataset.active === "1");
+    });
+    body.querySelectorAll("[data-action='reset-password']").forEach((btn) => {
+      btn.onclick = () => AdminApp.resetPassword(btn.dataset.username || "");
+    });
+    body.querySelectorAll("[data-action='delete-user']").forEach((btn) => {
+      btn.onclick = () => AdminApp.deleteUser(btn.dataset.username || "");
+    });
   }
 
   function renderPagination(total, offset, limit, containerId, onNav) {
@@ -856,6 +870,8 @@
             ["Database", cfg.database_backend],
             ["Đăng ký mở", cfg.enable_registration ? "Bật" : "Tắt"],
             ["Security headers", cfg.enable_security_headers ? "Bật" : "Tắt"],
+            ["JWT secret", cfg.auth_secret_configured ? "Configured" : "Default / needs change"],
+            ["Admin setup", cfg.admin_setup_enabled ? "Enabled" : "Disabled"],
           ],
         },
         {

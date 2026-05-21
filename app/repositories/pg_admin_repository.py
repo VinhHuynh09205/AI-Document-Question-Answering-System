@@ -121,9 +121,22 @@ class PgAdminRepository(IAdminRepository):
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    INSERT INTO admin_audit_log (log_id, admin_username, action, target, detail, created_at)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, (entry.log_id, entry.admin_username, entry.action, entry.target, entry.detail, entry.created_at))
+                    INSERT INTO admin_audit_log (
+                        log_id, admin_username, action, target, detail, created_at,
+                        ip_address, user_agent, request_id
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    entry.log_id,
+                    entry.admin_username,
+                    entry.action,
+                    entry.target,
+                    entry.detail,
+                    entry.created_at,
+                    entry.ip_address,
+                    entry.user_agent,
+                    entry.request_id,
+                ))
             conn.commit()
         finally:
             conn.close()
@@ -133,7 +146,8 @@ class PgAdminRepository(IAdminRepository):
         try:
             with conn.cursor() as cur:
                 cur.execute("""
-                    SELECT log_id, admin_username, action, target, detail, created_at
+                    SELECT log_id, admin_username, action, target, detail, created_at,
+                           ip_address, user_agent, request_id
                     FROM admin_audit_log ORDER BY created_at DESC LIMIT %s OFFSET %s
                 """, (limit, offset))
                 rows = cur.fetchall()
@@ -141,7 +155,9 @@ class PgAdminRepository(IAdminRepository):
             conn.close()
         return [
             AuditLogEntry(log_id=row[0], admin_username=row[1], action=row[2],
-                          target=row[3], detail=row[4], created_at=str(row[5]))
+                          target=row[3], detail=row[4], created_at=str(row[5]),
+                          ip_address=str(row[6] or ""), user_agent=str(row[7] or ""),
+                          request_id=str(row[8] or ""))
             for row in rows
         ]
 
@@ -165,9 +181,24 @@ class PgAdminRepository(IAdminRepository):
                         action VARCHAR(64) NOT NULL,
                         target VARCHAR(255) NOT NULL DEFAULT '',
                         detail TEXT NOT NULL,
-                        created_at VARCHAR(64) NOT NULL
+                        created_at VARCHAR(64) NOT NULL,
+                        ip_address VARCHAR(64) NOT NULL DEFAULT '',
+                        user_agent TEXT NOT NULL DEFAULT '',
+                        request_id VARCHAR(128) NOT NULL DEFAULT ''
                     )
                 """)
+                cur.execute("""
+                    SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public' AND table_name = 'admin_audit_log'
+                """)
+                columns = {row[0] for row in cur.fetchall()}
+                if "ip_address" not in columns:
+                    cur.execute("ALTER TABLE admin_audit_log ADD COLUMN ip_address VARCHAR(64) NOT NULL DEFAULT ''")
+                if "user_agent" not in columns:
+                    cur.execute("ALTER TABLE admin_audit_log ADD COLUMN user_agent TEXT NOT NULL DEFAULT ''")
+                if "request_id" not in columns:
+                    cur.execute("ALTER TABLE admin_audit_log ADD COLUMN request_id VARCHAR(128) NOT NULL DEFAULT ''")
                 cur.execute("""
                     CREATE INDEX IF NOT EXISTS idx_audit_created ON admin_audit_log (created_at)
                 """)
